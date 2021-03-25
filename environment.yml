@@ -1,0 +1,8 @@
+name: nodal
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - colorcet
+  - ipython
+  - obspy
