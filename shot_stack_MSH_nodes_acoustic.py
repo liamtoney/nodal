@@ -11,7 +11,7 @@ SAMPLING_RATE = 80  # [Hz]
 
 # Corners for bandpass filter
 FREQMIN = 1  # [Hz]
-FREQMAX = 20  # [Hz]
+FREQMAX = 10  # [Hz]
 
 # For STA/LTA processing
 NSTA = 20  # [samples]
