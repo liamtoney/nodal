@@ -1,4 +1,5 @@
 /.idea/
+/.set_up_env.bash
 /brandon_matlab_code/
 /MSH_node_seis.mat
 *.png
