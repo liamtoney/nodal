@@ -3,7 +3,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - black
   - ipython
+  - isort
   - obspy
   - pip:
     - mat73
