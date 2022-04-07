@@ -7,5 +7,6 @@ dependencies:
   - ipython
   - isort
   - obspy
+  - pip
   - pip:
     - mat73
