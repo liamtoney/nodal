@@ -8,5 +8,6 @@ dependencies:
   - isort
   - obspy
   - pip
+  - pygmt
   - pip:
     - mat73
