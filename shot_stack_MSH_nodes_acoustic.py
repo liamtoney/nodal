@@ -1,7 +1,7 @@
-from mat73 import loadmat
-from obspy import Stream, Trace
 import matplotlib.pyplot as plt
 import numpy as np
+from mat73 import loadmat
+from obspy import Stream, Trace
 
 # Load data
 MSH_NODE_SEIS = loadmat('MSH_node_seis.mat')
@@ -34,7 +34,9 @@ stp.filter(type='bandpass', freqmin=FREQMIN, freqmax=FREQMAX, corners=1, zeropha
 
 # Plot section
 stp_mat = np.array(stp)
-vmax = np.nanpercentile(np.abs(stp_mat), q=65)  # Use a suitable percentile to avoid outliers
+vmax = np.nanpercentile(
+    np.abs(stp_mat), q=65
+)  # Use a suitable percentile to avoid outliers
 fig, ax = plt.subplots()
 ax.imshow(stp_mat.T, cmap='seismic', vmin=-vmax, vmax=vmax)
 ax.axis('off')
@@ -62,8 +64,10 @@ bin_width = 0.15
 all_dists = np.array([tr.stats.distance for tr in stp])
 stp_bins = np.empty((stp[0].stats.npts, dist_centers.size))
 for i, dist in enumerate(dist_centers):
-    dist_ind = np.where((all_dists > dist - bin_width / 2) & (all_dists < dist + bin_width / 2))[0]
-    stp_bins[:, i] = np.mean(stp_mat[dist_ind,:], axis=0)  # Also can try sum, product
+    dist_ind = np.where(
+        (all_dists > dist - bin_width / 2) & (all_dists < dist + bin_width / 2)
+    )[0]
+    stp_bins[:, i] = np.mean(stp_mat[dist_ind, :], axis=0)  # Also can try sum, product
 
 # Plot section, again (again)
 stp_bins[stp_bins == 0] = np.nan  # Set 0 to NaN
@@ -71,7 +75,15 @@ PERCENTILE_RANGE = 96  # [%] Central range of data to show
 vmin = np.nanpercentile(stp_bins, q=(100 - PERCENTILE_RANGE) / 2)
 vmax = np.nanpercentile(stp_bins, q=PERCENTILE_RANGE + (100 - PERCENTILE_RANGE) / 2)
 fig, ax = plt.subplots()
-ax.pcolormesh(dist_centers, stp[0].times() - 20, stp_bins, vmin=vmin, vmax=vmax, cmap='inferno', shading='nearest')
+ax.pcolormesh(
+    dist_centers,
+    stp[0].times() - 20,
+    stp_bins,
+    vmin=vmin,
+    vmax=vmax,
+    cmap='inferno',
+    shading='nearest',
+)
 ax.set_xlim(4, 20)
 ax.set_ylim(55, -15)
 ax.set_xlabel('Distance (km)')
