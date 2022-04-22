@@ -1,10 +1,13 @@
+import os
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mat73 import loadmat
 from obspy import Stream, Trace
 
 # Load data
-MSH_NODE_SEIS = loadmat('MSH_node_seis.mat')
+MSH_NODE_SEIS = loadmat(Path(os.environ['NODAL_WORKING_DIR']) / 'MSH_node_seis.mat')
 
 # From Brandon's code
 SAMPLING_RATE = 80  # [Hz]
