@@ -7,6 +7,7 @@ dependencies:
   - ipython
   - isort
   - obspy
+  - openpyxl
   - pip
   - pygmt
   - pip:
