@@ -5,4 +5,5 @@
 *.png
 *.gdoc
 *.xlsx
+*.mseed
 .DS_Store
