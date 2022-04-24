@@ -34,7 +34,7 @@ fig.grdimage(
 pygmt.makecpt(series=[np.min(codes), np.max(codes)], cmap='turbo', reverse=True)
 fig.plot(x=lons, y=lats, color=codes, style='c0.05i', cmap=True, pen='black')  # Nodes
 fig.plot(x=df.lon, y=df.lat, style='s0.2i', color='black', pen='white')  # Shots
-fig.text(x=df.lon, y=df.lat, text=df.Shot, font='6p,white', justify='CM')  # Shot labels
+fig.text(x=df.lon, y=df.lat, text=df.shot, font='6p,white', justify='CM')  # Shot labels
 fig.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
 fig.colorbar(frame='a200f100+l"Station code"')
 with fig.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
