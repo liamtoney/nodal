@@ -5,22 +5,15 @@ from pathlib import Path
 
 import numpy as np
 import pygmt
-from obspy import UTCDateTime
-from obspy.clients.fdsn import Client
 
-from utils import get_shots
+from utils import get_shots, get_stations
 
 # Set PyGMT defaults
 pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
-# Read in shot info
+# Read in info for plotting
 df = get_shots()
-
-# Grab "MSH Node Array"
-# http://ds.iris.edu/mda/1D/?starttime=2014-01-01T00:00:00&endtime=2014-12-31T23:59:59
-net = Client('IRIS').get_stations(
-    network='1D', starttime=UTCDateTime(2014, 1, 1), endtime=UTCDateTime(2014, 12, 31)
-)[0]
+net = get_stations()[0]
 
 # Create station info arrays
 lons = [sta.longitude for sta in net]

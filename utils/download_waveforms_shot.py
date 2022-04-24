@@ -12,11 +12,10 @@ from pathlib import Path
 
 import numpy as np
 from matplotlib.dates import SEC_PER_MIN
-from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
 from obspy.geodetics.base import gps2dist_azimuth
 
-from utils import get_shots
+from utils import get_shots, get_stations
 
 # Input checks
 assert len(sys.argv) == 2, 'Must provide exactly one argument!'
@@ -26,15 +25,11 @@ assert shot in get_shots().index, 'Argument must be a valid shot name!'
 MIN_CELERITY = 280  # [m/s] For calculating propagation times
 PRE_ROLL = 30  # [s] Duration of data to download prior to shot time
 
-client = Client('IRIS')
-
 # Read in shot info
 df = get_shots()
 
 # Calculate required data duration
-net = client.get_stations(
-    network='1D', starttime=UTCDateTime(2014, 1, 1), endtime=UTCDateTime(2014, 12, 31)
-)[0]
+net = get_stations()[0]
 station_distances = []
 for lat, lon in zip([sta.latitude for sta in net], [sta.longitude for sta in net]):
     dist_m = gps2dist_azimuth(lat, lon, df.loc[shot].lat, df.loc[shot].lon)[0]
@@ -44,7 +39,7 @@ max_prop_time_min_ceil = np.ceil(max_prop_time / SEC_PER_MIN) * SEC_PER_MIN
 
 # Gather data
 print(f'Downloading waveforms for shot {shot}...')
-st = client.get_waveforms(
+st = Client('IRIS').get_waveforms(
     network='1D',
     station='*',
     location='--',

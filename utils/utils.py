@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from obspy import UTCDateTime
+from obspy import UTCDateTime, read_inventory
 
 # Read in and process shot metadata
 with warnings.catch_warnings():
@@ -46,9 +46,13 @@ df.drop(
     inplace=True,
 )
 
+# Read in station information
+inv = read_inventory(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / '1D.xml'))
+
 
 def get_stations():
-    pass
+    """Return ObsPy Inventory containing 1D network information."""
+    return inv
 
 
 def get_waveforms_shot(shot):

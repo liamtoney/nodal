@@ -4,30 +4,21 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from obspy import UTCDateTime, read
-from obspy.clients.fdsn import Client
+from obspy import read
 from obspy.geodetics.base import gps2dist_azimuth
 
-from utils import get_shots
+from utils import get_shots, get_stations
 
 SHOT = 'Y5'  # Shot to plot
 
 # Read in shot info
 df = get_shots()
 
+# Read in station info
+inv = get_stations()
+
 # Read in data
 st = read(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{SHOT}.mseed'))
-
-# Grab "MSH Node Array"
-# http://ds.iris.edu/mda/1D/?starttime=2014-01-01T00:00:00&endtime=2014-12-31T23:59:59
-print('Downloading coordinate and response information...')
-inv = Client('IRIS').get_stations(
-    network='1D',
-    starttime=UTCDateTime(2014, 1, 1),
-    endtime=UTCDateTime(2014, 12, 31),
-    level='response',
-)
-print('Done')
 
 # Assign coordinates and distances
 for tr in st:
