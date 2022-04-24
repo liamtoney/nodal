@@ -48,9 +48,9 @@ fig.show()
 # STA/LTA
 stp.trigger(type='classicstalta', nsta=NSTA, nlta=6 * NSTA)
 if False:  # Toggle smoothing using something similar to MATLAB's smooth()
-    widow_size = int(np.rint(0.5 * NSTA))
+    window_size = int(np.rint(0.5 * NSTA))
     for tr in stp:
-        tr.data = np.convolve(tr.data, np.ones(widow_size), mode='same') / widow_size
+        tr.data = np.convolve(tr.data, np.ones(window_size), mode='same') / window_size
 
 # Plot section, again
 stp_mat = np.array(stp)
@@ -93,3 +93,5 @@ ax.set_xlabel('Distance (km)')
 ax.set_ylabel('Time (s)')
 ax.set_title(f'{FREQMIN}–{FREQMAX} Hz STA/LTA iMUSH shots')
 fig.show()
+
+# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / 'iMUSH_shot_acoustic_python.png', dpi=300, bbox_inches='tight')
