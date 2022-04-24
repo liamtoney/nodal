@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from obspy import UTCDateTime, read_inventory
+from obspy import UTCDateTime, read, read_inventory
 
 # Read in and process shot metadata
 with warnings.catch_warnings():
@@ -56,7 +56,9 @@ def get_stations():
 
 
 def get_waveforms_shot(shot):
-    pass
+    """Return ObsPy Stream containing waveforms for a given shot."""
+    st = read(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{shot}.mseed'))
+    return st
 
 
 def get_shots():

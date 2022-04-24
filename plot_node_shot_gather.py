@@ -7,7 +7,7 @@ import pandas as pd
 from obspy import read
 from obspy.geodetics.base import gps2dist_azimuth
 
-from utils import get_shots, get_stations
+from utils import get_shots, get_stations, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to plot
 
@@ -18,7 +18,7 @@ df = get_shots()
 inv = get_stations()
 
 # Read in data
-st = read(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{SHOT}.mseed'))
+st = get_waveforms_shot(SHOT)
 
 # Assign coordinates and distances
 for tr in st:
