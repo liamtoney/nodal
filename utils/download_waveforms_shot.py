@@ -43,7 +43,7 @@ max_prop_time = np.max(station_distances) / MIN_CELERITY  # [s]
 max_prop_time_min_ceil = np.ceil(max_prop_time / SEC_PER_MIN) * SEC_PER_MIN
 
 # Gather data
-print('Downloading data...')
+print(f'Downloading waveforms for shot {shot}...')
 st = client.get_waveforms(
     network='1D',
     station='*',
