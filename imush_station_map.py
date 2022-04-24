@@ -4,17 +4,17 @@ import os
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import pygmt
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
+
+from utils import get_shots
 
 # Set PyGMT defaults
 pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
 # Read in shot info
-df = pd.read_excel(Path(os.environ['NODAL_WORKING_DIR']) / 'iMUSH_shot_metadata.xlsx')
-df.dropna(inplace=True)
+df = get_shots()
 
 # Grab "MSH Node Array"
 # http://ds.iris.edu/mda/1D/?starttime=2014-01-01T00:00:00&endtime=2014-12-31T23:59:59
@@ -56,10 +56,10 @@ with fig.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         projection='M?',
     )
     in_main_map = (
-        (df.Lon > MAIN_REGION[0])
-        & (df.Lon < MAIN_REGION[1])
-        & (df.Lat > MAIN_REGION[2])
-        & (df.Lat < MAIN_REGION[3])
+        (df.lon > MAIN_REGION[0])
+        & (df.lon < MAIN_REGION[1])
+        & (df.lat > MAIN_REGION[2])
+        & (df.lat < MAIN_REGION[3])
     )
     kwargs = dict(style='s0.07i', pen='black')
     fig.plot(x=df[in_main_map].Lon, y=df[in_main_map].Lat, color='black', **kwargs)

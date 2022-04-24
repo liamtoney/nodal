@@ -1,4 +1,3 @@
-import math
 import os
 from pathlib import Path
 
@@ -9,23 +8,12 @@ from obspy import UTCDateTime, read
 from obspy.clients.fdsn import Client
 from obspy.geodetics.base import gps2dist_azimuth
 
+from utils import get_shots
+
 SHOT = 'Y5'  # Shot to plot
 
 # Read in shot info
-df = pd.read_excel(Path(os.environ['NODAL_WORKING_DIR']) / 'iMUSH_shot_metadata.xlsx')
-df.dropna(inplace=True)
-df.set_index('Shot', inplace=True)  # So we can easily look up shots by name
-
-# Get shot origin time
-frac_sec, whole_sec = math.modf(df.loc[SHOT].Sec)
-shot_time = UTCDateTime(
-    year=2014,
-    julday=int(df.loc[SHOT].Julian),
-    hour=int(df.loc[SHOT]['UTC Hour']),
-    minute=int(df.loc[SHOT].Min),
-    second=int(whole_sec),
-    microsecond=int(frac_sec * 1e6),
-)
+df = get_shots()
 
 # Read in data
 st = read(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{SHOT}.mseed'))
@@ -47,7 +35,7 @@ for tr in st:
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = gps2dist_azimuth(
-        tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].Lat, df.loc[SHOT].Lon
+        tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
 
 # Remove sensitivity (fast but NOT accurate!)
@@ -64,7 +52,7 @@ dist_km = np.array([tr.stats.distance / 1000 for tr in st])
 dist_idx = np.argsort(dist_km)
 fig, ax = plt.subplots()
 ax.pcolormesh(
-    st[0].times(reftime=shot_time),
+    st[0].times(reftime=df.loc[SHOT].time),
     dist_km[dist_idx],  # Converting to km
     np.array([tr.data for tr in st])[dist_idx, :],
     vmin=-1e-5,

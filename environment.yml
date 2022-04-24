@@ -12,3 +12,4 @@ dependencies:
   - pygmt
   - pip:
     - mat73
+    - --editable .  # Installs packages specified in setup.py
