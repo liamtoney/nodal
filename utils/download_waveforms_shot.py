@@ -50,4 +50,4 @@ st = Client('IRIS').get_waveforms(
 print('Done')
 
 # Save as miniSEED file
-st.write(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{shot}.mseed')
+st.write(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'mseed' / f'{shot}.mseed')

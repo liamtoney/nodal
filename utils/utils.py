@@ -57,7 +57,9 @@ def get_stations():
 
 def get_waveforms_shot(shot):
     """Return ObsPy Stream containing waveforms for a given shot."""
-    st = read(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{shot}.mseed'))
+    st = read(
+        str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'mseed' / f'{shot}.mseed')
+    )
     return st
 
 
