@@ -4,7 +4,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from obspy import read
 from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import get_shots, get_stations, get_waveforms_shot
@@ -54,3 +53,5 @@ ax.set_xlabel('Time from shot (s)')
 ax.set_ylabel('Distance from shot (km)')
 ax.set_title(f'Shot {SHOT}')
 fig.show()
+
+# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
