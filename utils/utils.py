@@ -10,7 +10,7 @@ from obspy import UTCDateTime, read, read_inventory
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', category=UserWarning)  # Ignore "extension" warning
     df = pd.read_excel(
-        Path(os.environ['NODAL_WORKING_DIR']) / 'iMUSH_shot_metadata.xlsx'
+        Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / 'iMUSH_shot_metadata.xlsx'
     )
 df.dropna(inplace=True)
 df.rename(
@@ -47,7 +47,7 @@ df.drop(
 )
 
 # Read in station information
-inv = read_inventory(str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / '1D.xml'))
+inv = read_inventory(str(Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / '1D.xml'))
 
 
 def get_stations():

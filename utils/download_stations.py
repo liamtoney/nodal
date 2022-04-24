@@ -22,5 +22,6 @@ print('Done')
 
 # Save as StationXML file
 inventory.write(
-    str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / '1D.xml'), format='STATIONXML'
+    str(Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / '1D.xml'),
+    format='STATIONXML',
 )

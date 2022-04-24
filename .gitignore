@@ -2,7 +2,7 @@
 /.set_up_env.bash
 /brandon_matlab_code/
 /data/MSH_node_seis.mat
-/data/1D.xml
+/metadata/1D.xml
 /*.egg-info/
 *.png
 *.gdoc
