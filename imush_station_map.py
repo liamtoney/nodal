@@ -55,8 +55,8 @@ with fig.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         & (df.lat < MAIN_REGION[3])
     )
     kwargs = dict(style='s0.07i', pen='black')
-    fig.plot(x=df[in_main_map].Lon, y=df[in_main_map].Lat, color='black', **kwargs)
-    fig.plot(x=df[~in_main_map].Lon, y=df[~in_main_map].Lat, color='white', **kwargs)
+    fig.plot(x=df[in_main_map].lon, y=df[in_main_map].lat, color='black', **kwargs)
+    fig.plot(x=df[~in_main_map].lon, y=df[~in_main_map].lat, color='white', **kwargs)
     fig.basemap(map_scale='g-122.2/45.8+w50')
 
 fig.show()
