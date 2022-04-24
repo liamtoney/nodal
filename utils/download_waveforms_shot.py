@@ -54,5 +54,5 @@ st = client.get_waveforms(
 )
 print('Done')
 
-# Save data
+# Save as miniSEED file
 st.write(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / f'{shot}.mseed')
