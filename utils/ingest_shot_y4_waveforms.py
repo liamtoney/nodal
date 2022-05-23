@@ -8,6 +8,7 @@ Cut shot gathers are saved as miniSEED files. Usage: ./ingest_shot_y4_waveforms.
 import os
 from pathlib import Path
 
+import numpy as np
 from obspy import Stream, Trace
 from scipy.io import loadmat
 
@@ -30,6 +31,8 @@ df = get_shots()  # Read in shot info to get timing information for the shot
 starttime = df.loc[SHOT].time - PRE_ROLL
 st = Stream()
 for data, metadata in zip(y4_data['seis'].T, y4_data['S'].squeeze()):
+    if np.isnan(data).any():
+        continue  # Skip any traces that have NaNs, as these are verified empty
     header = dict(
         network='1D',
         station=str(metadata[0][0][0]),
