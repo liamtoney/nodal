@@ -1,7 +1,6 @@
 /.idea/
 /.set_up_env.bash
 /brandon_matlab_code/
-/data/MSH_node_seis.mat
 /data/weather/
 /metadata/1D.xml
 /*.egg-info/
@@ -9,4 +8,5 @@
 *.gdoc
 *.xlsx
 *.mseed
+*.mat
 .DS_Store
