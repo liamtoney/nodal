@@ -83,17 +83,51 @@ fig.show()
 SHOT = 'Y6'
 STATION = 'E04D'
 
+FREQMIN = 0.5
+FREQMAX = 5
+
+CELERITY = 340  # [m/s] For marking predicted arrival
+
+# Download waveform
 st = client.get_waveforms(
     network='*',
     station=STATION,
     location='*',
     channel=CHANNEL,
-    starttime=df.loc[SHOT].time,
-    endtime=df.loc[SHOT].time + 500,
+    starttime=df.loc[SHOT].time - 100,  # Extra for tapering
+    endtime=df.loc[SHOT].time + 500,  # Covers spatial extent
     attach_response=True,
 )
 
+# Calculate distance from shot to station
+coords = inventory.get_coordinates(st[0].id)
+dist_m = gps2dist_azimuth(
+    df.loc[SHOT].lat, df.loc[SHOT].lon, coords['latitude'], coords['longitude']
+)[0]
+
+# Process waveform
+st.detrend('linear')
+st.remove_response()
+stf = st.copy()
+stf.taper(0.05)
+stf.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
+
+# Make waveform plot w/ predicted arrival marked
 fig = plt.figure()
-st.plot(fig=fig, method='full')
-fig.axes[0].set_title(f'Shot {SHOT}')
+stf.plot(fig=fig, method='full')
+ax = fig.axes[0]
+pred_arr_time = df.loc[SHOT].time + (dist_m / CELERITY)
+ax.axvline(
+    pred_arr_time.matplotlib_date,
+    color='red',
+    zorder=-5,
+    linewidth=2,
+    label=f'Predicted arrival time\n({CELERITY} m/s celerity)',
+)
+ax.set_title(f'Shot {SHOT}, {FREQMIN}–{FREQMAX} Hz bandpass')
+ax.set_ylabel('Pressure (Pa)')
+ax.set_xlim(df.loc[SHOT].time.matplotlib_date, (pred_arr_time + 30).matplotlib_date)
+ax.legend(loc='lower left')
 fig.show()
+
+# fig.savefig(f'/Users/ldtoney/Downloads/{SHOT}-{STATION}.png', dpi=300, bbox_inches='tight')
