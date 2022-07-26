@@ -6,6 +6,7 @@
 /metadata/imush_shots.kml
 /*.egg-info/
 *.png
+*.jpg
 *.gdoc
 *.xlsx
 *.mseed
