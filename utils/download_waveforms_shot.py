@@ -17,16 +17,16 @@ from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import get_shots, get_stations
 
+# Read in shot info
+df = get_shots()
+
 # Input checks
 assert len(sys.argv) == 2, 'Must provide exactly one argument!'
 shot = sys.argv[1]
-assert shot in get_shots().index, 'Argument must be a valid shot name!'
+assert shot in df.index, 'Argument must be a valid shot name!'
 
 MIN_CELERITY = 280  # [m/s] For calculating propagation times
 PRE_ROLL = 30  # [s] Duration of data to download prior to shot time
-
-# Read in shot info
-df = get_shots()
 
 # Calculate required data duration
 net = get_stations()[0]
