@@ -2,12 +2,9 @@
 
 """Creates KML file of iMUSH shot locations."""
 
-import os
-from pathlib import Path
-
 import simplekml
 
-from utils import get_shots
+from utils import NODAL_WORKING_DIR, get_shots
 
 # Load shot metadata
 df = get_shots()
@@ -25,4 +22,4 @@ for _, row in df.iterrows():
     )
 
 # Save KML file
-kml.save(Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / 'imush_shots.kml')
+kml.save(NODAL_WORKING_DIR / 'metadata' / 'imush_shots.kml')

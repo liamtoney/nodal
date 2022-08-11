@@ -1,17 +1,14 @@
-import os
-from pathlib import Path
-
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from obspy import UTCDateTime
 
-from utils import get_shots
+from utils import NODAL_WORKING_DIR, get_shots
 
 # Read in CSV files containing temp data (this code is format-specific!)
 temp_df = pd.DataFrame()
-for file in (Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'weather').glob('*.csv'):
+for file in (NODAL_WORKING_DIR / 'data' / 'weather').glob('*.csv'):
     temp_df = pd.concat([temp_df, pd.read_csv(file, comment='#')])
 temp_df.dropna(inplace=True)
 temp_df.air_temp_set_1 = temp_df.air_temp_set_1.astype(float)
@@ -114,4 +111,4 @@ fig.tight_layout()
 fig.subplots_adjust(hspace=0)
 fig.show()
 
-# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / 'shot_times_temps.png', dpi=300, bbox_inches='tight')
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'shot_times_temps.png', dpi=300, bbox_inches='tight')

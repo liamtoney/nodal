@@ -1,15 +1,12 @@
-import os
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 from mat73 import loadmat
 from obspy import Stream, Trace
 
+from utils import NODAL_WORKING_DIR
+
 # Load data
-MSH_NODE_SEIS = loadmat(
-    Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'MSH_node_seis.mat'
-)
+MSH_NODE_SEIS = loadmat(NODAL_WORKING_DIR / 'data' / 'MSH_node_seis.mat')
 
 # From Brandon's code
 SAMPLING_RATE = 80  # [Hz]
@@ -96,4 +93,4 @@ ax.set_ylabel('Time (s)')
 ax.set_title(f'{FREQMIN}–{FREQMAX} Hz STA/LTA iMUSH shots')
 fig.show()
 
-# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / 'iMUSH_shot_acoustic_python.png', dpi=300, bbox_inches='tight')
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'iMUSH_shot_acoustic_python.png', dpi=300, bbox_inches='tight')

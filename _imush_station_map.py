@@ -1,10 +1,7 @@
-import os
-from pathlib import Path
-
 import numpy as np
 import pygmt
 
-from utils import get_shots, get_stations
+from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 # Set PyGMT defaults
 pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
@@ -59,4 +56,4 @@ with fig.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
 
 fig.show()
 
-# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / 'imush_station_map.png', dpi=600)
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'imush_station_map.png', dpi=600)

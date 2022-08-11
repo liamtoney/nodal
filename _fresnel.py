@@ -1,8 +1,5 @@
 #%% Get DEM and project to UTM; define functions
 
-import os
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -12,7 +9,7 @@ from matplotlib.colors import Normalize
 from pygmt.datasets import load_earth_relief
 from pyproj import CRS
 
-from utils import get_shots, get_stations
+from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
@@ -214,8 +211,5 @@ data_dict = dict(
 )
 df = pd.DataFrame(data=data_dict)
 df.to_csv(
-    Path(os.environ['NODAL_WORKING_DIR'])
-    / 'fresnel'
-    / f'{SHOT.lower()}_path_differences.csv',
-    index=False,
+    NODAL_WORKING_DIR / 'fresnel' / f'{SHOT.lower()}_path_differences.csv', index=False
 )

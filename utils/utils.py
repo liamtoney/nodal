@@ -6,12 +6,13 @@ import numpy as np
 import pandas as pd
 from obspy import UTCDateTime, read, read_inventory
 
+# Define working directory here so that it can be exposed for easy import
+NODAL_WORKING_DIR = Path(os.environ['NODAL_WORKING_DIR'])
+
 # Read in and process shot metadata
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', category=UserWarning)  # Ignore "extension" warning
-    df = pd.read_excel(
-        Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / 'iMUSH_shot_metadata.xlsx'
-    )
+    df = pd.read_excel(NODAL_WORKING_DIR / 'metadata' / 'iMUSH_shot_metadata.xlsx')
 df.dropna(inplace=True)
 df.rename(
     columns={'Shot': 'shot', 'Lat': 'lat', 'Lon': 'lon', 'Weight (lb)': 'weight_lb'},
@@ -47,7 +48,7 @@ df.drop(
 )
 
 # Read in station information
-inv = read_inventory(str(Path(os.environ['NODAL_WORKING_DIR']) / 'metadata' / '1D.xml'))
+inv = read_inventory(str(NODAL_WORKING_DIR / 'metadata' / '1D.xml'))
 
 
 def get_stations():
@@ -57,9 +58,7 @@ def get_stations():
 
 def get_waveforms_shot(shot):
     """Return ObsPy Stream containing waveforms for a given shot."""
-    st = read(
-        str(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'mseed' / f'{shot}.mseed')
-    )
+    st = read(str(NODAL_WORKING_DIR / 'data' / 'mseed' / f'{shot}.mseed'))
     return st
 
 

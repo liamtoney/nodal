@@ -6,16 +6,14 @@ Cut shot gathers are saved as miniSEED files. Usage: ./download_waveforms_shot.p
 where SHOT is a valid iMUSH shot name.
 """
 
-import os
 import sys
-from pathlib import Path
 
 import numpy as np
 from matplotlib.dates import SEC_PER_MIN
 from obspy.clients.fdsn import Client
 from obspy.geodetics.base import gps2dist_azimuth
 
-from utils import get_shots, get_stations
+from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 # Read in shot info
 df = get_shots()
@@ -50,4 +48,4 @@ st = Client('IRIS').get_waveforms(
 print('Done')
 
 # Save as miniSEED file
-st.write(Path(os.environ['NODAL_WORKING_DIR']) / 'data' / 'mseed' / f'{shot}.mseed')
+st.write(NODAL_WORKING_DIR / 'data' / 'mseed' / f'{shot}.mseed')
