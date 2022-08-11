@@ -108,7 +108,7 @@ print('Done')
 
 #%% Calculate and plot all profiles + paths
 
-CMAP = 'viridis'  # Colormap for path length differences
+CMAP = 'inferno_r'  # Colormap for path length differences
 EQUAL_ASPECT = False  # Toggle for equal aspect ratio
 
 # Iterate over all profiles, calculating paths
