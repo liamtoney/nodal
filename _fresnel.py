@@ -1,7 +1,11 @@
 #%% Get DEM and project to UTM; define functions
 
+import os
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import utm
 import xarray as xr
 from matplotlib.colors import Normalize
@@ -201,3 +205,17 @@ fig.colorbar(
 
 fig.tight_layout()
 fig.show()
+
+#%% Export path differences as CSV
+
+data_dict = dict(
+    station=[sta.code for sta in inv[0]],
+    path_length_diff_m=[ds.path_length_difference for ds in ds_list],
+)
+df = pd.DataFrame(data=data_dict)
+df.to_csv(
+    Path(os.environ['NODAL_WORKING_DIR'])
+    / 'fresnel'
+    / f'{SHOT.lower()}_path_differences.csv',
+    index=False,
+)
