@@ -15,4 +15,5 @@ dependencies:
   - utm
   - pip:
     - mat73
+    - --editable ~/repos/infresnel
     - --editable .  # Installs packages specified in setup.py

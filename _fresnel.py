@@ -1,143 +1,32 @@
-#%% Get DEM and project to UTM; define functions
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import utm
-import xarray as xr
+from infresnel import calculate_paths
 from matplotlib.colors import Normalize
-from pygmt.datasets import load_earth_relief
-from pyproj import CRS
 
 from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-MAIN_REGION = (-122.42, -121.98, 46.06, 46.36)  # From station map
+SHOT = 'Y5'  # Shot to calculate paths for
 
-dem = load_earth_relief(resolution='01s', region=MAIN_REGION, use_srtm=True)
-dem.rio.write_crs(dem.horizontal_datum, inplace=True)
-dem_utm = dem.rio.reproject(dem.rio.estimate_utm_crs())
-
-
-# Helper function to calculate horizontal difference vector for a profile DataArray
-def _horiz_dist(profile):
-    return np.hstack(
-        [0, np.cumsum(np.linalg.norm([np.diff(profile.x), np.diff(profile.y)], axis=0))]
-    )
-
-
-# Function for computing shortest diffracted path
-def diffracted_path(x, y):
-
-    # Compute the direct path (subtract x[0] from x to make intercept work!)
-    direct_path = (y[-1] - y[0]) / (x[-1] - x[0]) * (x - x[0]) + y[0]
-
-    # If y is everywhere "on" or "underneath" the direct path, we're done (first
-    # we mask values that are ~equal; then we check for "less than")
-    isclose = np.isclose(y, direct_path)
-    if (y[~isclose] < direct_path[~isclose]).all():
-        return direct_path
-
-    # Location of maximum of profile (detrended using direct_path)
-    max_ind = np.argmax(y - direct_path)
-
-    # Split profile into two pieces here (including common midpoint in both)
-    left = slice(None, max_ind + 1)
-    right = slice(max_ind, None)
-
-    # Recursively call this function
-    path_left = diffracted_path(x[left], y[left])
-    path_right = diffracted_path(x[right], y[right])
-
-    # Join at common midpoint, removing duplicate
-    return np.hstack([path_left[:-1], path_right])
-
-
-#%% Make profiles through DEM for a specified shot -> all nodes
-
-SHOT = 'Y5'
-
-# [m] Target horizontal spacing for profile (determines # points) - does not seem to
-# slow down code much if this is decreased
-TARGET_SPACING = 10
-
-# Get UTM coords for shot
+# Get shot and station info
 df = get_shots()
-utm_zone_number = int(CRS(dem_utm.rio.crs).utm_zone[:-1])  # Ensure same UTM zone; hacky
-shot_x, shot_y = utm.from_latlon(
-    df.loc[SHOT].lat, df.loc[SHOT].lon, force_zone_number=utm_zone_number
-)[:2]
-
-# Get UTM coords for all nodes
-sta_x_list, sta_y_list = [], []
 inv = get_stations()
-for sta in inv[0]:
-    sta_x, sta_y = utm.from_latlon(
-        sta.latitude, sta.longitude, force_zone_number=utm_zone_number
-    )[:2]
-    sta_x_list.append(sta_x)
-    sta_y_list.append(sta_y)
 
-# Iterate over all nodes, grabbing profile
-profiles = []
-total_its = len(sta_x_list)
-counter = 0
-for sta_x, sta_y in zip(sta_x_list, sta_y_list):
+# Calculate paths
+ds_list, _ = calculate_paths(
+    src_lat=df.loc[SHOT].lat,
+    src_lon=df.loc[SHOT].lon,
+    rec_lat=[sta.latitude for sta in inv[0]],
+    rec_lon=[sta.longitude for sta in inv[0]],
+    full_output=True,
+)
 
-    # Determine # of points in profile
-    dist = np.linalg.norm([shot_x - sta_x, shot_y - sta_y])
-    n = int(np.ceil(dist / TARGET_SPACING))
-
-    # Make profile, clean up, and add to list
-    profile = dem_utm.interp(
-        x=xr.DataArray(np.linspace(shot_x, sta_x, n)),
-        y=xr.DataArray(np.linspace(shot_y, sta_y, n)),
-        method='linear',
-    )
-    profile = profile.assign_coords(dim_0=_horiz_dist(profile))
-    profile = profile.rename(dim_0='distance').drop('spatial_ref')
-    profile.attrs = {}
-
-    profiles.append(profile)
-
-    # Print progress
-    counter += 1
-    print('{:.1f}%'.format((counter / total_its) * 100), end='\r')
-
-print('Done')
-
-#%% Calculate and plot all profiles + paths
+#%% Plot all profiles + paths
 
 CMAP = 'inferno_r'  # Colormap for path length differences
 EQUAL_ASPECT = False  # Toggle for equal aspect ratio
-
-# Iterate over all profiles, calculating paths
-ds_list = []
-for profile in profiles:
-
-    # Ensure numpy.ndarray type for function input
-    x = profile.distance.values
-    y = profile.values
-
-    # Compute DIRECT path
-    direct_path = (y[-1] - y[0]) / (x[-1] - x[0]) * (x - x[0]) + y[0]
-    direct_path_len = np.linalg.norm([np.diff(x), np.diff(direct_path)], axis=0).sum()
-
-    # Compute SHORTEST DIFFRACTED path
-    diff_path = diffracted_path(x, y)
-    diff_path_len = np.linalg.norm([np.diff(x), np.diff(diff_path)], axis=0).sum()
-
-    # Make nice Dataset of all info
-    ds = xr.Dataset(
-        {
-            profile.name: profile,
-            'direct_path': ('distance', direct_path, dict(length=direct_path_len)),
-            'diffracted_path': ('distance', diff_path, dict(length=diff_path_len)),
-        },
-        attrs=dict(path_length_difference=diff_path_len - direct_path_len, units='m'),
-    )
-    ds_list.append(ds)
 
 # Set up axes
 fig, axes = plt.subplot_mosaic(
