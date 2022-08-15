@@ -23,7 +23,7 @@ ds_list, _ = calculate_paths(
     full_output=True,
 )
 
-#%% Plot all profiles + paths
+#%% Plot all profiles + paths (optional)
 
 CMAP = 'inferno_r'  # Colormap for path length differences
 EQUAL_ASPECT = False  # Toggle for equal aspect ratio
