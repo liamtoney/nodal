@@ -12,7 +12,6 @@ dependencies:
   - pygmt
   - rioxarray
   - simplekml
-  - utm
   - pip:
     - mat73
     - --editable ~/repos/infresnel
