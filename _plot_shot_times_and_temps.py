@@ -5,6 +5,7 @@ import pandas as pd
 from obspy import UTCDateTime
 
 from utils import NODAL_WORKING_DIR, get_shots
+from utils.utils import INNER_RING_REGION  # Since I haven't fully exposed this constant
 
 # Read in CSV files containing temp data (this code is format-specific!)
 temp_df = pd.DataFrame()
@@ -25,14 +26,13 @@ ax.set_ylabel('Estimated dry air\nsound speed (m/s)')
 ax.set_ylim(334, 348)
 
 # Plot shot times
-MAIN_REGION = [-122.42, -121.98, 46.06, 46.36]  # TODO: from _imush_station_map.py
 df = get_shots()
 df_sort = df.sort_values(by='time')
 in_main_map = (
-    (df_sort.lon > MAIN_REGION[0])
-    & (df_sort.lon < MAIN_REGION[1])
-    & (df_sort.lat > MAIN_REGION[2])
-    & (df_sort.lat < MAIN_REGION[3])
+    (df_sort.lon > INNER_RING_REGION[0])
+    & (df_sort.lon < INNER_RING_REGION[1])
+    & (df_sort.lat > INNER_RING_REGION[2])
+    & (df_sort.lat < INNER_RING_REGION[3])
 )
 df_sort['yloc'] = np.array([352, 350, 348, 346] * 6)[:-1]  # Manual stagger
 for _, row in df_sort.iterrows():
