@@ -81,6 +81,7 @@ def station_map(
     region=INNER_RING_REGION,
     cmap='viridis',
     reverse_cmap=False,
+    plot_shot='all',  # Or a shot name or list of shot names
     plot_inset=False,
 ):
     """Plot nodes and shots with nodes colored by provided values."""
@@ -88,13 +89,23 @@ def station_map(
     # Set PyGMT defaults (inside function since we might want to make FONT an input arg)
     pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
+    # Determine which shots to plot in main map
+    df_plot = df.loc[df.Index if plot_shot == 'all' else np.atleast_1d(plot_shot)]
+
     # Plot
     fig = pygmt.Figure()
     shaded_relief = pygmt.grdgradient(
         '@earth_relief_01s', region=region, azimuth=-45.0, normalize='t1+a0'
     )
     pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nice(?)
-    fig.grdimage(shaded_relief, cmap=True, projection='M4i', region=region, frame=False)
+    fig.grdimage(
+        shaded_relief,
+        cmap=True,
+        projection='M4i',
+        region=region,
+        frame=False,
+        transparency=30,
+    )
     pygmt.makecpt(
         series=[np.min(sta_values), np.max(sta_values)],
         cmap=cmap,
@@ -104,9 +115,11 @@ def station_map(
     fig.plot(
         x=sta_lons, y=sta_lats, color=sta_values, style='c0.05i', cmap=True, pen='black'
     )  # Nodes
-    fig.plot(x=df.lon, y=df.lat, style='s0.2i', color='black', pen='white')  # Shots
+    fig.plot(
+        x=df_plot.lon, y=df_plot.lat, style='s0.2i', color='black', pen='white'
+    )  # Shots
     fig.text(
-        x=df.lon, y=df.lat, text=df.index, font='6p,white', justify='CM'
+        x=df_plot.lon, y=df_plot.lat, text=df_plot.index, font='6p,white', justify='CM'
     )  # Shot names
     # TODO: below fig.basemap() values optimized for the default region only!
     fig.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
