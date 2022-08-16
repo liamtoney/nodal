@@ -79,6 +79,8 @@ def station_map(
     cbar_label,
     cbar_tick_ints='',  # GMT formatting; use empty string for automatic
     region=INNER_RING_REGION,
+    vmin=None,  # If None, then uses minimum of sta_values
+    vmax=None,  # If None, then uses maximum of sta_values
     cmap='viridis',
     reverse_cmap=False,
     plot_shot='all',  # Or a shot name or list of shot names
@@ -107,7 +109,10 @@ def station_map(
         transparency=30,
     )
     pygmt.makecpt(
-        series=[np.min(sta_values), np.max(sta_values)],
+        series=[
+            np.min(sta_values) if vmin is None else vmin,
+            np.max(sta_values) if vmax is None else vmax,
+        ],
         cmap=cmap,
         reverse=reverse_cmap,
         background=True,
