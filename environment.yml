@@ -15,4 +15,5 @@ dependencies:
   - pip:
     - mat73
     - --editable ~/repos/infresnel
+    - --editable ~/work/python_util
     - --editable .  # Installs packages specified in setup.py
