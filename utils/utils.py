@@ -96,7 +96,10 @@ def station_map(
     pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nice(?)
     fig.grdimage(shaded_relief, cmap=True, projection='M4i', region=region, frame=False)
     pygmt.makecpt(
-        series=[np.min(sta_values), np.max(sta_values)], cmap=cmap, reverse=reverse_cmap
+        series=[np.min(sta_values), np.max(sta_values)],
+        cmap=cmap,
+        reverse=reverse_cmap,
+        background=True,
     )
     fig.plot(
         x=sta_lons, y=sta_lats, color=sta_values, style='c0.05i', cmap=True, pen='black'
