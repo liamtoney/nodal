@@ -9,6 +9,7 @@ fig = station_map(
     [sta.latitude for sta in net],
     [int(sta.code) for sta in net],
     cbar_label='Station code',
+    cbar_tick_ints='a200f100',
     cmap='turbo',
     reverse_cmap=True,
     plot_inset=True,

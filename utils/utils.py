@@ -77,7 +77,7 @@ def station_map(
     sta_lats,
     sta_values,
     cbar_label,
-    cbar_tick_ints='a200f100',  # GMT formatting
+    cbar_tick_ints='',  # GMT formatting; use empty string for automatic
     region=INNER_RING_REGION,
     cmap='viridis',
     reverse_cmap=False,
