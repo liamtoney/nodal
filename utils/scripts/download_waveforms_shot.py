@@ -2,7 +2,7 @@
 
 """Downloads iMUSH nodal data for a specified shot.
 
-Cut shot gathers are saved as miniSEED files. Usage: ./download_waveforms_shot.py SHOT
+Cut shot gathers are saved as miniSEED files. Usage: download_waveforms_shot.py SHOT
 where SHOT is a valid iMUSH shot name.
 """
 

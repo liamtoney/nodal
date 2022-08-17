@@ -2,7 +2,7 @@
 
 """Ingest iMUSH nodal data for shot Y4 from Brandon's provided MAT file.
 
-Cut shot gathers are saved as miniSEED files. Usage: ./ingest_shot_y4_waveforms.py
+Cut shot gathers are saved as miniSEED files. Usage: ingest_shot_y4_waveforms.py
 """
 
 import numpy as np
