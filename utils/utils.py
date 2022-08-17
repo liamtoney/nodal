@@ -97,7 +97,7 @@ def station_map(
     # Plot
     fig = pygmt.Figure()
     shaded_relief = pygmt.grdgradient(
-        '@earth_relief_01s', region=region, azimuth=-45.0, normalize='t1+a0'
+        '@earth_relief_01s_g', region=region, azimuth=-45.0, normalize='t1+a0'
     )
     pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nice(?)
     fig.grdimage(
