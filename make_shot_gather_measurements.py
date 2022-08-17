@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+"""Creates CSV file of measured parameters for a given shot.
+
+Usage: ./make_shot_gather_measurements.py SHOT (where SHOT is a valid iMUSH shot name)
+"""
+
+import sys
+
 import numpy as np
 import pandas as pd
 from infresnel import calculate_paths
@@ -5,7 +14,13 @@ from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
-SHOT = 'Y5'  # Shot to create measurements for
+# Read in shot info
+df = get_shots()
+
+# Input checks
+assert len(sys.argv) == 2, 'Must provide exactly one argument!'
+SHOT = sys.argv[1]
+assert SHOT in df.index, 'Argument must be a valid shot name!'
 
 # -------------------------------
 # MEASUREMENT PARAMETERS TO TWEAK
@@ -17,8 +32,7 @@ LTA = 2  # [s]
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
 # -------------------------------
 
-# Read in shot info, station info, and shot data
-df = get_shots()
+# Read in station info and shot data
 inv = get_stations()
 st = get_waveforms_shot(SHOT)
 
@@ -89,5 +103,7 @@ data_dict = dict(
     path_length_diff_m=path_diffs,
     sta_lta_amp=amps,
 )
-df = pd.DataFrame(data=data_dict)
-df.to_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{SHOT}.csv', index=False)
+data_df = pd.DataFrame(data=data_dict)
+data_df.to_csv(
+    NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{SHOT}.csv', index=False
+)

@@ -1,8 +1,20 @@
+#!/usr/bin/env python
+
+"""Plots measured parameters for a given shot.
+
+Usage: ./plot_shot_gather_measurements.py SHOT (where SHOT is a valid iMUSH shot name)
+"""
+
+import sys
+
 import pandas as pd
 
-from utils import NODAL_WORKING_DIR, station_map
+from utils import NODAL_WORKING_DIR, get_shots, station_map
 
-SHOT = 'Y5'  # Shot to plot
+# Input checks
+assert len(sys.argv) == 2, 'Must provide exactly one argument!'
+SHOT = sys.argv[1]
+assert SHOT in get_shots().index, 'Argument must be a valid shot name!'
 
 # ----------------------------
 # PLOTTING PARAMETERS TO TWEAK
