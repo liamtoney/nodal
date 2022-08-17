@@ -28,6 +28,7 @@ df = pd.read_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{SHOT}.csv')
 
 #%% Plot STA/LTA amplitudes
 
+print('Plotting STA/LTA map...')
 fig = station_map(
     df.lon,
     df.lat,
@@ -42,6 +43,7 @@ if SAVE:
 
 #%% Plot path differences
 
+print('Plotting path difference map...')
 fig = station_map(
     df.lon,
     df.lat,
