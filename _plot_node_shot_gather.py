@@ -76,7 +76,7 @@ fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / 'processed_gathers' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
 
-#%% (Plot min/max celerities on top of shot gather created abpve)
+#%% (Plot min/max celerities on top of shot gather created above)
 
 celerity_limits = (330, 350)
 
