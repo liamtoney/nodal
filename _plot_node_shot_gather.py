@@ -75,3 +75,53 @@ if SHOT == 'Y4':
 fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / 'processed_gathers' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
+
+#%% (Plot min/max celerities on top of shot gather created abpve)
+
+celerity_limits = (330, 350)
+
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+
+for celerity in celerity_limits:
+    ax.plot(
+        [0, xlim[1]],
+        [0, (celerity / 1000) * xlim[1]],
+        color='white',
+        alpha=0.5,
+        linewidth=1,
+    )
+
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+
+fig.show()
+
+#%% Align acoustic arrivals using a best-choice celerity (trial and error for each shot)
+
+# [m/s] Celerity to use for aligning arrivals
+celerity = 343
+
+# [s] Padding before and after estimated arrival (defines trimmed Trace duration)
+pre = 4
+post = 10
+
+st_window = st.copy()  # Since we're destructively trimming here
+
+for tr in st_window:
+    start = df.loc[SHOT].time + (tr.stats.distance / celerity) - pre
+    end = start + post
+    tr.trim(start, end)
+
+dist_km = np.array([tr.stats.distance / 1000 for tr in st_window])
+dist_idx = np.argsort(dist_km)
+fig, ax = plt.subplots()
+ax.pcolormesh(
+    st_window[0].times() - pre,
+    dist_km[dist_idx],  # Converting to km
+    np.array([tr.data for tr in st_window])[dist_idx, :],
+)
+ax.set_xlabel('Time (s) relative to estimated arrival time')
+ax.set_ylabel('Distance from shot (km)')
+ax.set_title(f'Shot {SHOT}, celerity = {celerity} m/s')
+fig.show()
