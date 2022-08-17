@@ -99,6 +99,4 @@ data_dict = dict(
     path_length_diff_m=[ds.path_length_difference for ds in ds_list],
 )
 df = pd.DataFrame(data=data_dict)
-df.to_csv(
-    NODAL_WORKING_DIR / 'fresnel' / f'{SHOT.lower()}_path_differences.csv', index=False
-)
+df.to_csv(NODAL_WORKING_DIR / 'fresnel' / f'{SHOT}_path_differences.csv', index=False)
