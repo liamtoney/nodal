@@ -1,12 +1,9 @@
-import os
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from obspy.geodetics.base import gps2dist_azimuth
 
-from utils import get_shots, get_stations, get_waveforms_shot
+from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to plot
 
@@ -21,7 +18,13 @@ st = get_waveforms_shot(SHOT)
 
 # Assign coordinates and distances
 for tr in st:
-    coords = inv.get_coordinates(tr.id)
+    # Need the "try" statement here for the shot Y4 data from Brandon
+    try:
+        coords = inv.get_coordinates(tr.id)
+    except Exception:
+        print(f'{tr.id} not found on IRIS. Removing.')
+        st.remove(tr)
+        continue
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = gps2dist_azimuth(
@@ -29,7 +32,8 @@ for tr in st:
     )[0]
 
 # Remove sensitivity (fast but NOT accurate!)
-st.remove_sensitivity(inv)
+if SHOT != 'Y4':
+    st.remove_sensitivity(inv)
 
 # Detrend, taper, filter
 st.detrend('demean')
@@ -42,6 +46,9 @@ st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 STA = 0.2  # [s]
 LTA = 2  # [s]
 st.trigger('classicstalta', sta=STA, lta=LTA)
+
+# Merge, as some stations have multiple Traces (doing this as late as possible)
+st.merge(fill_value=np.nan)
 
 # Ensure data are all same length (UGLY)
 vc = pd.Series([tr.stats.npts for tr in st]).value_counts()
@@ -63,6 +70,8 @@ ax.set_ylabel('Distance from shot (km)')
 ax.set_title(
     f'Shot {SHOT}, {FREQMIN}–{FREQMAX} Hz bandpass, STA = {STA} s, LTA = {LTA} s'
 )
+if SHOT == 'Y4':
+    ax.set_xlim(-30, 120)  # To match other plots
 fig.show()
 
-# fig.savefig(Path(os.environ['NODAL_WORKING_DIR']) / 'figures' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'processed_gathers' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
