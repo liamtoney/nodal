@@ -55,7 +55,7 @@ for tr in st:
 if SHOT != 'Y4':
     st.remove_sensitivity(inv)
 else:
-    print(f'Not removing sensitivity for shot {SHOT}!')
+    print(f'Not removing sensitivity for shot {SHOT}!\n')
 
 # Detrend, taper, filter
 st.detrend('demean')
