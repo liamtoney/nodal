@@ -1,3 +1,5 @@
+# TODO: Make this code available to make_shot_gather_measurements.py for troubleshooting
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
