@@ -35,6 +35,9 @@ fig = station_map(
     df.sta_lta_amp,
     cbar_label='STA/LTA amplitude',
     plot_shot=SHOT,
+    vmin=1,
+    vmax=9,
+    cbar_tick_ints='a1f0.5',
 )
 if SAVE:
     fig.savefig(
@@ -50,10 +53,10 @@ fig = station_map(
     df.path_length_diff_m,
     cbar_label='Difference between shortest diffracted path and direct path (m)',
     plot_shot=SHOT,
-    reverse_cmap=True,
     vmin=10,  # [m]
     vmax=60,  # [m] Making this smaller highlights the differences better!
     cbar_tick_ints='a10f5',
+    reverse_cmap=True,
 )
 if SAVE:
     fig.savefig(
