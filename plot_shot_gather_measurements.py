@@ -51,7 +51,9 @@ fig = station_map(
     cbar_label='Difference between shortest diffracted path and direct path (m)',
     plot_shot=SHOT,
     reverse_cmap=True,
+    vmin=10,  # [m]
     vmax=60,  # [m] Making this smaller highlights the differences better!
+    cbar_tick_ints='a10f5',
 )
 if SAVE:
     fig.savefig(
