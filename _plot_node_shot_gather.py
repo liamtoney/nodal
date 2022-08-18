@@ -9,6 +9,8 @@ from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to plot
 
+RAW = False  # If True, then produce a "raw" gather — we just remove the sensitivity
+
 # Read in shot info
 df = get_shots()
 
@@ -33,21 +35,55 @@ for tr in st:
         tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
 
-# Remove sensitivity (fast but NOT accurate!)
-if SHOT != 'Y4':
-    st.remove_sensitivity(inv)
+# TODO: Figure out Y4 data scaling issue... see "acoustic waves on nodes?" email chain
+if SHOT == 'Y4':
+    fudge_factor = 87921  # Chosen to make max amp of closest station match shot Y5
+    for tr in st:
+        tr.data *= fudge_factor
 
-# Detrend, taper, filter
-st.detrend('demean')
-st.taper(0.05)
-FREQMIN = 1  # [Hz]
-FREQMAX = 50  # [Hz]
-st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
+# Remove sensitivity (fast but NOT accurate!) to get m/s units
+st.remove_sensitivity(inv)
 
-# Apply STA/LTA
-STA = 0.2  # [s]
-LTA = 2  # [s]
-st.trigger('classicstalta', sta=STA, lta=LTA)
+# If we're not making a raw gather, then process
+if not RAW:
+
+    # Detrend, taper, filter
+    st.detrend('demean')
+    st.taper(0.05)
+    FREQMIN = 1  # [Hz]
+    FREQMAX = 50  # [Hz]
+    st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
+
+    # Apply STA/LTA
+    STA = 0.2  # [s]
+    LTA = 2  # [s]
+    st.trigger('classicstalta', sta=STA, lta=LTA)
+
+    # Define title
+    title = (
+        f'Shot {SHOT}, {FREQMIN}–{FREQMAX} Hz bandpass, STA = {STA} s, LTA = {LTA} s'
+    )
+
+    # Define plotting options
+    vmin = None
+    vmax = None
+    cmap = None
+
+    # Define subdirectory
+    subdir = 'processed_gathers'
+
+else:
+
+    # Define title
+    title = f'Shot {SHOT}'
+
+    # Define plotting options
+    vmin = -1e-5  # [m/s]
+    vmax = 1e-5  # [m/s]
+    cmap = 'seismic'
+
+    # Define subdirectory
+    subdir = 'raw_gathers'
 
 # Merge, as some stations have multiple Traces (doing this as late as possible)
 st.merge(fill_value=np.nan)
@@ -66,17 +102,28 @@ ax.pcolormesh(
     st[0].times(reftime=df.loc[SHOT].time),
     dist_km[dist_idx],  # Converting to km
     np.array([tr.data for tr in st])[dist_idx, :],
+    vmin=vmin,
+    vmax=vmax,
+    cmap=cmap,
 )
 ax.set_xlabel('Time from shot (s)')
 ax.set_ylabel('Distance from shot (km)')
-ax.set_title(
-    f'Shot {SHOT}, {FREQMIN}–{FREQMAX} Hz bandpass, STA = {STA} s, LTA = {LTA} s'
-)
+ax.set_title(title)
 if SHOT == 'Y4':
     ax.set_xlim(-30, 120)  # To match other plots
+    ax.text(
+        0.99,
+        0.985,
+        f'{fudge_factor = }',
+        transform=ax.transAxes,
+        ha='right',
+        va='top',
+        color='black' if RAW else 'white',
+        fontname=['JetBrains Mono', 'monospace'],
+    )
 fig.show()
 
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'processed_gathers' / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / subdir / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
 
 #%% (Plot min/max celerities on top of shot gather created above)
 
@@ -89,8 +136,7 @@ for celerity in celerity_limits:
     ax.plot(
         [0, xlim[1]],
         [0, (celerity / 1000) * xlim[1]],
-        color='white',
-        alpha=0.5,
+        color='black' if RAW else 'white',
         linewidth=1,
     )
 
@@ -122,8 +168,22 @@ ax.pcolormesh(
     st_window[0].times() - pre,
     dist_km[dist_idx],  # Converting to km
     np.array([tr.data for tr in st_window])[dist_idx, :],
+    vmin=vmin,
+    vmax=vmax,
+    cmap=cmap,
 )
 ax.set_xlabel('Time (s) relative to estimated arrival time')
 ax.set_ylabel('Distance from shot (km)')
 ax.set_title(f'Shot {SHOT}, celerity = {celerity} m/s')
+if SHOT == 'Y4':
+    ax.text(
+        0.99,
+        0.985,
+        f'{fudge_factor = }',
+        transform=ax.transAxes,
+        ha='right',
+        va='top',
+        color='black' if RAW else 'white',
+        fontname=['JetBrains Mono', 'monospace'],
+    )
 fig.show()
