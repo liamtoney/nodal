@@ -40,7 +40,7 @@ for SHOT, ax in zip(shot_list, axes):
     # Remove sensitivity (fast but NOT accurate!)
     st.remove_sensitivity(inv)
 
-    target_dist = 8
+    target_dist = 8  # [km]
     ind = np.argmin(
         np.abs(np.array([tr.stats.distance for tr in st]) - (target_dist * 1000))
     )
