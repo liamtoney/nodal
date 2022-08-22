@@ -145,6 +145,40 @@ ax.set_ylim(ylim)
 
 fig.show()
 
+#%% (Plot mask distance params on top of shot gather created above)
+
+from utils import MASK_DISTANCE_KM
+from utils.utils import T_SEP, V_P, C
+
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+
+# Plot the two wavespeeds
+for speed in C, V_P:
+    ax.plot(
+        [0, xlim[1]],
+        [0, (speed / 1000) * xlim[1]],
+        color='black' if RAW else 'white',
+        linewidth=1,
+    )
+# Plot t_sep
+ax.plot(
+    [T_SEP, xlim[1] + T_SEP],
+    [0, (speed / 1000) * xlim[1]],
+    color='black' if RAW else 'white',
+    linewidth=1,
+    linestyle='--',
+)
+# Plot masking distance
+ax.fill_between(
+    xlim, [MASK_DISTANCE_KM, MASK_DISTANCE_KM], linewidth=0, color='white', alpha=0.8
+)
+
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+
+fig.show()
+
 #%% Align acoustic arrivals using a best-choice celerity (trial and error for each shot)
 
 # [m/s] Celerity to use for aligning arrivals

@@ -10,9 +10,17 @@ from obspy import UTCDateTime, read, read_inventory
 # Define working directory here so that it can be exposed for easy import
 NODAL_WORKING_DIR = Path(os.environ['NODAL_WORKING_DIR'])
 
+# Parameters for mask distance calculation
+T_SEP = 20  # [s] Coda length
+C = 340  # [m/s] Sound speed
+V_P = 5000  # [m/s] P-wave speed
+
 # Nicely-rounded regions
 FULL_REGION = (-123.1, -121.3, 45.6, 46.8)  # All 23 shots
 INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
+
+# Code constants
+M_PER_KM = 1000  # [m/km] CONSTANT
 
 # Read in and process shot metadata
 with warnings.catch_warnings():
@@ -157,3 +165,12 @@ def station_map(
     fig.show()
 
     return fig
+
+
+def _estimate_mask_distance(t_sep, c, v_p):
+    """Estimate distance within which we expect acoustic arrivals to be masked by coda."""
+    return t_sep * ((1 / c) - (1 / v_p)) ** -1  # [m] (if inputs are all in SI!)
+
+
+# Call function to create masking distance, which is then exposed
+MASK_DISTANCE_KM = _estimate_mask_distance(T_SEP, C, V_P) / M_PER_KM  # [km]
