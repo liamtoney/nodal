@@ -9,7 +9,7 @@ import sys
 
 import pandas as pd
 
-from utils import NODAL_WORKING_DIR, get_shots, station_map
+from utils import MASK_DISTANCE_KM, NODAL_WORKING_DIR, get_shots, station_map
 
 # Input checks
 assert len(sys.argv) == 2, 'Must provide exactly one argument!'
@@ -33,11 +33,13 @@ fig = station_map(
     df.lon,
     df.lat,
     df.sta_lta_amp,
+    sta_dists=df.dist_m,
     cbar_label='STA/LTA amplitude',
     plot_shot=SHOT,
     vmin=1,
     vmax=9,
     cbar_tick_ints='a1f0.5',
+    mask_distance=MASK_DISTANCE_KM,
 )
 if SAVE:
     fig.savefig(

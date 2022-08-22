@@ -85,6 +85,7 @@ def station_map(
     sta_lats,
     sta_values,
     cbar_label,
+    sta_dists=None,  # [m] (Optional) station distances, needed for mask_distance > 0
     cbar_tick_ints='',  # GMT formatting; use empty string for automatic
     region=INNER_RING_REGION,
     vmin=None,  # If None, then uses minimum of sta_values
@@ -93,6 +94,7 @@ def station_map(
     reverse_cmap=False,
     plot_shot='all',  # Or a shot name or list of shot names
     plot_inset=False,
+    mask_distance=0,  # [km] Plot markers within this range differently
 ):
     """Plot nodes and shots with nodes colored by provided values."""
 
@@ -101,6 +103,15 @@ def station_map(
 
     # Determine which shots to plot in main map
     df_plot = df.loc[df.Index if plot_shot == 'all' else np.atleast_1d(plot_shot)]
+
+    # Determine which nodes to mask
+    if mask_distance > 0:
+        if sta_dists is None:
+            raise ValueError('sta_dists must be provided to use mask_distance!')
+        else:
+            is_masked = sta_dists < mask_distance * M_PER_KM
+    else:  # Nothing should be masked, as mask_distance is 0
+        is_masked = np.full(len(sta_lons), False)
 
     # Plot
     fig = pygmt.Figure()
@@ -125,9 +136,25 @@ def station_map(
         reverse=reverse_cmap,
         background=True,
     )
+    node_style = 'c0.05i'
+    # Plot nodes INSIDE mask (if any!)
+    if is_masked.any():
+        fig.plot(
+            x=sta_lons[is_masked],
+            y=sta_lats[is_masked],
+            color=sta_values[is_masked],
+            style=node_style,
+            pen='gray31',
+        )
+    # Plot nodes OUTSIDE mask
     fig.plot(
-        x=sta_lons, y=sta_lats, color=sta_values, style='c0.05i', cmap=True, pen='black'
-    )  # Nodes
+        x=sta_lons[~is_masked],
+        y=sta_lats[~is_masked],
+        color=sta_values[~is_masked],
+        style=node_style,
+        cmap=True,
+        pen='black',
+    )
     fig.plot(
         x=df_plot.lon, y=df_plot.lat, style='s0.2i', color='black', pen='white'
     )  # Shots
