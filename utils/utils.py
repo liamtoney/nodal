@@ -138,8 +138,8 @@ def station_map(
     )
     pygmt.makecpt(
         series=[
-            np.min(sta_values) if vmin is None else vmin,
-            np.max(sta_values) if vmax is None else vmax,
+            sta_values.min() if vmin is None else vmin,
+            sta_values.max() if vmax is None else vmax,
         ],
         cmap=cmap,
         reverse=reverse_cmap,
