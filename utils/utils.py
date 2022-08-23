@@ -98,6 +98,11 @@ def station_map(
 ):
     """Plot nodes and shots with nodes colored by provided values."""
 
+    # Convert lons/lats/values to arrays
+    sta_lons = np.array(sta_lons)
+    sta_lats = np.array(sta_lats)
+    sta_values = np.array(sta_values)
+
     # Set PyGMT defaults (inside function since we might want to make FONT an input arg)
     pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
