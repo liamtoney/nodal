@@ -214,9 +214,9 @@ def station_map(
         shot_x = df_plot.lon
         shot_y = df_plot.lat
     # Plot shots
-    fig.plot(x=shot_x, y=shot_y, style='s0.2i', color='black', pen='white')
+    fig.plot(x=shot_x, y=shot_y, style='s0.21i', color='black')
     # Plot shot names
-    fig.text(x=shot_x, y=shot_y, text=df_plot.index, font='6p,white', justify='CM')
+    fig.text(x=shot_x, y=shot_y, text=df_plot.index, font='5p,white', justify='CM')
 
     # TODO: below fig.basemap() values optimized for the default region only!
     fig.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
