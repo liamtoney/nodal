@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pygmt
 from obspy import UTCDateTime, read, read_inventory
+from obspy.geodetics.base import gps2dist_azimuth
 
 # Define working directory here so that it can be exposed for easy import
 NODAL_WORKING_DIR = Path(os.environ['NODAL_WORKING_DIR'])
@@ -20,8 +21,9 @@ FULL_REGION = (-123.1, -121.3, 45.6, 46.8)  # All 23 shots
 INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
 
 # "Outside arrow" parameters
-BOUNDARY_PAD = 1  # [km] Padding between map boundary and arrow head (along arrow axis!)
-ARROW_LENGTH = 3  # [km] Length of arrow
+BOUNDARY_PAD = 0.5  # [km] Pad between map boundary and arrow head (along arrow axis!)
+ARROW_LENGTH = 4.5  # [km] Length of arrow
+OFFSET = 0.05  # [in] Distance text offset (perpendicular to arrow axis)
 
 # Code constants
 M_PER_KM = 1000  # [m/km] CONSTANT
@@ -194,14 +196,17 @@ def station_map(
             direction=[[head_coords[0]], [head_coords[1]]],
         )
         # Plot arrow distance text
+        az = gps2dist_azimuth(*tail_coords[::-1], *head_coords[::-1])[1]
+        angle = 90 - az % 180  # Degrees CCW from horizontal (make always upright!)
+        offset_angle = np.deg2rad(angle + 90)
         fig.text(
-            x=tail_coords[0],
-            y=tail_coords[1],
+            x=np.mean([tail_coords[0], head_coords[0]]),
+            y=np.mean([tail_coords[1], head_coords[1]]),
+            angle=angle,
             text=f'{tail_shot_dist_km:.1f} km',
             font='6p,Helvetica-Bold',
-            justify='LM',
-            offset='0.12i/0',
-            no_clip=True,
+            justify='CB',
+            offset=f'{OFFSET * np.cos(offset_angle)}i/{OFFSET * np.sin(offset_angle)}i',
         )
         shot_x = tail_coords[0]
         shot_y = tail_coords[1]
