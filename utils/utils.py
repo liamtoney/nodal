@@ -252,7 +252,7 @@ def station_map(
 
 
 def _outside_arrow(
-    region, lon1, lat1, lon2, lat2, boundary_pad_km, arrow_length_km, interval_km=0.1
+    region, lon1, lat1, lon2, lat2, boundary_pad_km, arrow_length_km, interval_km=0.01
 ):
     """Determine optimal arrow tail and head locations subject to placement constraints.
 
