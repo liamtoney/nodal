@@ -102,7 +102,7 @@ def station_map(
     pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
     # Determine which shots to plot in main map
-    df_plot = df.loc[df.Index if plot_shot == 'all' else np.atleast_1d(plot_shot)]
+    df_plot = df.loc[df.index if plot_shot == 'all' else np.atleast_1d(plot_shot)]
 
     # Determine which nodes to mask
     if mask_distance > 0:
