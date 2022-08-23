@@ -20,7 +20,7 @@ FULL_REGION = (-123.1, -121.3, 45.6, 46.8)  # All 23 shots
 INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
 
 # "Outside arrow" parameters
-BOUNDARY_PAD = 1  # [km] Padding between map boundary and arrow head
+BOUNDARY_PAD = 1  # [km] Padding between map boundary and arrow head (along arrow axis!)
 ARROW_LENGTH = 3  # [km] Length of arrow
 
 # Code constants
@@ -251,7 +251,7 @@ def _outside_arrow(
 ):
     """Determine optimal arrow tail and head locations subject to placement constraints.
 
-    The user request an arrow length and the amount of padding between the arrow head
+    The user requests an arrow length and the amount of padding between the arrow head
     and the region boundary. The arrow points from (lon1, lat1), inside the map, to
     (lon2, lat2), outside the map.
 
