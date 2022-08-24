@@ -253,7 +253,7 @@ def station_map(
                 color='white',
                 **kwargs,
             )
-            fig.basemap(map_scale='g-122.2/45.8+w50')
+            fig.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
 
     fig.show()
 
