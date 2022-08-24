@@ -17,7 +17,7 @@ C = 340  # [m/s] Sound speed
 V_P = 5000  # [m/s] P-wave speed
 
 # Nicely-rounded regions
-FULL_REGION = (-123.1, -121.3, 45.6, 46.8)  # All 23 shots
+FULL_REGION = (-123.2, -121.2, 45.6, 46.8)  # All 23 shots
 INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
 
 # "Outside arrow" parameters
@@ -237,12 +237,21 @@ def station_map(
                 & (df.lat > region[2])
                 & (df.lat < region[3])
             )
-            kwargs = dict(style='s0.07i', pen='black')
+            kwargs = dict(style='si', pen='black')
+            scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
             fig.plot(
-                x=df[in_main_map].lon, y=df[in_main_map].lat, color='black', **kwargs
+                x=df[in_main_map].lon,
+                y=df[in_main_map].lat,
+                size=df[in_main_map].weight_lb * scale,
+                color='black',
+                **kwargs,
             )
             fig.plot(
-                x=df[~in_main_map].lon, y=df[~in_main_map].lat, color='white', **kwargs
+                x=df[~in_main_map].lon,
+                y=df[~in_main_map].lat,
+                size=df[~in_main_map].weight_lb * scale,
+                color='white',
+                **kwargs,
             )
             fig.basemap(map_scale='g-122.2/45.8+w50')
 
