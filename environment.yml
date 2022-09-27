@@ -4,15 +4,19 @@ channels:
   - defaults
 dependencies:
   - black
+  - cdsapi
+  - colorcet
   - ipython
   - isort
   - numba
   - obspy
   - openpyxl
   - pip
+  - pooch
   - pygmt
   - rioxarray
   - simplekml
+  - tqdm
   - pip:
     - mat73
     - --editable ${HOME}/repos/infresnel
