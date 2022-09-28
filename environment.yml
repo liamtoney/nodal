@@ -5,6 +5,7 @@ channels:
 dependencies:
   - black
   - cdsapi
+  - cfgrib
   - colorcet
   - ipython
   - isort
