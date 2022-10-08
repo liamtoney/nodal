@@ -11,6 +11,15 @@ from obspy.geodetics.base import gps2dist_azimuth
 # Define working directory here so that it can be exposed for easy import
 NODAL_WORKING_DIR = Path(os.environ['NODAL_WORKING_DIR'])
 
+# The 37 ERA5 pressure levels [hPa]
+# fmt: off
+ERA5_PRESSURE_LEVELS = (
+    1000, 975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 700, 650, 600, 550, 500,
+     450, 400, 350, 300, 250, 225, 200, 175, 150, 125, 100,  70,  50,  30,  20,  10,
+       7,   5,   3,   2,   1,
+)
+# fmt: on
+
 # Parameters for mask distance calculation
 T_SEP = 20  # [s] Coda length
 C = 340  # [m/s] Sound speed
