@@ -20,14 +20,14 @@ ERA5_PRESSURE_LEVELS = (
 )
 # fmt: on
 
+# Nicely-rounded regions
+FULL_REGION = (-123.2, -121.2, 45.6, 46.8)  # All 23 shots
+INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
+
 # Parameters for mask distance calculation
 T_SEP = 20  # [s] Coda length
 C = 340  # [m/s] Sound speed
 V_P = 5000  # [m/s] P-wave speed
-
-# Nicely-rounded regions
-FULL_REGION = (-123.2, -121.2, 45.6, 46.8)  # All 23 shots
-INNER_RING_REGION = (-122.42, -121.98, 46.06, 46.36)  # Inner ring of 8 shots
 
 # "Outside arrow" parameters
 BOUNDARY_PAD = 0.5  # [km] Pad between map boundary and arrow head (along arrow axis!)
