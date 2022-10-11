@@ -43,7 +43,13 @@ with warnings.catch_warnings():
     df = pd.read_excel(NODAL_WORKING_DIR / 'metadata' / 'iMUSH_shot_metadata.xlsx')
 df.dropna(inplace=True)
 df.rename(
-    columns={'Shot': 'shot', 'Lat': 'lat', 'Lon': 'lon', 'Weight (lb)': 'weight_lb'},
+    columns={
+        'Shot': 'shot',
+        'Lat': 'lat',
+        'Lon': 'lon',
+        'Elev': 'elev_m',
+        'Weight (lb)': 'weight_lb',
+    },
     inplace=True,
 )
 df.set_index('shot', inplace=True)  # So we can easily look up shots by name
@@ -68,7 +74,6 @@ df.drop(
         'UTC Hour',
         'Min',
         'Sec',
-        'Elev',
         'Est Mag (PNSN)',
         'Unnamed: 9',
     ],
