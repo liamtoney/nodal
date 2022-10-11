@@ -135,7 +135,6 @@ sm = ax.quiver(
     clim=(shot.elev_m / 1000, MAX_ALT),  # Start colormap at shot elevation
     clip_on=False,
 )
-max_wind = np.max([np.abs(ds_plot.u).max(), np.abs(ds_plot.v).max()])
 ax.set_xlim(min([ds_plot.u.min(), 0]), max([ds_plot.u.max(), 0]))
 ax.set_ylim(min([ds_plot.v.min(), 0]), max([ds_plot.v.max(), 0]))
 ax.set_aspect('equal')
@@ -149,7 +148,7 @@ ax.quiverkey(
     coordinates='data',
 )
 ax.axis('off')
-cbar = fig.colorbar(sm, cax=cax, label='Altitude (km)')
+fig.colorbar(sm, cax=cax, label='Altitude (km)')
 cax.axhline(
     shot.elev_m / 1000,  # Horizontal line at shot elevation
     linestyle='--',
