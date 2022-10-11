@@ -64,32 +64,103 @@ ds = get_era5_u_v_z(
 
 # Select nearest 1D profile
 ds_shot = ds.sel(latitude=shot.lat, longitude=shot.lon, method='nearest')
+ds_shot['alt_km'] = (ds_shot.z / 9.8) / 1000  # [km] Convert to geopotential height
 
-#%% Plot the profile
+#%% Plot the profile (vertical view)
 
-cmap = cc.m_CET_C6  # Must match grid plotting code!
-norm = plt.Normalize(0, 360)
+MAX_ALT = 12  # [km]
+
+ds_plot = ds_shot.where(ds_shot.alt_km < MAX_ALT, drop=True)
 
 fig, ax = plt.subplots(figsize=(5, 9))
-altitude = (ds_shot.z / 9.8) / 1000  # [km] Converting to geopotential here
-for wind, dir in zip([ds_shot.u, ds_shot.v], [270, 180]):
+for wind, dir in zip([ds_plot.u, ds_plot.v], [270, 180]):
     ax.plot(
         wind,
-        altitude,
-        color=cmap(norm(dir)),
+        ds_plot.alt_km,
+        color=cc.m_CET_C6(plt.Normalize(0, 360)(dir)),  # TODO: Must match grid code!
         label=wind.standard_name.replace('_', ' ').capitalize(),
     )
-ax.axvline(0, linestyle=':', color='black', zorder=-5)
+ax.axvline(
+    0,  # Show 0 m/s wind as vertical line
+    linestyle=':',
+    color=plt.rcParams['grid.color'],
+    linewidth=plt.rcParams['grid.linewidth'],
+    zorder=-5,
+)
+ax.axhline(
+    shot.elev_m / 1000,  # Horizontal line at shot elevation
+    linestyle='--',
+    color='black',
+    linewidth=plt.rcParams['axes.linewidth'],
+    zorder=-5,
+    label='Shot elevation',
+)
 ax.set_xlabel('Wind speed (m/s)')
 ax.set_ylabel('Altitude (km)')
-ax.set_title(
+title_str = (
     rf'$\bf{{Shot~{shot.name}}}$'
     + '\nModel time: '
-    + UTCDateTime(str(ds_shot.time.values)).strftime('%Y-%m-%d %H:%M')
-    + f'\nProfile location: ({ds_shot.latitude:.2f}°, {ds_shot.longitude:.2f}°)'.replace(
+    + UTCDateTime(str(ds_plot.time.values)).strftime('%Y-%m-%d %H:%M')
+    + f'\nProfile location: ({ds_plot.latitude:.2f}°, {ds_plot.longitude:.2f}°)'.replace(
         '-', '–'
     )
 )
-ax.set_ylim(0, 50)
+ax.set_title(title_str)
+ax.set_ylim(0, MAX_ALT)
 ax.legend()
+fig.show()
+
+#%% Plot the profile (map view) [ABOVE CELL MUST BE RUN FIRST]
+
+fig, (ax, cax) = plt.subplots(
+    ncols=2, gridspec_kw=dict(width_ratios=[40, 1]), figsize=(8, 8)
+)
+
+# Form colormap
+cmap = cc.m_rainbow_r.copy()
+under_color = 'tab:gray'
+cmap.set_under(under_color)
+
+sm = ax.quiver(
+    np.zeros(ds_plot.alt_km.size),
+    np.zeros(ds_plot.alt_km.size),
+    ds_plot.u,
+    ds_plot.v,
+    ds_plot.alt_km,  # We're coloring the arrows by altitude
+    cmap=cmap,
+    angles='xy',
+    scale_units='xy',
+    scale=1,
+    width=0.007,
+    clim=(shot.elev_m / 1000, MAX_ALT),  # Start colormap at shot elevation
+    clip_on=False,
+)
+max_wind = np.max([np.abs(ds_plot.u).max(), np.abs(ds_plot.v).max()])
+ax.set_xlim(min([ds_plot.u.min(), 0]), max([ds_plot.u.max(), 0]))
+ax.set_ylim(min([ds_plot.v.min(), 0]), max([ds_plot.v.max(), 0]))
+ax.set_aspect('equal')
+reference_speed = 5  # [m/s]
+ax.quiverkey(
+    sm,
+    0,
+    ds_plot.v.max(),
+    reference_speed,
+    label=f'{reference_speed} m/s',
+    coordinates='data',
+)
+ax.axis('off')
+cbar = fig.colorbar(sm, cax=cax, label='Altitude (km)')
+cax.axhline(
+    shot.elev_m / 1000,  # Horizontal line at shot elevation
+    linestyle='--',
+    color='black',
+    linewidth=plt.rcParams['axes.linewidth'],
+)
+cax.set_ylim(bottom=0)
+cax.set_facecolor(under_color)
+ax_pos = ax.get_position()
+cax_pos = cax.get_position()
+cax.set_position([cax_pos.x0, ax_pos.y0, cax_pos.width, ax_pos.height])
+ax.set_title(title_str, pad=60)
+
 fig.show()
