@@ -33,7 +33,8 @@ for sta in get_stations()[0]:
     x, y = proj.transform(sta.latitude, sta.longitude)
     sta_x.append(x)
     sta_y.append(y)
-    sta_elev.append(sta.elevation)
+    # sta_elev.append(sta.elevation)  # Use metadata elevation (ISSUES!)
+    sta_elev.append(dem.sel(x=x, y=y, method='nearest').values)  # Use DEM elevation
 sta_x = np.array(sta_x)
 sta_y = np.array(sta_y)
 sta_elev = np.array(sta_elev)
