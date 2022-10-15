@@ -83,6 +83,7 @@ sm = ax.scatter(
     vmin=-MASK_DIST,
     vmax=MASK_DIST,
     cmap=cc.m_CET_D13,
+    zorder=10,
 )
 ax.scatter(
     sta_x[outside],
@@ -115,6 +116,7 @@ sm = ax.scatter(
     vmin=-MASK_DIST,
     vmax=MASK_DIST,
     cmap=cc.m_CET_D13,
+    zorder=10,
 )
 ax.scatter(
     along_profile_dists[outside],
