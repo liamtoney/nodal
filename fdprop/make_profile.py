@@ -34,6 +34,9 @@ for sta in get_stations()[0]:
     sta_x.append(x)
     sta_y.append(y)
     sta_elev.append(sta.elevation)
+sta_x = np.array(sta_x)
+sta_y = np.array(sta_y)
+sta_elev = np.array(sta_elev)
 
 # Find m and b in y = mx + b for profile
 m = (profile.y[-1] - profile.y[0]) / (profile.x[-1] - profile.x[0])
@@ -51,7 +54,16 @@ for x, y in zip(sta_x, sta_y):
     dd = np.linalg.norm(np.array([u2, v2]) - np.array([profile.x[0], profile.y[0]]))
     out_of_plane_dists.append(d)
     along_profile_dists.append(dd - delta)
-dist_lim = np.min([np.abs(np.min(out_of_plane_dists)), np.max(out_of_plane_dists)])
+out_of_plane_dists = np.array(out_of_plane_dists)
+along_profile_dists = np.array(along_profile_dists)
+
+# [m] Outside this distance from the profile, we discard stations (if None, then don't
+# discard any stations)
+MASK_DIST = 500
+
+if not MASK_DIST:
+    MASK_DIST = np.abs(out_of_plane_dists).max()
+outside = np.abs(out_of_plane_dists) > MASK_DIST
 
 # Plot map view
 fig, ax = plt.subplots(figsize=(8, 7))
@@ -61,15 +73,24 @@ ax.plot(
 )
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
 sm = ax.scatter(
-    sta_x,
-    sta_y,
+    sta_x[~outside],
+    sta_y[~outside],
     s=20,
-    c=out_of_plane_dists,
+    c=out_of_plane_dists[~outside],
     edgecolor='black',
     linewidths=0.5,
-    vmin=-dist_lim,
-    vmax=dist_lim,
+    vmin=-MASK_DIST,
+    vmax=MASK_DIST,
     cmap=cc.m_CET_D13,
+)
+ax.scatter(
+    sta_x[outside],
+    sta_y[outside],
+    s=20,
+    facecolor='none',
+    edgecolor='black',
+    linewidths=0.5,
+    alpha=0.3,
 )
 ax.ticklabel_format(style='plain')
 ax.set_xlim(xlim)
@@ -84,15 +105,24 @@ fig.show()
 fig, ax = plt.subplots(figsize=(20, 2.5))
 profile.plot(x='distance', ax=ax, color='tab:orange')
 sm = ax.scatter(
-    along_profile_dists,
-    sta_elev,
+    along_profile_dists[~outside],
+    sta_elev[~outside],
     s=20,
-    c=out_of_plane_dists,
+    c=out_of_plane_dists[~outside],
     edgecolor='black',
     linewidths=0.5,
-    vmin=-dist_lim,
-    vmax=dist_lim,
+    vmin=-MASK_DIST,
+    vmax=MASK_DIST,
     cmap=cc.m_CET_D13,
+)
+ax.scatter(
+    along_profile_dists[outside],
+    sta_elev[outside],
+    s=20,
+    facecolor='none',
+    edgecolor='black',
+    linewidths=0.5,
+    alpha=0.3,
 )
 ax.set_aspect('equal')
 cbar = fig.colorbar(sm, label='Distance from profile (m)')
