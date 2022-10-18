@@ -79,6 +79,9 @@ df.drop(
     ],
     inplace=True,
 )
+df['gcas_on_nodes'] = pd.read_json(
+    NODAL_WORKING_DIR / 'metadata' / 'shot_gcas_on_nodes.json', typ='series'
+)
 
 # Read in station information
 inv = read_inventory(str(NODAL_WORKING_DIR / 'metadata' / '1D.xml'))
