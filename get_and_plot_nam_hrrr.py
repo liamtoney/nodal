@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""Run the following in an IPython console to iterate over all shots:
+
+from utils import get_shots
+for shot in get_shots().index:
+    %run get_and_plot_nam_hrrr.py {shot}
+"""
+
 import sys
 
 import colorcet as cc
@@ -141,6 +148,7 @@ def plot_wind_speed_direction(
                 wind * np.sin(np.deg2rad(270 - wdir)),  # V
                 wdir,
                 cmap=cmaps[1],
+                clim=(0, 360),
                 scale=100,
                 scale_units='width',
             )
