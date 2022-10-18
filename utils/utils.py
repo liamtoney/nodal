@@ -231,20 +231,24 @@ def station_map(
         shot_x = df_plot.lon
         shot_y = df_plot.lat
     # Plot shots
-    shot_kwargs = dict(style='s0.21i', pen=True)
+    size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
+    kwargs = dict(style='si', pen=True)
+    scale = size_1000_lb / 1000  # [in/lb] Scale shot weights to marker sizes
     fig.plot(
         x=shot_x[df_plot.gcas_on_nodes],
         y=shot_y[df_plot.gcas_on_nodes],
+        size=df_plot[df_plot.gcas_on_nodes].weight_lb * scale,
         color='black',
-        label='GCAs observed',
-        **shot_kwargs,
+        label=f'GCAs observed+S{size_1000_lb}i',
+        **kwargs,
     )
     fig.plot(
         x=shot_x[~df_plot.gcas_on_nodes],
         y=shot_y[~df_plot.gcas_on_nodes],
+        size=df_plot[~df_plot.gcas_on_nodes].weight_lb * scale,
         color='white',
-        label='GCAs not observed',
-        **shot_kwargs,
+        label=f'GCAs not observed+S{size_1000_lb}i',
+        **kwargs,
     )
     # Plot shot names
     justify = 'CM'
