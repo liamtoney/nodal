@@ -134,13 +134,24 @@ def plot_wind_speed_direction(
         )
         if type == wind_speed and combo_plot:
             sm.remove()
-            ax.quiver(
+            sm = ax.quiver(
                 da.longitude,
                 da.latitude,
                 wind * np.cos(np.deg2rad(270 - wdir)),  # U
                 wind * np.sin(np.deg2rad(270 - wdir)),  # V
                 wdir,
                 cmap=cmaps[1],
+                scale=100,
+                scale_units='width',
+            )
+            reference_speed = 10  # [m/s]
+            ax.quiverkey(
+                sm,
+                0.05,
+                1.05,
+                reference_speed,
+                label=f'{reference_speed} m/s',
+                coordinates='axes',
             )
         ax.set_xlim(region[:2])
         ax.set_ylim(region[2:])
