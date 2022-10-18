@@ -231,13 +231,49 @@ def station_map(
         shot_x = df_plot.lon
         shot_y = df_plot.lat
     # Plot shots
-    fig.plot(x=shot_x, y=shot_y, style='s0.21i', color='black')
+    shot_kwargs = dict(style='s0.21i', pen=True)
+    fig.plot(
+        x=shot_x[df_plot.gcas_on_nodes],
+        y=shot_y[df_plot.gcas_on_nodes],
+        color='black',
+        label='GCAs observed',
+        **shot_kwargs,
+    )
+    fig.plot(
+        x=shot_x[~df_plot.gcas_on_nodes],
+        y=shot_y[~df_plot.gcas_on_nodes],
+        color='white',
+        label='GCAs not observed',
+        **shot_kwargs,
+    )
     # Plot shot names
-    fig.text(x=shot_x, y=shot_y, text=df_plot.index, font='5p,white', justify='CM')
+    justify = 'CM'
+    fontsize = 5  # [pts]
+    fig.text(
+        x=shot_x[df_plot.gcas_on_nodes],
+        y=shot_y[df_plot.gcas_on_nodes],
+        text=df_plot[df_plot.gcas_on_nodes].index,
+        font=f'{fontsize}p,white',
+        justify=justify,
+    )
+    fig.text(
+        x=shot_x[~df_plot.gcas_on_nodes],
+        y=shot_y[~df_plot.gcas_on_nodes],
+        text=df_plot[~df_plot.gcas_on_nodes].index,
+        font=f'{fontsize}p',
+        justify=justify,
+    )
 
     # TODO: below fig.basemap() values optimized for the default region only!
     fig.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
-    fig.colorbar(frame=f'{cbar_tick_ints}+l"{cbar_label}"')
+    plot_legend = not (df_plot.shape[0] == 1 and not plot_inset)
+    if plot_legend:
+        position = 'JBL+jML'  # Shift colorbar to make room for legend
+    else:
+        position = 'JBC+jMC'
+    fig.colorbar(
+        frame=f'{cbar_tick_ints}+l"{cbar_label}"', position=position + '+o0/-0.5i+h'
+    )
     if plot_inset:
         with fig.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
             fig.plot(
@@ -248,29 +284,27 @@ def station_map(
                 region=FULL_REGION,
                 projection='M?',
             )
-            in_main_map = (
-                (df.lon > region[0])
-                & (df.lon < region[1])
-                & (df.lat > region[2])
-                & (df.lat < region[3])
-            )
-            kwargs = dict(style='si', pen='black')
+            kwargs = dict(style='si', pen=True)
             scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
             fig.plot(
-                x=df[in_main_map].lon,
-                y=df[in_main_map].lat,
-                size=df[in_main_map].weight_lb * scale,
+                x=df[df.gcas_on_nodes].lon,
+                y=df[df.gcas_on_nodes].lat,
+                size=df[df.gcas_on_nodes].weight_lb * scale,
                 color='black',
                 **kwargs,
             )
             fig.plot(
-                x=df[~in_main_map].lon,
-                y=df[~in_main_map].lat,
-                size=df[~in_main_map].weight_lb * scale,
+                x=df[~df.gcas_on_nodes].lon,
+                y=df[~df.gcas_on_nodes].lat,
+                size=df[~df.gcas_on_nodes].weight_lb * scale,
                 color='white',
                 **kwargs,
             )
             fig.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
+
+    # Make legend if appropriate
+    if plot_legend:
+        fig.legend(position='JBR+jML+o-0.6i/-0.5i+l1.5')  # +l controls line spacing!
 
     fig.show()
 
