@@ -1,3 +1,5 @@
+from matplotlib import font_manager
+
 from .utils import (
     ERA5_PRESSURE_LEVELS,
     FULL_REGION,
@@ -9,3 +11,7 @@ from .utils import (
     get_waveforms_shot,
     station_map,
 )
+
+# TODO: Liam-system-specific!
+for font in font_manager.findSystemFonts('/Users/ldtoney/Documents/Helvetica/ttf'):
+    font_manager.fontManager.addfont(font)
