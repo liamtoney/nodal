@@ -1,4 +1,6 @@
-# %% Define function(s)
+#!/usr/bin/env python
+
+import sys
 
 import colorcet as cc
 import matplotlib.pyplot as plt
@@ -9,7 +11,23 @@ import pooch
 import xarray as xr
 from obspy import UTCDateTime
 
-from utils import FULL_REGION, INNER_RING_REGION, get_shots, get_stations
+from utils import (
+    FULL_REGION,
+    INNER_RING_REGION,
+    NODAL_WORKING_DIR,
+    get_shots,
+    get_stations,
+)
+
+SAVE = True  # Toggle saving PNG files
+
+# Read in shot info
+df = get_shots()
+
+# Input checks
+assert len(sys.argv) == 2, 'Must provide exactly one argument!'
+SHOT = sys.argv[1]
+assert SHOT in df.index, 'Argument must be a valid shot name!'
 
 
 def build_url(year, month, day, hour, measurement):
@@ -70,7 +88,6 @@ def plot_wind_speed_direction(
     assert dt1 == dt2, 'Files not from same time!'
 
     # Get shots and stations for plotting
-    df = get_shots()
     net = get_stations()[0]
 
     wind_speed = 'Wind speed (m/s)'
@@ -167,14 +184,15 @@ def plot_wind_speed_direction(
 
     fig.show()
 
+    return fig
+
 
 #%% Get 10-m wind grid for a given shot
 
-SHOT = 'X4'
 TYPE = 'nam'  # 'nam' or 'hrrr'
 
 # Get shot info
-shot = get_shots().loc[SHOT]
+shot = df.loc[SHOT]
 time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
 
 # TODO: Interpolate to exact shot time?
@@ -195,6 +213,13 @@ else:
 
 #%% Plot grid
 
-plot_wind_speed_direction(
-    u, v, grid_name, shot, region=INNER_RING_REGION, combo_plot=False
+fig = plot_wind_speed_direction(
+    u, v, grid_name, shot, region=INNER_RING_REGION, combo_plot=True
 )
+
+if SAVE:
+    fig.savefig(
+        NODAL_WORKING_DIR / 'figures' / '10_m_wind_grids' / f'shot_{SHOT}.png',
+        dpi=300,
+        bbox_inches='tight',
+    )

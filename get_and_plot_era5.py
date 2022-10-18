@@ -1,4 +1,6 @@
-#%% Define function(s)
+#!/usr/bin/env python
+
+import sys
 
 import cdsapi
 import colorcet as cc
@@ -9,7 +11,17 @@ import pooch
 import xarray as xr
 from obspy import UTCDateTime
 
-from utils import ERA5_PRESSURE_LEVELS, FULL_REGION, get_shots
+from utils import ERA5_PRESSURE_LEVELS, FULL_REGION, NODAL_WORKING_DIR, get_shots
+
+SAVE = True  # Toggle saving PNG files
+
+# Read in shot info
+df = get_shots()
+
+# Input checks
+assert len(sys.argv) == 2, 'Must provide exactly one argument!'
+SHOT = sys.argv[1]
+assert SHOT in df.index, 'Argument must be a valid shot name!'
 
 
 def get_era5_u_v_z(year, month, day, hour, level, region=None):
@@ -45,10 +57,8 @@ def get_era5_u_v_z(year, month, day, hour, level, region=None):
 
 #%% Get ERA5 profile for a given shot
 
-SHOT = 'X4'
-
 # Get shot info
-shot = get_shots().loc[SHOT]
+shot = df.loc[SHOT]
 time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
 
 # Get region surrounding shot so we can find nearest neighbor
@@ -163,3 +173,10 @@ cax.set_position([cax_pos.x0, ax_pos.y0, cax_pos.width, ax_pos.height])
 ax.set_title(title_str, pad=60)
 
 fig.show()
+
+if SAVE:
+    fig.savefig(
+        NODAL_WORKING_DIR / 'figures' / 'era5_profiles' / f'shot_{SHOT}.png',
+        dpi=300,
+        bbox_inches='tight',
+    )
