@@ -17,7 +17,7 @@ temp_df.air_temp_set_1 = temp_df.air_temp_set_1.astype(float)
 fig, ax = plt.subplots(figsize=(14, 3.5))
 
 # Plot estimated speed of sound (relies on evenly sampled temps from above to get mean)
-df_mean = temp_df.groupby('Date_Time').mean()
+df_mean = temp_df.groupby('Date_Time').mean(numeric_only=True)
 # Below calc from https://en.wikipedia.org/wiki/Speed_of_sound#Practical_formula_for_dry_air
 c = 20.05 * np.sqrt(df_mean.air_temp_set_1 + 273.15)  # [m/s]
 ax.plot([UTCDateTime(t).matplotlib_date for t in df_mean.index], c, color='black')
@@ -38,21 +38,31 @@ for _, row in df_sort.iterrows():
         lw=0.5,
         zorder=-5,
     )  # Connecting lines
+size_1000_lb = 130  # Marker size for the smaller, 1000-lb shots
+kwargs = dict(edgecolor='black', lw=0.5, marker='s', clip_on=False)
+scale = size_1000_lb / 1000  # [1/lb] Scale shot weights to marker sizes
 ax.scatter(
-    [t.matplotlib_date for t in df_sort.time],
-    df_sort.yloc,
-    s=130,
-    facecolors='black',
-    lw=0,
-    marker='s',
-    clip_on=False,
+    [t.matplotlib_date for t in df_sort[~df_sort.gcas_on_nodes].time],
+    df_sort[~df_sort.gcas_on_nodes].yloc,
+    s=df_sort[~df_sort.gcas_on_nodes].weight_lb * scale,
+    color='white',
+    label='GCAs not observed',
+    **kwargs,
+)
+ax.scatter(
+    [t.matplotlib_date for t in df_sort[df_sort.gcas_on_nodes].time],
+    df_sort[df_sort.gcas_on_nodes].yloc,
+    s=df_sort[df_sort.gcas_on_nodes].weight_lb * scale,
+    color='black',
+    label='GCAs observed',
+    **kwargs,
 )
 for _, row in df_sort.iterrows():
     ax.text(
         row.time.matplotlib_date,
         row.yloc,
         row.name,
-        color='white',
+        color='white' if row.gcas_on_nodes else 'black',
         va='center',
         ha='center',
         fontsize=5,
@@ -72,7 +82,8 @@ for station in sorted(temp_df.Station_ID.unique()):
         label=station,
         alpha=alpha,
     )
-leg = ax2.legend(ncol=2, loc='lower center', frameon=False)
+leg_y = 0
+leg = ax2.legend(ncol=2, loc='lower center', bbox_to_anchor=(0.5, leg_y), frameon=False)
 for text in leg.texts:
     text.set_alpha(alpha)
 ax2.set_ylabel('Temperature (°C)', alpha=alpha)
@@ -94,6 +105,14 @@ ax.xaxis.set_minor_locator(mdates.HourLocator(range(0, 24, 6)))
 ax.set_xlim(
     UTCDateTime('2014-07-24').matplotlib_date, UTCDateTime('2014-08-02').matplotlib_date
 )
+
+# Hacky legend (ensuring proper order, and that sizes reflect the 1000-lbs shots)
+h, l = ax.get_legend_handles_labels()
+leg = ax.legend(
+    h[::-1], l[::-1], loc='lower left', bbox_to_anchor=(0.59, leg_y), frameon=False
+)
+for handle in leg.legendHandles:
+    handle.set_sizes([size_1000_lb])
 
 fig.tight_layout()
 fig.subplots_adjust(hspace=0)
