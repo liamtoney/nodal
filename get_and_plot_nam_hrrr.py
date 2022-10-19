@@ -25,6 +25,7 @@ from utils import (
     get_shots,
     get_stations,
 )
+from utils.utils import _outside_arrow
 
 SAVE = True  # Toggle saving PNG files
 
@@ -164,23 +165,71 @@ def plot_wind_speed_direction(
         ax.set_xlim(region[:2])
         ax.set_ylim(region[2:])
         ax.set_aspect('equal')
+
+        # Get station coordinates
+        sta_lons = np.array([sta.longitude for sta in net])
+        sta_lats = np.array([sta.latitude for sta in net])
+
+        # Plot shot
+        if not (
+            (shot.lon > region[0])
+            & (shot.lon < region[1])
+            & (shot.lat > region[2])
+            & (shot.lat < region[3])
+        ):
+            # If shot is outside the region
+            tail_coords, head_coords, tail_shot_dist_km = _outside_arrow(
+                region,
+                sta_lons.mean(),
+                sta_lats.mean(),
+                shot.lon,
+                shot.lat,
+                0.5,  # [km] Padding from boundary
+                8,  # [km] Length of arrow
+            )
+            # Plot arrow
+            ax.annotate(
+                xy=head_coords,
+                xytext=tail_coords,
+                text='',
+                arrowprops=dict(arrowstyle='->'),
+            )
+            # Plot arrow distance text
+            angle = np.rad2deg(
+                np.arctan(
+                    (tail_coords[1] - head_coords[1])
+                    / (tail_coords[0] - head_coords[0])
+                )
+            )
+            offset_angle = np.deg2rad(angle + 90)
+            offset_amt = 0.01  # [deg.]
+            xoff = offset_amt * np.cos(offset_angle)
+            yoff = offset_amt * np.sin(offset_angle)
+            ax.text(
+                x=np.mean([tail_coords[0], head_coords[0]]) + xoff,
+                y=np.mean([tail_coords[1], head_coords[1]]) + yoff,
+                rotation=angle,
+                s=f'{tail_shot_dist_km:.1f} km',
+                va='center',
+                ha='center',
+                weight='bold',
+            )
+            shot_x = tail_coords[0]
+            shot_y = tail_coords[1]
+        else:
+            shot_x = shot.lon
+            shot_y = shot.lat
         ax.scatter(
-            df.lon,
-            df.lat,
-            s=df.weight_lb * 0.025,  # Arbitrary scale factor here
-            c=df.index == shot.name,
-            cmap='Greys',
+            shot_x,
+            shot_y,
+            s=shot.weight_lb * 0.04,  # Arbitrary scale factor here
+            color='black' if shot.gcas_on_nodes else 'white',
             marker='s',
             ec='black',
             zorder=5,
         )
-        ax.scatter(
-            [sta.longitude for sta in net],
-            [sta.latitude for sta in net],
-            s=2,
-            color='black',
-            lw=0,
-        )
+
+        ax.scatter(sta_lons, sta_lats, s=2, color='black', lw=0)
         for axis in ax.xaxis, ax.yaxis:
             axis.set_major_locator(plt.MultipleLocator(0.1))
             axis.set_major_formatter(major_formatter)
