@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""Run the following in an IPython console to iterate over all shots:
+
+from utils import get_shots
+for shot in get_shots().index:
+    %run get_and_plot_era5.py {shot}
+"""
+
 import sys
 
 import cdsapi
