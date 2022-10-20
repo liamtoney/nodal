@@ -124,14 +124,14 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         )
     ax_twin.spines['top'].set_visible(False)
     ax_twin.spines['left'].set_visible(False)
+    ax_twin.set_ylim(5, 30)  # HARD-CODED based on data range
     if ax == ax2:
         ax_twin.set_ylabel('Temperature (°C)', alpha=alpha)
         for l in ax_twin.get_yticklines():
             l.set_alpha(alpha)
         for t in ax_twin.get_yticklabels():
             t.set_alpha(alpha)
-        ax_twin.set_ylim(top=30)
-        ax_twin.yaxis.set_major_locator(plt.MultipleLocator(2))
+        ax_twin.yaxis.set_major_locator(plt.MultipleLocator(5))
         ax_twin.spines['right'].set_alpha(alpha)
     else:
         ax_twin.spines['right'].set_visible(False)
