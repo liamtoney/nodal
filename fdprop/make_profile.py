@@ -143,8 +143,6 @@ print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
 x = profile.distance.values
 z = (profile - profile.min()).values
 
-np.savetxt(
-    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat',
-    np.transpose([x, z]),
-    fmt='%.2f',
-)
+dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
+np.savetxt(dat_file, np.transpose([x, z]), fmt='%.2f')
+print(f'Wrote {dat_file}')
