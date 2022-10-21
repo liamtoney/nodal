@@ -4,7 +4,9 @@ import numpy as np
 from infresnel import calculate_paths
 from pyproj import CRS, Transformer
 
-from utils import get_shots, get_stations
+from utils import NODAL_WORKING_DIR, get_shots, get_stations
+
+M_PER_KM = 1000  # [m/km]
 
 # Use shot location as start of profile
 shot = get_shots().loc['Y5']
@@ -12,7 +14,6 @@ shot = get_shots().loc['Y5']
 # (latitude, longitude) coordinates of profile endpoints
 profile_start = (shot.lat, shot.lon)
 profile_end = (46.224, -122.031)
-profile_end = (46.122, -122.032)
 
 # Get elevation profile
 ds_list, dem = calculate_paths(
@@ -134,4 +135,16 @@ fig.tight_layout()
 fig.show()
 
 # Print info about the profile
-print(f'\nx-extent: {profile.distance[-1] / 1000:.1f} km')
+print(f'\nx-extent: {profile.distance[-1] / M_PER_KM:.1f} km')
+print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
+
+#%% Write .dat file
+
+x = profile.distance.values
+z = (profile - profile.min()).values
+
+np.savetxt(
+    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat',
+    np.transpose([x, z]),
+    fmt='%.2f',
+)
