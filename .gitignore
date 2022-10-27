@@ -4,6 +4,8 @@
 /data/weather/
 /metadata/1D.xml
 /metadata/imush_shots.kml
+/fdprop/Acoustic_2D/
+/fdprop/nodal_fdprop_runs/
 /*.egg-info/
 *.png
 *.jpg
