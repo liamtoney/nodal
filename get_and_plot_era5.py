@@ -148,18 +148,18 @@ sm = ax.quiver(
     angles='xy',
     scale_units='xy',
     scale=1,
-    width=0.007,
+    width=0.005,
     clim=(shot.elev_m / 1000, MAX_ALT),  # Start colormap at shot elevation
-    clip_on=False,
 )
-ax.set_xlim(min([ds_plot.u.min(), 0]), max([ds_plot.u.max(), 0]))
-ax.set_ylim(min([ds_plot.v.min(), 0]), max([ds_plot.v.max(), 0]))
+radius = 30  # Hard-coded for the speeds we see here!
+ax.set_xlim(-radius, radius)
+ax.set_ylim(-radius, radius)
 ax.set_aspect('equal')
-reference_speed = 5  # [m/s]
+reference_speed = 10  # [m/s]  # Ideally matches the reference speed for grid plots
 ax.quiverkey(
     sm,
     0,
-    ds_plot.v.max(),
+    radius,
     reference_speed,
     label=f'{reference_speed} m/s',
     coordinates='data',
@@ -176,8 +176,16 @@ cax.set_ylim(bottom=0)
 cax.set_facecolor(under_color)
 ax_pos = ax.get_position()
 cax_pos = cax.get_position()
-cax.set_position([cax_pos.x0, ax_pos.y0, cax_pos.width, ax_pos.height])
-ax.set_title(title_str, pad=60)
+cbar_height = ax_pos.height * 0.5
+cax.set_position(
+    [
+        ax_pos.x1,
+        ax_pos.y0 + (ax_pos.height - cbar_height) / 2,
+        cax_pos.width,
+        cbar_height,
+    ]
+)
+ax.set_title(title_str, pad=30)
 
 fig.show()
 
