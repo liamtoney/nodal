@@ -43,6 +43,8 @@ MIN_TIME = 0  # [s]
 MAX_TIME = 25  # [s]
 MIN_DIST = 1  # [km]
 MAX_DIST = 7  # [km]
+PRE_ROLL = 2  # [s]
+POST_ROLL = 18  # [s]
 
 # Hacky params
 MIN_PEAK_PRESSURE = 0.5e-4  # [Pa] Don't plot signals w/ peak pressures less than this
@@ -66,10 +68,15 @@ norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 # Make plot
 fig, ax = plt.subplots(figsize=(7, 10))
 for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
-    p2p = (tr.data.max() - tr.data.min()) * 1e6  # [μPa]
+    tr_plot = tr.copy()
+    first_ind = np.argwhere(tr_plot.data)[0][0]  # Find index of first non-zero value
+    onset_time = tr_plot.times('UTCDateTime')[first_ind]
+    starttime = np.max([onset_time - PRE_ROLL, tr_plot.stats.starttime])  # For nearest
+    tr_plot.trim(starttime, onset_time + POST_ROLL)
+    p2p = (tr_plot.data.max() - tr_plot.data.min()) * 1e6  # [μPa]
     ax.plot(
-        tr.times() + MIN_TIME,
-        (tr.data / SCALE) + tr.stats.x - X_SRC / M_PER_KM,  # Set source at x = 0
+        tr_plot.times() + MIN_TIME + (starttime - tr.stats.starttime),  # CAREFUL!
+        (tr_plot.data / SCALE) + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
         color=cmap(norm(p2p)),
         clip_on=False,
         solid_capstyle='round',
