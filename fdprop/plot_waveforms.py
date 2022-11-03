@@ -37,39 +37,42 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 #%% Plot
 
 # Plotting config params
-SKIP = 50  # Plot every SKIP stations
+SKIP = 100  # Plot every SKIP stations
 SCALE = 0.005  # [Pa] Single scale factor
-MIN_TIME = 0  # [s]
-MAX_TIME = 25  # [s]
-MIN_DIST = 1  # [km]
-MAX_DIST = 7  # [km]
+MIN_TIME, MAX_TIME = 0, 70  # [s]
+MIN_DIST, MAX_DIST = 0, 25  # [km]
 PRE_ROLL = 2  # [s]
 POST_ROLL = 18  # [s]
 
 # Hacky params
-MIN_PEAK_PRESSURE = 0.5e-4  # [Pa] Don't plot signals w/ peak pressures less than this
+MIN_PEAK_PRESSURE = 1e-5  # [Pa] Don't plot signals w/ peak pressures less than this
 X_SRC = 500  # [m] TODO from make_main.py
 
-# Form plotting Stream
+# Form subsetted plotting Stream
 starttime = st[0].stats.starttime - st[0].stats.t0  # Start at t = 0
-st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)
+st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
 
-# Edit and remove traces not meeting criteria
-xs = np.array([tr.stats.x for tr in st_plot]) - X_SRC / M_PER_KM  # Set source at x = 0
-maxes = np.array([tr.data.max() for tr in st_plot])
-include = (xs >= MIN_DIST) & (xs <= MAX_DIST) & (maxes >= MIN_PEAK_PRESSURE)
-st_plot = Stream(compress(st_plot, include))[::SKIP]
-
-# Define colormap normalized to waveform peak-to-peak amplitudes
-cmap = plt.cm.viridis
+# Make measurements on the windowed traces
+maxes = []
 p2p_all = []
 for tr in st_plot:
     tr_measure = tr.copy()
     first_ind = np.argwhere(tr_measure.data)[0][0]  # Find index of first non-zero value
     onset_time = tr_measure.times('UTCDateTime')[first_ind]
     tr_measure.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL)
+    maxes.append(tr_measure.data.max())
     p2p_all.append(tr_measure.data.max() - tr_measure.data.min() * 1e6)  # [μPa]
+maxes = np.array(maxes)
 p2p_all = np.array(p2p_all)
+
+# Further subset Stream
+xs = np.array([tr.stats.x for tr in st_plot]) - X_SRC / M_PER_KM  # Set source at x = 0
+include = (xs >= MIN_DIST) & (xs <= MAX_DIST) & (maxes >= MIN_PEAK_PRESSURE)
+st_plot = Stream(compress(st_plot, include))
+
+# Configure colormap limits from p2p measurements of windowed traces
+cmap = plt.cm.viridis
+p2p_all = p2p_all[include]
 norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 
 # Make plot
@@ -93,11 +96,11 @@ ax.set_ylim(MIN_DIST, MAX_DIST)
 ax.set_xlabel('Time from "shot" (s)')
 ax.set_ylabel('Distance from "shot" (km)')
 cbar = fig.colorbar(
-    plt.cm.ScalarMappable(norm=norm, cmap=cmap), location='top', aspect=40
+    plt.cm.ScalarMappable(norm=norm, cmap=cmap), location='top', aspect=40, pad=0.02
 )
 cbar.set_label('Peak-to-peak pressure (μPa)', labelpad=10)
 for side in 'top', 'right':
     ax.spines[side].set_visible(False)
-ax.spines['left'].set_position(('outward', 20))
-ax.spines['bottom'].set_position(('outward', 30))
+ax.spines['left'].set_position(('outward', 15))
+ax.spines['bottom'].set_position(('outward', 20))
 fig.show()
