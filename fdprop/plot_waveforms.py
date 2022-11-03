@@ -39,6 +39,7 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 # Plotting config params
 SKIP = 100  # Plot every SKIP stations
 SCALE = 0.005  # [Pa] Single scale factor
+SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 70  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 PRE_ROLL = 2  # [s]
@@ -84,9 +85,13 @@ for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
     starttime = np.max([onset_time - PRE_ROLL, tr_plot.stats.starttime])  # For nearest
     tr_plot.trim(starttime, onset_time + POST_ROLL)
     p2p = (tr_plot.data.max() - tr_plot.data.min()) * 1e6  # [μPa]
+    if SELF_NORMALIZE:
+        data_scaled = tr_plot.copy().normalize().data / (SCALE / maxes.max())
+    else:
+        data_scaled = tr_plot.data / SCALE
     ax.plot(
         tr_plot.times() + MIN_TIME + (starttime - tr.stats.starttime),  # CAREFUL!
-        (tr_plot.data / SCALE) + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
+        data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
         color=cmap(norm(p2p)),
         clip_on=False,
         solid_capstyle='round',
