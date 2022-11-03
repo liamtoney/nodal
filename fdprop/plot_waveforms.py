@@ -62,7 +62,14 @@ st_plot = Stream(compress(st_plot, include))[::SKIP]
 
 # Define colormap normalized to waveform peak-to-peak amplitudes
 cmap = plt.cm.viridis
-p2p_all = np.array([tr.data.max() - tr.data.min() for tr in st_plot]) * 1e6  # [μPa]
+p2p_all = []
+for tr in st_plot:
+    tr_measure = tr.copy()
+    first_ind = np.argwhere(tr_measure.data)[0][0]  # Find index of first non-zero value
+    onset_time = tr_measure.times('UTCDateTime')[first_ind]
+    tr_measure.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL)
+    p2p_all.append(tr_measure.data.max() - tr_measure.data.min() * 1e6)  # [μPa]
+p2p_all = np.array(p2p_all)
 norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 
 # Make plot
