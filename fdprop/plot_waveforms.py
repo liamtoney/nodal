@@ -7,7 +7,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR
 
 # CHANGE ME!
-run = '04_back_to_lf'
+run = '03_smaller'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from make_main.py
 
@@ -38,7 +38,7 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 
 # Plotting config params
 SKIP = 100  # Plot every SKIP stations
-SCALE = 0.005  # [Pa] Single scale factor
+SCALE = 0.03  # [Pa] Single scale factor
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
@@ -72,7 +72,7 @@ for tr in st_plot:
     if onset_time:
         tr_measure.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL)
         maxes.append(tr_measure.data.max())
-        p2p_all.append(tr_measure.data.max() - tr_measure.data.min() * 1e6)  # [μPa]
+        p2p_all.append(tr_measure.data.max() - tr_measure.data.min())  # [Pa]
     else:  # No break!
         st_plot.remove(tr)
 maxes = np.array(maxes)
@@ -95,7 +95,7 @@ for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
     onset_time = _get_onset_time(tr_plot)
     starttime = np.max([onset_time - PRE_ROLL, tr_plot.stats.starttime])  # For nearest
     tr_plot.trim(starttime, onset_time + POST_ROLL)
-    p2p = (tr_plot.data.max() - tr_plot.data.min()) * 1e6  # [μPa]
+    p2p = tr_plot.data.max() - tr_plot.data.min()  # [Pa]
     if SELF_NORMALIZE:
         data_scaled = tr_plot.copy().normalize().data / (SCALE / maxes.max())
     else:
@@ -106,6 +106,7 @@ for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
         color=cmap(norm(p2p)),
         clip_on=False,
         solid_capstyle='round',
+        lw=0.5,
     )
 ax.set_xlim(MIN_TIME, MAX_TIME)
 ax.set_ylim(MIN_DIST, MAX_DIST)
@@ -114,7 +115,7 @@ ax.set_ylabel('Distance from "shot" (km)')
 cbar = fig.colorbar(
     plt.cm.ScalarMappable(norm=norm, cmap=cmap), location='top', aspect=40, pad=0.02
 )
-cbar.set_label('Peak-to-peak pressure (μPa)', labelpad=10)
+cbar.set_label('Peak-to-peak pressure (Pa)', labelpad=10)
 for side in 'top', 'right':
     ax.spines[side].set_visible(False)
 ax.spines['left'].set_position(('outward', 15))
