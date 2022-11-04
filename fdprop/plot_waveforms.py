@@ -2,6 +2,7 @@ from itertools import compress
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LogNorm
 from obspy import Stream, Trace
 
 from utils import NODAL_WORKING_DIR
@@ -86,7 +87,7 @@ st_plot = Stream(compress(st_plot, include))
 # Configure colormap limits from p2p measurements of windowed traces
 cmap = plt.cm.viridis
 p2p_all = p2p_all[include]
-norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
+norm = LogNorm(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 
 # Make plot
 fig, ax = plt.subplots(figsize=(7, 10))
