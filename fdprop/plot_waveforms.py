@@ -40,35 +40,47 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 SKIP = 100  # Plot every SKIP stations
 SCALE = 0.005  # [Pa] Single scale factor
 SELF_NORMALIZE = True
-MIN_TIME, MAX_TIME = 0, 70  # [s]
+MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 PRE_ROLL = 2  # [s]
-POST_ROLL = 18  # [s]
+POST_ROLL = 10  # [s]
 
 # Hacky params
-MIN_PEAK_PRESSURE = 1e-5  # [Pa] Don't plot signals w/ peak pressures less than this
+PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
 X_SRC = 500  # [m] TODO from make_main.py
 
 # Form subsetted plotting Stream
 starttime = st[0].stats.starttime - st[0].stats.t0  # Start at t = 0
 st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
 
+
+# Helper function to get the onset time for a [synthetic] waveform
+def _get_onset_time(tr):
+    inds = np.argwhere(np.abs(tr.data) > PRESSURE_THRESH)
+    if inds.size > 0:
+        return tr.times('UTCDateTime')[inds[0][0]]  # Find index of first non-zero value
+    else:
+        return None  # No "break" found
+
+
 # Make measurements on the windowed traces
 maxes = []
 p2p_all = []
 for tr in st_plot:
     tr_measure = tr.copy()
-    first_ind = np.argwhere(tr_measure.data)[0][0]  # Find index of first non-zero value
-    onset_time = tr_measure.times('UTCDateTime')[first_ind]
-    tr_measure.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL)
-    maxes.append(tr_measure.data.max())
-    p2p_all.append(tr_measure.data.max() - tr_measure.data.min() * 1e6)  # [μPa]
+    onset_time = _get_onset_time(tr_measure)
+    if onset_time:
+        tr_measure.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL)
+        maxes.append(tr_measure.data.max())
+        p2p_all.append(tr_measure.data.max() - tr_measure.data.min() * 1e6)  # [μPa]
+    else:  # No break!
+        st_plot.remove(tr)
 maxes = np.array(maxes)
 p2p_all = np.array(p2p_all)
 
 # Further subset Stream
 xs = np.array([tr.stats.x for tr in st_plot]) - X_SRC / M_PER_KM  # Set source at x = 0
-include = (xs >= MIN_DIST) & (xs <= MAX_DIST) & (maxes >= MIN_PEAK_PRESSURE)
+include = (xs >= MIN_DIST) & (xs <= MAX_DIST)
 st_plot = Stream(compress(st_plot, include))
 
 # Configure colormap limits from p2p measurements of windowed traces
@@ -80,8 +92,7 @@ norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 fig, ax = plt.subplots(figsize=(7, 10))
 for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
     tr_plot = tr.copy()
-    first_ind = np.argwhere(tr_plot.data)[0][0]  # Find index of first non-zero value
-    onset_time = tr_plot.times('UTCDateTime')[first_ind]
+    onset_time = _get_onset_time(tr_plot)
     starttime = np.max([onset_time - PRE_ROLL, tr_plot.stats.starttime])  # For nearest
     tr_plot.trim(starttime, onset_time + POST_ROLL)
     p2p = (tr_plot.data.max() - tr_plot.data.min()) * 1e6  # [μPa]
