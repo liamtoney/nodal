@@ -35,16 +35,16 @@ P = dict(
     x_bnds_g=(0, 25000),  # [m]
     z_bnds_g=(0, 6000),  # [m]
     dx=DX,
-    dt=0.004,  # [s] `dx / (np.sqrt(2) * 345)`
-    x_src=500,  # [m]
-    z_src=668,  # [m] `profile.sel(distance=x_src, method='nearest') - profile.min()`
+    dt=0.004,  # [s] `DX / (np.sqrt(2) * 345)`
+    x_src=500,  # [m] TODO should match EXTENT from make_topography.py
+    z_src=552,  # [m] `profile.sel(distance=x_src, method='nearest') - profile.min()`
     t0=-0.01,  # [s]
     t_max=80,  # [s]
     wavefield_snapshot_interval=1000,  # Multiply by `dt` to get interval in s
     waveform_snapshot_interval=5,  # Multiply by `dt` to get interval in s
 )
 ATMO_FILE = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.met'
-TOPO_FILE = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
+TOPO_FILE = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
 
 # Check some parameters
 assert P['proc_x'] * P['proc_z'] == P['SIZE']
