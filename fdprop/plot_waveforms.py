@@ -45,6 +45,9 @@ MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 PRE_ROLL = 2  # [s]
 POST_ROLL = 10  # [s]
+TOPO_FILE = (
+    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
+)  # TODO from make_main.py
 
 # Hacky params
 PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
@@ -89,8 +92,20 @@ cmap = plt.cm.viridis
 p2p_all = p2p_all[include]
 norm = LogNorm(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 
+# Load topography
+topo_x, topo_z = np.loadtxt(TOPO_FILE).T / M_PER_KM  # [km]
+topo_x -= X_SRC / M_PER_KM
+
 # Make plot
-fig, ax = plt.subplots(figsize=(7, 10))
+fig, axes = plt.subplots(
+    nrows=2,
+    ncols=2,
+    figsize=(7, 10),
+    gridspec_kw=dict(width_ratios=(1, 10), height_ratios=(1, 50)),
+)
+_, cax, topo_ax, ax = axes.flatten()
+_.axis('off')
+topo_ax.sharey(ax)
 for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
     tr_plot = tr.copy()
     onset_time = _get_onset_time(tr_plot)
@@ -109,16 +124,26 @@ for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
         solid_capstyle='round',
         lw=0.5,
     )
+topo_ax.fill_betweenx(topo_x, topo_z, lw=0, color='tab:gray')
+topo_ax.set_xlim(topo_z.min(), topo_z.max())
+topo_ax.set_aspect('equal')
 ax.set_xlim(MIN_TIME, MAX_TIME)
 ax.set_ylim(MIN_DIST, MAX_DIST)
-ax.set_xlabel('Time from "shot" (s)')
-ax.set_ylabel('Distance from "shot" (km)')
-cbar = fig.colorbar(
-    plt.cm.ScalarMappable(norm=norm, cmap=cmap), location='top', aspect=40, pad=0.02
+ax.set_xlabel('Time from "shot" (s)', labelpad=10)
+topo_ax.set_ylabel('Distance from "shot" (km)', labelpad=20, rotation=-90)
+fig.colorbar(
+    plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal'
 )
-cbar.set_label('Peak-to-peak pressure (Pa)', labelpad=10)
-for side in 'top', 'right':
+cax.xaxis.set_ticks_position('top')
+cax.set_xlabel('Peak-to-peak pressure (Pa)', labelpad=10)
+cax.xaxis.set_label_position('top')
+for side in 'top', 'right', 'left':
     ax.spines[side].set_visible(False)
-ax.spines['left'].set_position(('outward', 15))
-ax.spines['bottom'].set_position(('outward', 20))
+for side in 'top', 'right', 'bottom':
+    topo_ax.spines[side].set_visible(False)
+ax.tick_params(left=False, labelleft=False)
+topo_ax.tick_params(bottom=False, labelbottom=False)
+ax.patch.set_alpha(0)
+ax.spines['bottom'].set_position(('outward', 10))
+fig.subplots_adjust(wspace=0, hspace=0.05)
 fig.show()
