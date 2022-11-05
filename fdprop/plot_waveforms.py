@@ -43,13 +43,13 @@ SCALE = 0.03  # [Pa] Single scale factor
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
-PRE_ROLL = 2  # [s]
 POST_ROLL = 10  # [s]
 TOPO_FILE = (
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
 )  # TODO from make_main.py
 
 # Hacky params
+PRE_ROLL = 0.4  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
 PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
 X_SRC = 500  # [m] TODO from make_main.py
 
@@ -95,6 +95,9 @@ norm = LogNorm(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
 # Load topography
 topo_x, topo_z = np.loadtxt(TOPO_FILE).T / M_PER_KM  # [km]
 topo_x -= X_SRC / M_PER_KM
+mask = (topo_x >= MIN_DIST) & (topo_x <= MAX_DIST)  # Since we use clip_on = False later
+topo_x = topo_x[mask]
+topo_z = topo_z[mask]
 
 # Make plot
 fig, axes = plt.subplots(
@@ -109,27 +112,27 @@ topo_ax.sharey(ax)
 for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
     tr_plot = tr.copy()
     onset_time = _get_onset_time(tr_plot)
-    starttime = np.max([onset_time - PRE_ROLL, tr_plot.stats.starttime])  # For nearest
-    tr_plot.trim(starttime, onset_time + POST_ROLL)
+    tr_plot.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL, pad=True, fill_value=0)
     p2p = tr_plot.data.max() - tr_plot.data.min()  # [Pa]
     if SELF_NORMALIZE:
         data_scaled = tr_plot.copy().normalize().data / (SCALE / maxes.max())
     else:
         data_scaled = tr_plot.data / SCALE
     ax.plot(
-        tr_plot.times() + MIN_TIME + (starttime - tr.stats.starttime),  # CAREFUL!
+        tr_plot.times() - PRE_ROLL,
         data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
         color=cmap(norm(p2p)),
         clip_on=False,
         solid_capstyle='round',
         lw=0.5,
     )
-topo_ax.fill_betweenx(topo_x, topo_z, lw=0, color='tab:gray')
-topo_ax.set_xlim(topo_z.min(), topo_z.max())
+topo_ax.fill_betweenx(topo_x, topo_z, lw=0, color='tab:gray', clip_on=False)
+topo_ax.set_xlim(topo_z.min(), topo_z[0])  # Axis technically ends at elevation of shot
 topo_ax.set_aspect('equal')
-ax.set_xlim(MIN_TIME, MAX_TIME)
+topo_ax.set_zorder(5)
+ax.set_xlim(0, POST_ROLL)
 ax.set_ylim(MIN_DIST, MAX_DIST)
-ax.set_xlabel('Time from "shot" (s)', labelpad=10)
+ax.set_xlabel('Reduced time (s)', labelpad=10)
 topo_ax.set_ylabel('Distance from "shot" (km)', labelpad=20, rotation=-90)
 fig.colorbar(
     plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal'
@@ -144,6 +147,20 @@ for side in 'top', 'right', 'bottom':
 ax.tick_params(left=False, labelleft=False)
 topo_ax.tick_params(bottom=False, labelbottom=False)
 ax.patch.set_alpha(0)
+topo_ax.patch.set_alpha(0)
 ax.spines['bottom'].set_position(('outward', 10))
-fig.subplots_adjust(wspace=0, hspace=0.05)
+fig.subplots_adjust(hspace=0.05)
+
+# Kind of hacky, but nifty!
+ax_pos = ax.get_position()
+topo_ax_pos = topo_ax.get_position()
+topo_ax.set_position(
+    [
+        ax_pos.x0 - topo_ax_pos.width,  # Elevation of shot is at t = 0!
+        topo_ax_pos.y0,
+        topo_ax_pos.width,
+        topo_ax_pos.height,
+    ]
+)
+
 fig.show()
