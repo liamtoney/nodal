@@ -78,7 +78,7 @@ main = template.substitute(
     ),
     n_x_div=P['proc_x'] + 1,
     n_z_div=P['proc_z'] + 1,
-    atmo_file='None',
+    atmo_file=Path('/home') / linux_user / ATMO_FILE.relative_to(Path.home()),
     topo_file=Path('/home') / linux_user / TOPO_FILE.relative_to(Path.home()),
     **P,
 )
