@@ -2,7 +2,7 @@ import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
 from infresnel import calculate_paths
-from pyproj import CRS, Transformer
+from pyproj import CRS, Geod, Transformer
 
 from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
@@ -14,6 +14,12 @@ shot = get_shots().loc['Y5']
 # (latitude, longitude) coordinates of profile endpoints
 profile_start = (shot.lat, shot.lon)
 profile_end = (46.224, -122.031)
+
+# Find (latitude, longitude) of extended line (this is to pad the domain!)
+EXTEND = 500  # [m]
+g = Geod(ellps='WGS84')
+az_end_to_start = g.inv(*profile_end[::-1], *profile_start[::-1])[0]
+profile_start = g.fwd(*profile_start[::-1], az_end_to_start, EXTEND)[:2][::-1]
 
 # Get elevation profile
 ds_list, dem = calculate_paths(
@@ -73,6 +79,8 @@ dem.plot.imshow(ax=ax, cmap=cc.m_gray)
 ax.plot(
     [profile.x[0], profile.x[-1]], [profile.y[0], profile.y[-1]], color='tab:orange'
 )
+# Plot shot location
+ax.scatter(*proj.transform(shot.lat, shot.lon), marker='*', color='black', zorder=10)
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
 sm = ax.scatter(
     sta_x[~outside],
@@ -107,6 +115,14 @@ fig.show()
 # Plot profile view
 fig, ax = plt.subplots(figsize=(20, 2.5))
 profile.plot(x='distance', ax=ax, color='tab:orange')
+# Plot shot location
+ax.scatter(
+    EXTEND,
+    profile.sel(distance=EXTEND, method='nearest'),
+    marker='*',
+    color='black',
+    zorder=10,
+)
 sm = ax.scatter(
     along_profile_dists[~outside],
     sta_elev[~outside],
@@ -143,6 +159,6 @@ print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
 x = profile.distance.values
 z = (profile - profile.min()).values
 
-dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
+dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
 np.savetxt(dat_file, np.transpose([x, z]), fmt='%.2f')
 print(f'Wrote {dat_file}')
