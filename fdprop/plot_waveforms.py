@@ -49,7 +49,7 @@ TOPO_FILE = (
 )  # TODO from make_main.py
 
 # Hacky params
-PRE_ROLL = 0.4  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
+PRE_ROLL = 0.7  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
 PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
 X_SRC = 500  # [m] TODO from make_main.py
 
@@ -103,8 +103,8 @@ topo_z = topo_z[mask]
 fig, axes = plt.subplots(
     nrows=2,
     ncols=2,
-    figsize=(7, 10),
-    gridspec_kw=dict(width_ratios=(1, 10), height_ratios=(1, 50)),
+    figsize=(4, 10),
+    gridspec_kw=dict(width_ratios=(1, 10), height_ratios=(1, 70)),
 )
 _, cax, topo_ax, ax = axes.flatten()
 _.axis('off')
@@ -149,7 +149,7 @@ topo_ax.tick_params(bottom=False, labelbottom=False)
 ax.patch.set_alpha(0)
 topo_ax.patch.set_alpha(0)
 ax.spines['bottom'].set_position(('outward', 10))
-fig.subplots_adjust(hspace=0.05)
+fig.subplots_adjust(hspace=0.03)
 
 # Kind of hacky, but nifty!
 ax_pos = ax.get_position()
