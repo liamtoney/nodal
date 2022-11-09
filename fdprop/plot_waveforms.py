@@ -8,7 +8,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR
 
 # CHANGE ME!
-run = '03_smaller'
+run = '06_shot_y5'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from make_main.py
 
@@ -45,11 +45,11 @@ MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 POST_ROLL = 10  # [s]
 TOPO_FILE = (
-    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.dat'
+    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
 )  # TODO from make_main.py
 
 # Hacky params
-PRE_ROLL = 0.7  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
+PRE_ROLL = 0.55  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
 PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
 X_SRC = 500  # [m] TODO from make_main.py
 
@@ -126,14 +126,16 @@ for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
         solid_capstyle='round',
         lw=0.5,
     )
-topo_ax.fill_betweenx(topo_x, topo_z, lw=0, color='tab:gray', clip_on=False)
+topo_ax.fill_betweenx(
+    topo_x, topo_z.min(), topo_z, lw=0, color='tab:gray', clip_on=False
+)
 topo_ax.set_xlim(topo_z.min(), topo_z[0])  # Axis technically ends at elevation of shot
 topo_ax.set_aspect('equal')
 topo_ax.set_zorder(5)
 ax.set_xlim(0, POST_ROLL)
 ax.set_ylim(MIN_DIST, MAX_DIST)
 ax.set_xlabel('Reduced time (s)', labelpad=10)
-topo_ax.set_ylabel('Distance from "shot" (km)', labelpad=20, rotation=-90)
+topo_ax.set_ylabel('Distance from shot Y5 (km)', labelpad=20, rotation=-90)
 fig.colorbar(
     plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal'
 )
