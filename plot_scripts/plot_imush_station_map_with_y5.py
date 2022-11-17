@@ -21,4 +21,4 @@ fig = station_map(
     mask_distance=MASK_DISTANCE_KM,
 )
 
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'imush_station_map_with_y5.png', dpi=600)
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'imush_station_map_with_y5_transparent.png', dpi=600, transparent=True)
