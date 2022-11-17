@@ -19,7 +19,7 @@ st = Stream()
 for file in dir0.glob('process*_waveforms_pressure.txt'):
 
     # Read in params from file
-    dt, t0 = np.loadtxt(file, max_rows=2, delimiter=' = ', usecols=1)  # [s]
+    dt, t0 = np.loadtxt(file, max_rows=2, usecols=2)  # [s]
     x_locs = np.loadtxt(file, skiprows=2, max_rows=1) / M_PER_KM  # [km]
     traces = np.loadtxt(file, skiprows=3).T  # [Pa] Each row is a waveform!
 
@@ -47,10 +47,10 @@ POST_ROLL = 10  # [s]
 TOPO_FILE = (
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
 )  # TODO from make_main.py
+REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
 
 # Hacky params
 PRE_ROLL = 0.55  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
-PRESSURE_THRESH = 1e-8  # [Pa] Pick breaks at this pressure — if lower, then discard
 X_SRC = 500  # [m] TODO from make_main.py
 
 # Form subsetted plotting Stream
@@ -60,11 +60,12 @@ st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
 
 # Helper function to get the onset time for a [synthetic] waveform
 def _get_onset_time(tr):
-    inds = np.argwhere(np.abs(tr.data) > PRESSURE_THRESH)
-    if inds.size > 0:
-        return tr.times('UTCDateTime')[inds[0][0]]  # Find index of first non-zero value
+    dist_km = tr.stats.x - X_SRC / M_PER_KM
+    if dist_km >= 0:
+        return tr.stats.starttime + dist_km / REMOVAL_CELERITY
     else:
-        return None  # No "break" found
+        print(f'Removed station with x = {tr.stats.x - X_SRC / M_PER_KM:.2} km')
+        return None  # We're on the wrong side of the source
 
 
 # Make measurements on the windowed traces
@@ -134,7 +135,7 @@ topo_ax.set_aspect('equal')
 topo_ax.set_zorder(5)
 ax.set_xlim(0, POST_ROLL)
 ax.set_ylim(MIN_DIST, MAX_DIST)
-ax.set_xlabel('Reduced time (s)', labelpad=10)
+ax.set_xlabel(f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=10)
 topo_ax.set_ylabel('Distance from shot Y5 (km)', labelpad=20, rotation=-90)
 fig.colorbar(
     plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal'
