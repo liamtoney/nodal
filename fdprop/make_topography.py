@@ -1,3 +1,5 @@
+import json
+
 import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,16 +37,18 @@ profile = ds_list[0].elevation
 # Convert station coordinates to UTM
 dem_crs = CRS(dem.rio.crs)
 proj = Transformer.from_crs(dem_crs.geodetic_crs, dem_crs)
-sta_x, sta_y, sta_elev = [], [], []
+sta_x, sta_y, sta_elev, sta_code = [], [], [], []
 for sta in get_stations()[0]:
     x, y = proj.transform(sta.latitude, sta.longitude)
     sta_x.append(x)
     sta_y.append(y)
     # sta_elev.append(sta.elevation)  # Use metadata elevation (ISSUES!)
     sta_elev.append(dem.sel(x=x, y=y, method='nearest').values)  # Use DEM elevation
+    sta_code.append(sta.code)
 sta_x = np.array(sta_x)
 sta_y = np.array(sta_y)
 sta_elev = np.array(sta_elev)
+sta_code = np.array(sta_code)
 
 # Find m and b in y = mx + b for profile
 m = (profile.y[-1] - profile.y[0]) / (profile.x[-1] - profile.x[0])
@@ -149,6 +153,21 @@ cbar = fig.colorbar(sm, label='Distance from profile (m)')
 cbar.ax.set_yticklabels([f'{y:g}' for y in np.abs(cbar.ax.get_yticks())])
 fig.tight_layout()
 fig.show()
+
+# Write file with information about "inside" stations
+sta_info = dict(
+    zip(
+        sta_code[~outside],
+        [
+            [apd, oopd]
+            for apd, oopd in zip(
+                along_profile_dists[~outside], np.abs(out_of_plane_dists[~outside])
+            )
+        ],
+    )
+)
+with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json', 'w') as f:
+    json.dump(sta_info, f, indent='\t')
 
 # Print info about the profile
 print(f'\nx-extent: {profile.distance[-1] / M_PER_KM:.1f} km')
