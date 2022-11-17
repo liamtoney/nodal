@@ -155,6 +155,11 @@ def station_map(
         frame=False,
         transparency=30,
     )
+
+    # For AGU poster (profile endpoints from make_topography.py!)
+    with pygmt.config(PS_LINE_CAP='ROUND'):
+        fig.plot(x=[df.loc['Y5'].lon, -122.031], y=[df.loc['Y5'].lat, 46.224], pen='1p')
+
     pygmt.makecpt(
         series=[
             sta_values.min() if vmin is None else vmin,
