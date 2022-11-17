@@ -15,7 +15,7 @@ WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from make_main.py
 M_PER_KM = 1000  # [m/km] CONSTANT
 
 # Read in files to an ObsPy Stream
-st = Stream()
+st_syn = Stream()
 for file in dir0.glob('process*_waveforms_pressure.txt'):
 
     # Read in params from file
@@ -31,9 +31,9 @@ for file in dir0.glob('process*_waveforms_pressure.txt'):
         tr.stats.starttime += t0  # Shift for t0
         tr.stats.t0 = t0  # [s]
         tr.stats.x = x  # [km]
-        st += tr
+        st_syn += tr
 
-st.sort(keys=['x'])  # Sort by increasing x distance
+st_syn.sort(keys=['x'])  # Sort by increasing x distance
 
 #%% Plot
 
@@ -54,8 +54,8 @@ PRE_ROLL = 0.55  # [s] TODO must manually set this so that it doesn't go beyond 
 X_SRC = 500  # [m] TODO from make_main.py
 
 # Form subsetted plotting Stream
-starttime = st[0].stats.starttime - st[0].stats.t0  # Start at t = 0
-st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
+starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
+st_syn_plot = st_syn.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
 
 
 # Helper function to get the onset time for a [synthetic] waveform
@@ -71,7 +71,7 @@ def _get_onset_time(tr):
 # Make measurements on the windowed traces
 maxes = []
 p2p_all = []
-for tr in st_plot:
+for tr in st_syn_plot:
     tr_measure = tr.copy()
     onset_time = _get_onset_time(tr_measure)
     if onset_time:
@@ -79,14 +79,16 @@ for tr in st_plot:
         maxes.append(tr_measure.data.max())
         p2p_all.append(tr_measure.data.max() - tr_measure.data.min())  # [Pa]
     else:  # No break!
-        st_plot.remove(tr)
+        st_syn_plot.remove(tr)
 maxes = np.array(maxes)
 p2p_all = np.array(p2p_all)
 
 # Further subset Stream
-xs = np.array([tr.stats.x for tr in st_plot]) - X_SRC / M_PER_KM  # Set source at x = 0
+xs = (
+    np.array([tr.stats.x for tr in st_syn_plot]) - X_SRC / M_PER_KM
+)  # Set source at x = 0
 include = (xs >= MIN_DIST) & (xs <= MAX_DIST)
-st_plot = Stream(compress(st_plot, include))
+st_plot = Stream(compress(st_syn_plot, include))
 
 # Configure colormap limits from p2p measurements of windowed traces
 cmap = plt.cm.viridis
