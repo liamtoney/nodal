@@ -88,7 +88,7 @@ xs = (
     np.array([tr.stats.x for tr in st_syn_plot]) - X_SRC / M_PER_KM
 )  # Set source at x = 0
 include = (xs >= MIN_DIST) & (xs <= MAX_DIST)
-st_plot = Stream(compress(st_syn_plot, include))
+st_syn_plot = Stream(compress(st_syn_plot, include))
 
 # Configure colormap limits from p2p measurements of windowed traces
 cmap = plt.cm.viridis
@@ -112,7 +112,7 @@ fig, axes = plt.subplots(
 _, cax, topo_ax, ax = axes.flatten()
 _.axis('off')
 topo_ax.sharey(ax)
-for tr in st_plot[::-1]:  # Plot the closest waveforms on top!
+for tr in st_syn_plot[::-1]:  # Plot the closest waveforms on top!
     tr_plot = tr.copy()
     onset_time = _get_onset_time(tr_plot)
     tr_plot.trim(onset_time - PRE_ROLL, onset_time + POST_ROLL, pad=True, fill_value=0)
