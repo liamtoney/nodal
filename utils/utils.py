@@ -2,11 +2,15 @@ import os
 import warnings
 from pathlib import Path
 
+import geopandas  # pip install geopandas
 import numpy as np
 import pandas as pd
 import pygmt
+from infresnel._georeference import _estimate_utm_crs
 from obspy import UTCDateTime, read, read_inventory
 from obspy.geodetics.base import gps2dist_azimuth
+from pyproj import Transformer
+from shapely.geometry import LineString
 
 # Define working directory here so that it can be exposed for easy import
 NODAL_WORKING_DIR = Path(os.environ['NODAL_WORKING_DIR'])
@@ -157,8 +161,21 @@ def station_map(
     )
 
     # For AGU poster (profile endpoints from make_topography.py!)
-    with pygmt.config(PS_LINE_CAP='ROUND'):
-        fig.plot(x=[df.loc['Y5'].lon, -122.031], y=[df.loc['Y5'].lat, 46.224], pen='1p')
+    profile_start = (df.loc['Y5'].lat, df.loc['Y5'].lon)
+    profile_end = (46.224, -122.031)
+    crs = _estimate_utm_crs(*profile_start)
+    proj = Transformer.from_crs(crs.geodetic_crs, crs)
+    s = geopandas.GeoSeries(
+        LineString([proj.transform(*profile_start), proj.transform(*profile_end)])
+    )
+    buffer = s.buffer(500, cap_style=2)  # [m] TODO must match MASK_DIST!
+    lats, lons = proj.transform(*buffer[0].exterior.coords.xy, direction='INVERSE')
+    fig.plot(x=lons, y=lats, close=True, color='black', transparency=60)
+    fig.plot(
+        x=[profile_start[1], profile_end[1]],
+        y=[profile_start[0], profile_end[0]],
+        pen='0.5p',
+    )
 
     pygmt.makecpt(
         series=[
