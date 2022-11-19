@@ -8,7 +8,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR
 
 # CHANGE ME!
-run = '06_shot_y5'
+run = '08_shot_y5_lower_freq'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from make_main.py
 
@@ -39,7 +39,7 @@ st_syn.sort(keys=['x'])  # Sort by increasing x distance
 
 # Plotting config params
 SKIP = 100  # Plot every SKIP stations
-SCALE = 0.03  # [Pa] Single scale factor
+SCALE = 0.03 * 100  # [Pa] Single scale factor
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
@@ -169,3 +169,5 @@ topo_ax.set_position(
 )
 
 fig.show()
+
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'fdprop' / f'fdprop_imush_{run[:2]}_waveforms_reduced_topo.png', dpi=300, bbox_inches='tight')
