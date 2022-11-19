@@ -66,8 +66,8 @@ REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
 
 # Hacky params
 PRE_ROLL = [
-    0.52,
-    0.50,
+    0.96,
+    0.94,
 ]  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
 X_SRC = 500  # [m] TODO from make_main.py
 
@@ -151,15 +151,9 @@ topo_x = topo_x[mask]
 topo_z = topo_z[mask]
 
 # Make plot
-fig, axes = plt.subplots(
-    nrows=2,
-    ncols=4,
-    figsize=(4, 10),
-    gridspec_kw=dict(width_ratios=(1, 10, 1, 10), height_ratios=(1, 70)),
+fig, (topo_ax1, ax1, topo_ax2, ax2) = plt.subplots(
+    ncols=4, figsize=(4, 10), gridspec_kw=dict(width_ratios=(1, 10, 1, 10))
 )
-_1, cax1, _2, cax2, topo_ax1, ax1, topo_ax2, ax2 = axes.flatten()
-for _ in _1, _2:
-    _.axis('off')
 
 topo_ax1.sharey(ax1)
 topo_ax2.sharey(ax2)
@@ -172,7 +166,7 @@ for topo_ax in topo_ax1, topo_ax2:
     topo_ax.set_xlim(
         topo_z.min(), topo_z[0]
     )  # Axis technically ends at elevation of shot
-    # topo_ax.set_aspect('equal')
+    # topo_ax.set_aspect('equal')  # TODO: WHY DOES THIS NOT WORK!??
     topo_ax.set_zorder(5)
     topo_ax.tick_params(bottom=False, labelbottom=False)
     topo_ax.patch.set_alpha(0)
@@ -181,33 +175,25 @@ for topo_ax in topo_ax1, topo_ax2:
 topo_ax2.axis('off')
 topo_ax1.set_ylabel('Distance from shot Y5 (km)', labelpad=20, rotation=-90)
 
-for ax, cax, st, scale, pre_roll, log in zip(
+norms = []
+for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
-    [cax1, cax2],
     [st_syn_plot, st_plot],
     [0.03 * 100, 0.5e6],
     PRE_ROLL,
     [True, False],
 ):
     norm, cmap = process_and_plot(st, ax, scale, pre_roll, log=log)
+    norms.append(norm)
     ax.set_xlim(0, POST_ROLL)
     ax.set_ylim(MIN_DIST, MAX_DIST)
-    fig.colorbar(
-        plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation='horizontal'
-    )
-    cax.xaxis.set_ticks_position('top')
-    if cax == cax1:
-        cax.set_xlabel('Peak-to-peak pressure (Pa)', labelpad=10)
-    else:
-        cax.set_xlabel('Peak-to-peak amplitude (counts)', labelpad=10)
-    cax.xaxis.set_label_position('top')
     for side in 'top', 'right', 'left':
         ax.spines[side].set_visible(False)
 
     ax.tick_params(left=False, labelleft=False)
     ax.patch.set_alpha(0)
     ax.spines['bottom'].set_position(('outward', 10))
-    fig.subplots_adjust(hspace=0.03, wspace=0.05)
+    fig.subplots_adjust(hspace=0.03, wspace=0.1)
 
 for ax, topo_ax in zip([ax1, ax2], [topo_ax1, topo_ax2]):
     # Kind of hacky, but nifty!
@@ -222,19 +208,35 @@ for ax, topo_ax in zip([ax1, ax2], [topo_ax1, topo_ax2]):
         ]
     )
 
-overall_ax = fig.add_subplot(111)
+cax = fig.add_subplot(111)
 ax1_pos = ax1.get_position()
 ax2_pos = ax2.get_position()
-overall_ax.set_position(
-    [ax1_pos.xmin, ax1_pos.ymin, ax2_pos.xmax - ax1_pos.xmin, ax1_pos.height]
+cax.set_position(
+    [
+        ax1_pos.xmin,
+        ax1_pos.ymax * 1.06,
+        ax2_pos.xmax - ax1_pos.xmin,
+        ax1_pos.height / 70,
+    ]
 )
-for side in overall_ax.spines.keys():
-    overall_ax.spines[side].set_visible(False)
-overall_ax.set_xticks([])
-overall_ax.set_yticks([])
-overall_ax.patch.set_alpha(0)
-overall_ax.set_xlabel(
-    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=35
+cax.set_xticks([])
+cax.set_yticks([])
+
+for norm in norms:
+    _cax = fig.add_subplot(111)
+    _cax.set_position(cax.get_position())
+    fig.colorbar(
+        plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=_cax, orientation='horizontal'
+    )
+    if norm == norms[0]:
+        _cax.xaxis.set_ticks_position('top')
+        _cax.xaxis.set_label_position('top')
+        _cax.set_xlabel('Peak-to-peak pressure (Pa)', labelpad=7)
+    else:
+        _cax.set_xlabel('Peak-to-peak amplitude (counts)', labelpad=5)
+
+cax.set_xlabel(
+    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=625
 )
 
 fig.show()
