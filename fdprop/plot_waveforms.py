@@ -154,7 +154,7 @@ topo_z = topo_z[mask]
 fig, axes = plt.subplots(
     nrows=2,
     ncols=4,
-    figsize=(8, 10),
+    figsize=(4, 10),
     gridspec_kw=dict(width_ratios=(1, 10, 1, 10), height_ratios=(1, 70)),
 )
 _1, cax1, _2, cax2, topo_ax1, ax1, topo_ax2, ax2 = axes.flatten()
@@ -172,7 +172,7 @@ for topo_ax in topo_ax1, topo_ax2:
     topo_ax.set_xlim(
         topo_z.min(), topo_z[0]
     )  # Axis technically ends at elevation of shot
-    topo_ax.set_aspect('equal')
+    # topo_ax.set_aspect('equal')
     topo_ax.set_zorder(5)
     topo_ax.tick_params(bottom=False, labelbottom=False)
     topo_ax.patch.set_alpha(0)
@@ -180,7 +180,6 @@ for topo_ax in topo_ax1, topo_ax2:
         topo_ax.spines[side].set_visible(False)
 topo_ax2.axis('off')
 topo_ax1.set_ylabel('Distance from shot Y5 (km)', labelpad=20, rotation=-90)
-
 
 for ax, cax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
@@ -208,7 +207,7 @@ for ax, cax, st, scale, pre_roll, log in zip(
     ax.tick_params(left=False, labelleft=False)
     ax.patch.set_alpha(0)
     ax.spines['bottom'].set_position(('outward', 10))
-    fig.subplots_adjust(hspace=0.03, wspace=0)
+    fig.subplots_adjust(hspace=0.03, wspace=0.05)
 
 for ax, topo_ax in zip([ax1, ax2], [topo_ax1, topo_ax2]):
     # Kind of hacky, but nifty!
