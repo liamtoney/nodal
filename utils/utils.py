@@ -257,17 +257,17 @@ def station_map(
     kwargs = dict(style='si', pen=True)
     scale = size_1000_lb / 1000  # [in/lb] Scale shot weights to marker sizes
     fig.plot(
-        x=shot_x[df_plot.gcas_on_nodes],
-        y=shot_y[df_plot.gcas_on_nodes],
-        size=df_plot[df_plot.gcas_on_nodes].weight_lb * scale,
+        x=list(shot_x[df_plot.gcas_on_nodes]) + [np.nan],
+        y=list(shot_y[df_plot.gcas_on_nodes]) + [np.nan],
+        size=list(df_plot[df_plot.gcas_on_nodes].weight_lb * scale) + [np.nan],
         color='black',
         label=f'GCAs observed+S{size_1000_lb}i',
         **kwargs,
     )
     fig.plot(
-        x=shot_x[~df_plot.gcas_on_nodes],
-        y=shot_y[~df_plot.gcas_on_nodes],
-        size=df_plot[~df_plot.gcas_on_nodes].weight_lb * scale,
+        x=list(shot_x[~df_plot.gcas_on_nodes]) + [np.nan],
+        y=list(shot_y[~df_plot.gcas_on_nodes]) + [np.nan],
+        size=list(df_plot[~df_plot.gcas_on_nodes].weight_lb * scale) + [np.nan],
         color='white',
         label=f'GCAs not observed+S{size_1000_lb}i',
         **kwargs,
@@ -276,16 +276,16 @@ def station_map(
     justify = 'CM'
     fontsize = 5  # [pts]
     fig.text(
-        x=shot_x[df_plot.gcas_on_nodes],
-        y=shot_y[df_plot.gcas_on_nodes],
-        text=df_plot[df_plot.gcas_on_nodes].index,
+        x=list(shot_x[df_plot.gcas_on_nodes]) + [np.nan],
+        y=list(shot_y[df_plot.gcas_on_nodes]) + [np.nan],
+        text=list(df_plot[df_plot.gcas_on_nodes].index) + [np.nan],
         font=f'{fontsize}p,white',
         justify=justify,
     )
     fig.text(
-        x=shot_x[~df_plot.gcas_on_nodes],
-        y=shot_y[~df_plot.gcas_on_nodes],
-        text=df_plot[~df_plot.gcas_on_nodes].index,
+        x=list(shot_x[~df_plot.gcas_on_nodes]) + [np.nan],
+        y=list(shot_y[~df_plot.gcas_on_nodes]) + [np.nan],
+        text=list(df_plot[~df_plot.gcas_on_nodes].index) + [np.nan],
         font=f'{fontsize}p',
         justify=justify,
     )
