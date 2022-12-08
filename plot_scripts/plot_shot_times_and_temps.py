@@ -103,7 +103,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         )
 
 # Plot temp data
-alpha = 0.1
+alpha = 0.3
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     ax_twin = ax.twinx()
     ax.set_zorder(1)
