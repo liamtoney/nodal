@@ -108,7 +108,7 @@ ax.pcolormesh(
 )
 ax.set_xlabel('Time from shot (s)')
 ax.set_ylabel('Distance from shot (km)')
-# ax.set_title(title)  # No title for AGU poster
+ax.set_title(title)
 if SHOT == 'Y4':
     ax.set_xlim(-30, 120)  # To match other plots
     ax.text(
@@ -123,15 +123,15 @@ if SHOT == 'Y4':
     )
 
 # For AGU poster (shots X5 and Y5)
-ax.set_xlim(-10, 90)
-ax.set_ylim(5, 26)
-fig.savefig(
-    f'/Users/ldtoney/work/meetings/agu_22/poster/graphics/figures/{SHOT}_section.png',
-    dpi=300,
-    bbox_inches='tight',
-)
+# ax.set_xlim(-10, 90)
+# ax.set_ylim(5, 26)
+# fig.savefig(
+#     f'/Users/ldtoney/work/meetings/agu_22/poster/graphics/figures/{SHOT}_section.png',
+#     dpi=300,
+#     bbox_inches='tight',
+# )
 
-# fig.show()
+fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / subdir / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
 
