@@ -161,21 +161,21 @@ def station_map(
     )
 
     # For AGU poster (profile endpoints from make_topography.py!)
-    profile_start = (df.loc['Y5'].lat, df.loc['Y5'].lon)
-    profile_end = (46.224, -122.031)
-    crs = _estimate_utm_crs(*profile_start)
-    proj = Transformer.from_crs(crs.geodetic_crs, crs)
-    s = geopandas.GeoSeries(
-        LineString([proj.transform(*profile_start), proj.transform(*profile_end)])
-    )
-    buffer = s.buffer(500, cap_style=2)  # [m] TODO must match MASK_DIST!
-    lats, lons = proj.transform(*buffer[0].exterior.coords.xy, direction='INVERSE')
-    fig.plot(x=lons, y=lats, close=True, color='black', transparency=60)
-    fig.plot(
-        x=[profile_start[1], profile_end[1]],
-        y=[profile_start[0], profile_end[0]],
-        pen='0.5p',
-    )
+    # profile_start = (df.loc['Y5'].lat, df.loc['Y5'].lon)
+    # profile_end = (46.224, -122.031)
+    # crs = _estimate_utm_crs(*profile_start)
+    # proj = Transformer.from_crs(crs.geodetic_crs, crs)
+    # s = geopandas.GeoSeries(
+    #     LineString([proj.transform(*profile_start), proj.transform(*profile_end)])
+    # )
+    # buffer = s.buffer(500, cap_style=2)  # [m] TODO must match MASK_DIST!
+    # lats, lons = proj.transform(*buffer[0].exterior.coords.xy, direction='INVERSE')
+    # fig.plot(x=lons, y=lats, close=True, color='black', transparency=60)
+    # fig.plot(
+    #     x=[profile_start[1], profile_end[1]],
+    #     y=[profile_start[0], profile_end[0]],
+    #     pen='0.5p',
+    # )
 
     pygmt.makecpt(
         series=[
