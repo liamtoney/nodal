@@ -3,6 +3,12 @@
 """Creates CSV file of measured parameters for a given shot.
 
 Usage: ./make_shot_gather_measurements.py SHOT (where SHOT is a valid iMUSH shot name)
+
+Alternate IPython usage (for bulk processing!):
+
+from utils import get_shots
+for shot in get_shots().index:
+    %run make_shot_gather_measurements.py {shot}
 """
 
 import sys
