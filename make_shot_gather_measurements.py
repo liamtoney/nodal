@@ -30,6 +30,7 @@ FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
+WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculation
 # -------------------------------
 
 # Read in station info and shot data
@@ -38,11 +39,11 @@ st = get_waveforms_shot(SHOT)
 
 # Assign coordinates and distances
 for tr in st:
-    # Need the "try" statement here for the shot Y4 data from Brandon
+    # Shot Y4 data are from Brandon, so they don't match IRIS inv
     try:
         coords = inv.get_coordinates(tr.id)
     except Exception:
-        print(f'{tr.id} not found on IRIS. Removing.')
+        print(f'{tr.id} not found in inventory. Removing.')
         st.remove(tr)
         continue
     tr.stats.latitude = coords['latitude']
@@ -51,11 +52,16 @@ for tr in st:
         tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
 
-# Remove sensitivity (fast but NOT accurate!)
-if SHOT != 'Y4':
-    st.remove_sensitivity(inv)
-else:
-    print(f'Not removing sensitivity for shot {SHOT}!\n')
+# Remove sensitivity — st.remove_response() is SLOW; I think just sensitivity removal is
+# OK here? Units are m/s after this step
+if SHOT == 'Y4':
+    for tr in st:
+        fudge_factor = 87921  # TODO: See _plot_node_shot_gather.py
+        tr.data *= fudge_factor
+st.remove_sensitivity(inv)
+
+# Make copy of unprocessed Stream to use for RMS window calculation
+st_rms = st.copy()
 
 # Detrend, taper, filter
 st.detrend('demean')
@@ -63,7 +69,7 @@ st.taper(0.05)
 st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 
 # Apply STA/LTA
-st.trigger('classicstalta', sta=STA, lta=LTA)  # Try other trigger algs?
+st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
 
 # Merge, as some stations have multiple Traces (doing this as late as possible)
 st.merge(fill_value=np.nan)
@@ -82,6 +88,23 @@ for tr in st.copy():  # Copying since we're destructively trimming here
     tr.trim(*tlim)
     amps.append(tr.max())  # Simply taking the maximum of the STA/LTA function...
 
+#%% Calculate RMS velocity in pre-shot windows
+
+# Merge, if needed (IMPORTANT since AO4 gaps are in the pre-shot RMS window!)
+if SHOT == 'AO4':
+    st_rms.merge()  # Can't use fill_value=np.nan here!
+
+# Now that we've merged, check that st matches st_rms in terms of Traces!
+assert [tr.id for tr in st] == [tr.id for tr in st_rms]
+
+# Trim to pre-shot window
+st_rms.trim(df.loc[SHOT].time - WIN_DUR, df.loc[SHOT].time)
+
+# Compute RMS (within WIN_DUR) for each Trace
+rms_vals = []
+for tr in st_rms:
+    rms_vals.append(np.sqrt(np.mean(tr.data**2)))
+
 #%% Calculate path differences
 
 # Grab coordinates as a list
@@ -99,9 +122,10 @@ data_dict = dict(
     station=[int(tr.stats.station) for tr in st],  # int() since station names are #s
     lat=lats,
     lon=lons,
-    dist_m=[tr.stats.distance for tr in st],
-    path_length_diff_m=path_diffs,
+    dist_m=[tr.stats.distance for tr in st],  # [m]
+    path_length_diff_m=path_diffs,  # [m]
     sta_lta_amp=amps,
+    pre_shot_rms=rms_vals,  # [m/s]
 )
 data_df = pd.DataFrame(data=data_dict)
 data_df.to_csv(
