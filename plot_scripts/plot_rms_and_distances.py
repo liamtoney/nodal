@@ -86,4 +86,5 @@ ax.set_ylabel(ylabel_list[1])
 for side in 'top', 'right':
     ax.spines[side].set_visible(False)
 
+fig.tight_layout()
 fig.show()
