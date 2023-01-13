@@ -74,12 +74,6 @@ st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
 # Merge, as some stations have multiple Traces (doing this as late as possible)
 st.merge(fill_value=np.nan)
 
-# Ensure data are all same length (UGLY)
-vc = pd.Series([tr.stats.npts for tr in st]).value_counts()
-most_common_npts = vc[vc == vc.max()].index.values[0]
-st = st.select(npts=most_common_npts)
-print(f'Removed {vc[vc.index != most_common_npts].sum()} Trace(s)\n')
-
 #%% Calculate amplitudes (STA/LTA maxima)
 
 amps = []
