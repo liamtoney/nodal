@@ -41,7 +41,7 @@ ax.bar(
     edgecolor='black',
     width=0.6,
 )
-ax.set_ylabel(f'Median shot–node distance (km)')
+ax.set_ylabel('Median shot–node distance (km)')
 
 # Make legend using dummy entries
 kwargs = dict(edgecolor='black', marker='s', s=130)
