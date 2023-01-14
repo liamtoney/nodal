@@ -3,6 +3,12 @@
 """Plots measured parameters for a given shot.
 
 Usage: ./plot_shot_gather_measurements.py SHOT (where SHOT is a valid iMUSH shot name)
+
+Alternate IPython usage (for bulk processing!):
+
+from utils import get_shots
+for shot in get_shots().index:
+    %run plot_scripts/plot_shot_gather_measurements.py {shot}
 """
 
 import sys
