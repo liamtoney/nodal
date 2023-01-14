@@ -17,6 +17,8 @@ assert len(sys.argv) == 2, 'Must provide exactly one argument!'
 SHOT = sys.argv[1]
 assert SHOT in get_shots().index, 'Argument must be a valid shot name!'
 
+VALUE_MAP_DIR = NODAL_WORKING_DIR / 'figures' / 'node_value_maps'
+
 # ----------------------------
 # PLOTTING PARAMETERS TO TWEAK
 # ----------------------------
@@ -43,9 +45,7 @@ fig = station_map(
     mask_distance=MASK_DISTANCE_KM,
 )
 if SAVE:
-    fig.savefig(
-        NODAL_WORKING_DIR / 'figures' / 'amplitude_maps' / f'shot_{SHOT}.png', dpi=DPI
-    )
+    fig.savefig(VALUE_MAP_DIR / 'sta_lta' / f'shot_{SHOT}.png', dpi=DPI)
 
 #%% Plot path differences
 
@@ -62,9 +62,7 @@ fig = station_map(
     reverse_cmap=True,
 )
 if SAVE:
-    fig.savefig(
-        NODAL_WORKING_DIR / 'figures' / 'path_diff_maps' / f'shot_{SHOT}.png', dpi=DPI
-    )
+    fig.savefig(VALUE_MAP_DIR / 'path_diff' / f'shot_{SHOT}.png', dpi=DPI)
 
 #%% Plot pre-shot RMS velocities
 
@@ -80,6 +78,4 @@ fig = station_map(
     vmax=np.percentile(rms, 95),  # Avoiding large values
 )
 if SAVE:
-    fig.savefig(
-        NODAL_WORKING_DIR / 'figures' / 'rms_maps' / f'shot_{SHOT}.png', dpi=DPI
-    )
+    fig.savefig(VALUE_MAP_DIR / 'rms' / f'shot_{SHOT}.png', dpi=DPI)
