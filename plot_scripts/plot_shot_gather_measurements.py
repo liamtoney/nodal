@@ -76,6 +76,7 @@ fig = station_map(
     cbar_label=r'RMS velocity (\265m/s), 20 s window pre-shot',  # WIN_DUR
     plot_shot=SHOT,
     vmax=np.percentile(rms, 95),  # Avoiding large values
+    cmap='inferno',
 )
 if SAVE:
     fig.savefig(VALUE_MAP_DIR / 'rms' / f'shot_{SHOT}.png', dpi=DPI)
