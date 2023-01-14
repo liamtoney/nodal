@@ -7,6 +7,7 @@ Usage: ./plot_shot_gather_measurements.py SHOT (where SHOT is a valid iMUSH shot
 
 import sys
 
+import numpy as np
 import pandas as pd
 
 from utils import MASK_DISTANCE_KM, NODAL_WORKING_DIR, get_shots, station_map
@@ -63,4 +64,22 @@ fig = station_map(
 if SAVE:
     fig.savefig(
         NODAL_WORKING_DIR / 'figures' / 'path_diff_maps' / f'shot_{SHOT}.png', dpi=DPI
+    )
+
+#%% Plot pre-shot RMS velocities
+
+rms = df.pre_shot_rms * 1e6  # Converting to μm/s here
+
+print('Plotting pre-shot RMS noise map...')
+fig = station_map(
+    df.lon,
+    df.lat,
+    rms,
+    cbar_label=r'RMS velocity (\265m/s), 20 s window pre-shot',  # WIN_DUR
+    plot_shot=SHOT,
+    vmax=np.percentile(rms, 95),  # Avoiding large values
+)
+if SAVE:
+    fig.savefig(
+        NODAL_WORKING_DIR / 'figures' / 'rms_maps' / f'shot_{SHOT}.png', dpi=DPI
     )
