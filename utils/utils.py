@@ -252,6 +252,11 @@ def station_map(
     else:
         shot_x = df_plot.lon
         shot_y = df_plot.lat
+
+    # Ensure we can index these variables (i.e., if they are scalars)
+    shot_x = np.atleast_1d(shot_x)
+    shot_y = np.atleast_1d(shot_y)
+
     # Plot shots
     size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
     kwargs = dict(style='si', pen=True)
