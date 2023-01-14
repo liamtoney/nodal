@@ -54,6 +54,8 @@ for values, ylabel in zip(values_list, ylabel_list):
     fig.tight_layout()
     fig.show()
 
+    # fig.savefig(NODAL_WORKING_DIR / 'figures' / ('_'.join(ylabel.split(' ')[:3]).lower() + '.png'), dpi=300, bbox_inches='tight')
+
 #%% 2. Make one scatter plot
 
 size_1000_lb = 100  # Marker size for the smaller, 1000-lb shots
@@ -88,3 +90,5 @@ for side in 'top', 'right':
 
 fig.tight_layout()
 fig.show()
+
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'dist_vs_rms.png', dpi=300, bbox_inches='tight')
