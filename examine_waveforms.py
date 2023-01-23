@@ -6,31 +6,34 @@ import numpy as np
 import pygmt
 from matplotlib.colors import to_hex
 from obspy import Stream
-from obspy.geodetics.base import gps2dist_azimuth
+from obspy.geodetics.base import degrees2kilometers, gps2dist_azimuth
 
 from utils import get_shots, get_stations, get_waveforms_shot
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
+SHOT = 'Y5'
 
-REGION = [-122.254, -122.2, 46.285, 46.31]  # [xmin, xmax, ymin, ymax] Ridge/valley area
-
-# Hard-coded lists of sensors in the above REGION (ordered from W to E)
-RIDGE_SENSORS = [4960, 4961, 4962, 4963, 4964, 4965, 4966, 4967]
-VALLEY_SENSORS = [4704, 4981, 4994, 4980, 4995, 4979, 4996, 4978, 4997]
+# [xmin, xmax, ymin, ymax] Region to examine
+# ------------------------------------------
+# Shot Y5
+# -------
+REGION = [-122.254, -122.2, 46.285, 46.31]  # Ridge/valley area
+# REGION = [-122.2791, -122.2629, 46.2772, 46.2887]  # Tight cluster in hummocks
+# REGION = [-122.2549, -122.2276, 46.2723, 46.2791]  # Loowit(?) ridge
 
 #%% Open IRIS gmap station map
 
-URL = f'https://ds.iris.edu/gmap/#net=1D&minlon={REGION[0]}&maxlon={REGION[1]}&minlat={REGION[2]}&maxlat={REGION[3]}&drawingmode=box'
-_ = webbrowser.open(URL)
+# All stations: https://ds.iris.edu/gmap/#net=1D&starttime=2014-07-01&endtime=2014-09-01
+url = f'https://ds.iris.edu/gmap/#net=1D&minlon={REGION[0]}&maxlon={REGION[1]}&minlat={REGION[2]}&maxlat={REGION[3]}&drawingmode=box'
+_ = webbrowser.open(url)
 
 #%% PyGMT map
 
 # Get stations, data, shots
 inv = get_stations()
-st = get_waveforms_shot('Y5')
-shot = get_shots().loc['Y5']
+st = get_waveforms_shot(SHOT)
+shot = get_shots().loc[SHOT]
 
 # Assign coordinates and distance [km] to traces
 for tr in st:
@@ -42,6 +45,9 @@ for tr in st:
         / M_PER_KM
     )
 
+# Sort by distance to source
+st.sort(keys=['distance'])
+
 # Make region mask
 lons = np.array([tr.stats.longitude for tr in st])
 lats = np.array([tr.stats.latitude for tr in st])
@@ -50,21 +56,36 @@ in_region = (
 )
 
 # Plot
-PLOT_REGION = [-122.36, -122.16, 46.26, 46.32]
+BUFFER = 10  # [%] Buffer (percent of extent to pad on each side)
+width = REGION[1] - REGION[0]  # [deg.]
+height = REGION[3] - REGION[2]  # [deg.]
+x_buf = (BUFFER / 100) * width  # [deg.]
+y_buf = (BUFFER / 100) * height  # [deg.]
+plot_region = [
+    REGION[0] - x_buf,
+    REGION[1] + x_buf,
+    REGION[2] - y_buf,
+    REGION[3] + y_buf,
+]
 fig = pygmt.Figure()
 shaded_relief = pygmt.grdgradient(
-    '@earth_relief_01s_g', region=PLOT_REGION, azimuth=-45.0, normalize='t1+a0'
+    '@earth_relief_01s_g', region=plot_region, azimuth=-45.0, normalize='t1+a0'
 )
 pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nice(?)
 fig.grdimage(
     shaded_relief,
     cmap=True,
     projection='M6i',
-    region=PLOT_REGION,
+    region=plot_region,
     transparency=30,
 )
+SCALE_FRAC = 0.2  # How wide the scalebar should be as fraction of map width
+scale_width = np.ceil(degrees2kilometers(width * SCALE_FRAC))  # [km] Nearest whole
 with pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D'):
-    fig.basemap(frame=['a0.1f0.02', 'WESN'], map_scale='g-122.33/46.27+w2+f+l')
+    fig.basemap(
+        frame=['a0.1f0.01', 'WESN'],
+        map_scale=f'g{np.mean(REGION[:2])}/{REGION[2]}+w{scale_width}+f+l',
+    )
 node_style = 'c0.1i'
 fig.plot(
     x=lons[~in_region], y=lats[~in_region], style=node_style, pen=True, transparency=50
@@ -75,12 +96,16 @@ for lon, lat, color_rgb in zip(lons[in_region], lats[in_region], colors_rgb):
 fig.plot(x=shot.lon, y=shot.lat, style='s0.2i', color='black')
 fig.text(x=shot.lon, y=shot.lat, text=shot.name, font='5p,white', justify='CM')
 fig.show()
-# fig.savefig('/Users/ldtoney/Downloads/y5_zoom_map.png', dpi=600)
 
 #%% Corresponding waveform plot
 
 TIME_LIM = (-1, 4)
 EQUAL_SCALE = True
+
+# [km/s] For reduced time (use this to select which type of arrival!)
+# -------------------------------------------------------------------
+REMOVAL_CELERITY = 0.342
+# REMOVAL_CELERITY = 4.8
 
 # Subset stream, assign colors to traces early on
 st_region = Stream(compress(st, in_region)).copy()
@@ -88,28 +113,29 @@ for tr, color_rgb in zip(st_region, colors_rgb):
     tr.stats.color = to_hex(color_rgb)
 
 # Process!
-st_region.remove_response(inventory=inv)  # [m/s]
+st_region.remove_sensitivity(inventory=inv)  # [m/s] Full response removal is trickier!
 
 # Plot
 fig, axes = plt.subplots(
     nrows=in_region.sum(), sharex=True, sharey=EQUAL_SCALE, figsize=(8, 13)
 )
-for station, ax in zip(RIDGE_SENSORS + VALLEY_SENSORS, axes):
-    tr = st_region.select(station=str(station))[0]
+for tr, ax in zip(st_region, axes):
     t = tr.times(reftime=shot.time) - tr.stats.distance / REMOVAL_CELERITY
     t_win = t[(t >= TIME_LIM[0]) & (t <= TIME_LIM[1])]
     data_win = tr.data[(t >= TIME_LIM[0]) & (t <= TIME_LIM[1])]
-    ax.plot(
-        t_win,
-        data_win,
-        color=tr.stats.color,
+    ax.plot(t_win, data_win * 1e6, color=tr.stats.color)
+    ax.text(
+        1.01,
+        0.5,
+        f'{tr.stats.station}\n{tr.stats.distance:.2f} km',
+        ha='left',
+        va='center',
+        transform=ax.transAxes,
     )
-    if tr.stats.station == str(RIDGE_SENSORS[0]):
-        ax.set_title('Ridge sensors, W to E:')
-    if tr.stats.station == str(VALLEY_SENSORS[0]):
-        ax.set_title('Valley sensors, W to E:')
 axes[0].set_xlim(TIME_LIM)  # [m/s] Sets for all
-axes[-1].set_xlabel(f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s')
+axes[-1].set_xlabel(
+    rf'Time from shot {shot.name} (s), reduced by $\bf{{{REMOVAL_CELERITY * M_PER_KM:g}~m/s}}$'
+)
+axes[-1].set_ylabel('μm/s')
 fig.tight_layout()
 fig.show()
-# fig.savefig(f"/Users/ldtoney/Downloads/y5_zoom_wfs{'_equal_scale' if EQUAL_SCALE else ''}.png", dpi=300)
