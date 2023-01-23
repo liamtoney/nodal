@@ -12,7 +12,7 @@ from utils import get_shots, get_stations, get_waveforms_shot
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-SHOT = 'X3'
+SHOT = 'X4'
 
 # [xmin, xmax, ymin, ymax] Region to examine
 # ------------------------------------------
@@ -32,7 +32,11 @@ SHOT = 'X3'
 # ------------------------------------------
 # Shot X3
 # ------------------------------------------
-REGION = [-122.2958, -122.2755, 46.2291, 46.2412]  # Near Castle Lake
+# REGION = [-122.2958, -122.2755, 46.2291, 46.2412]  # Near Castle Lake
+# ------------------------------------------
+# Shot X4
+# ------------------------------------------
+REGION = [-122.1399, -122.1297, 46.1462, 46.1547]  # Y-shaped dense area
 
 #%% Open IRIS gmap station map
 
@@ -120,7 +124,7 @@ EQUAL_SCALE = False
 
 # [km/s] For reduced time (use this to select which type of arrival!)
 # -------------------------------------------------------------------
-REMOVAL_CELERITY = 0.335
+REMOVAL_CELERITY = 0.34
 # REMOVAL_CELERITY = 4.8
 
 # Subset stream, assign colors to traces early on
