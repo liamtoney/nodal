@@ -12,7 +12,7 @@ from utils import get_shots, get_stations, get_waveforms_shot
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-SHOT = 'AI1'
+SHOT = 'Y4'
 
 # [xmin, xmax, ymin, ymax] Region to examine
 # ------------------------------------------
@@ -24,7 +24,11 @@ SHOT = 'AI1'
 # ------------------------------------------
 # Shot AI1
 # ------------------------------------------
-REGION = [-122.2411, -122.2267, 46.1486, 46.161]  # Near Butte Camp TH
+# REGION = [-122.2411, -122.2267, 46.1486, 46.161]  # Near Butte Camp TH
+# ------------------------------------------
+# Shot Y4
+# ------------------------------------------
+REGION = [-122.2584, -122.2526, 46.1651, 46.1693]  # Near Blue Lake TH (DENSE!)
 
 #%% Open IRIS gmap station map
 
@@ -41,7 +45,11 @@ shot = get_shots().loc[SHOT]
 
 # Assign coordinates and distance [km] to traces
 for tr in st:
-    coords = inv.get_coordinates(tr.id)
+    try:
+        coords = inv.get_coordinates(tr.id)
+    except Exception:
+        print(f'Removing {tr.id}')
+        st.remove(tr)
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = (
@@ -117,6 +125,10 @@ for tr, color_rgb in zip(st_region, colors_rgb):
     tr.stats.color = to_hex(color_rgb)
 
 # Process!
+if SHOT == 'Y4':
+    for tr in st_region:
+        fudge_factor = 87921  # TODO: See _plot_node_shot_gather.py
+        tr.data *= fudge_factor
 st_region.remove_sensitivity(inventory=inv)  # [m/s] Full response removal is trickier!
 
 # Plot
