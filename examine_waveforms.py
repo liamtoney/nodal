@@ -12,15 +12,19 @@ from utils import get_shots, get_stations, get_waveforms_shot
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-SHOT = 'Y5'
+SHOT = 'AI1'
 
 # [xmin, xmax, ymin, ymax] Region to examine
 # ------------------------------------------
 # Shot Y5
-# -------
-REGION = [-122.254, -122.2, 46.285, 46.31]  # Ridge/valley area
+# ------------------------------------------
+# REGION = [-122.254, -122.2, 46.285, 46.31]  # Ridge/valley area
 # REGION = [-122.2791, -122.2629, 46.2772, 46.2887]  # Tight cluster in hummocks
 # REGION = [-122.2549, -122.2276, 46.2723, 46.2791]  # Loowit(?) ridge
+# ------------------------------------------
+# Shot AI1
+# ------------------------------------------
+REGION = [-122.2411, -122.2267, 46.1486, 46.161]  # Near Butte Camp TH
 
 #%% Open IRIS gmap station map
 
