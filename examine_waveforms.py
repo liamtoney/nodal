@@ -12,7 +12,7 @@ from utils import get_shots, get_stations, get_waveforms_shot
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
-SHOT = 'Y4'
+SHOT = 'X4'
 
 # [xmin, xmax, ymin, ymax] Region to examine
 # ------------------------------------------
@@ -26,7 +26,7 @@ SHOT = 'Y4'
 # ------------------------------------------
 # REGION = [-122.2411, -122.2267, 46.1486, 46.161]  # Near Butte Camp TH
 # ------------------------------------------
-# Shot Y4
+# Shots X4, Y4
 # ------------------------------------------
 REGION = [-122.2584, -122.2526, 46.1651, 46.1693]  # Near Blue Lake TH (DENSE!)
 
