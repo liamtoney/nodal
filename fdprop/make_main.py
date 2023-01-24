@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 """
+DEPRECATED (24 January 2023)
+
 Script for reading in a template for `main.cpp` (`main.cpp.template`), replacing all
 placeholder variables (`$example`) with parameters as specified in this script, and
 writing the compilation-ready `main.cpp`.
