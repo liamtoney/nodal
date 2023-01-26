@@ -11,7 +11,7 @@ from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 # CHANGE ME!
 run = '08_shot_y5_lower_freq'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
-WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from make_main.py
+WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
@@ -54,14 +54,13 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 
 # Plotting config params
 SKIP = 100  # Plot every SKIP stations
-SCALE = 0.03 * 100  # [Pa] Single scale factor
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 POST_ROLL = 10  # [s]
 TOPO_FILE = (
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
-)  # TODO from make_main.py
+)  # TODO from main.cpp
 REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
 
 # Hacky params
@@ -69,7 +68,7 @@ PRE_ROLL = [
     0.96,
     0.94,
 ]  # [s] TODO must manually set this so that it doesn't go beyond topo_ax
-X_SRC = 500  # [m] TODO from make_main.py
+X_SRC = 500  # [m] TODO from main.cpp
 
 # Form [subsetted] plotting Stream for FAKE data
 starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
