@@ -1,4 +1,8 @@
-from utils import NODAL_WORKING_DIR, get_stations, station_map
+import os
+import subprocess
+from pathlib import Path
+
+from utils import get_stations, station_map
 
 # Read in station info for plotting
 net = get_stations()[0]
@@ -15,4 +19,6 @@ fig = station_map(
     plot_inset=True,
 )
 
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'imush_station_map.png', dpi=600)
+_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
+
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'imush_station_map.png', dpi=600)
