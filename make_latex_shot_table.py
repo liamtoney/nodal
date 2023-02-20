@@ -5,6 +5,7 @@ from utils import get_shots
 df = get_shots()
 
 df = df.reset_index(level=0)  # Convert the index (which is shot name) to a column
+df = df.sort_values(by='time')  # Sort from earliest to latest in time
 
 # Format column names for table heading
 columns = dict(
