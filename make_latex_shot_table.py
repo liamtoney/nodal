@@ -20,10 +20,9 @@ columns = dict(
 )
 columns.update((k, rf'\textbf{{{v}}}') for k, v in columns.items())  # Make header bold
 
-# Function to make rows bold if GCAs are present (conditional formatting, basically)
-def color_gcas(row):
+# Color rows based on GCA presence/absence (conditional formatting, basically)
+def color_rows_by_gca_presence(row):
     if not row[columns['gcas_on_nodes']]:
-        # return [r'boldmath\bfseries:'] * len(row)
         return ['color: {lightgray}'] * len(row)
     else:
         return [None] * len(row)
@@ -38,9 +37,7 @@ df.rename(columns=columns).style.hide(axis='index').format(
 ).format(lambda x: f'${x:.4f}$', subset=[columns['lat'], columns['lon']]).format(
     lambda x: f'${x:g}$', subset=[columns['elev_m'], columns['weight_lb']]
 ).apply(
-    color_gcas, axis='columns'
+    color_rows_by_gca_presence, axis='columns'
 ).to_latex(
-    Path(os.environ['NODAL_FIGURE_DIR']).parent / 'shot_table.tex',
-    hrules=True,
-    column_format='l' * df.shape[1],
+    Path(os.environ['NODAL_FIGURE_DIR']).parent / 'shot_table.tex', hrules=True
 )
