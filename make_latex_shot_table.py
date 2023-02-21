@@ -31,7 +31,10 @@ def color_gcas(row):
 
 # Style and output .tex file
 df.rename(columns=columns).style.hide(axis='index').format(
-    {columns['time']: lambda t: '{}'.format(t.strftime('%Y-%m-%d %H:%M:%S'))}
+    {
+        columns['time']: lambda t: '{}'.format(t.strftime('%Y-%m-%d %H:%M:%S')),
+        columns['gcas_on_nodes']: lambda x: rf'\texttt{{{x}}}',
+    }
 ).format(lambda x: f'${x:.4f}$', subset=[columns['lat'], columns['lon']]).format(
     lambda x: f'${x:g}$', subset=[columns['elev_m'], columns['weight_lb']]
 ).apply(
