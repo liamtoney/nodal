@@ -1,4 +1,5 @@
-import subprocess
+import os
+from pathlib import Path
 
 from utils import get_shots
 
@@ -19,15 +20,24 @@ columns = dict(
 )
 columns.update((k, rf'\textbf{{{v}}}') for k, v in columns.items())  # Make header bold
 
-tex_code_string = (
-    df.rename(columns=columns)
-    .style.hide(axis='index')
-    .format({columns['time']: lambda t: '{}'.format(t.strftime('%Y-%m-%d %H:%M:%S'))})
-    .format(lambda x: f'${x:.4f}$', subset=[columns['lat'], columns['lon']])
-    .format(lambda x: f'${x:g}$', subset=[columns['elev_m'], columns['weight_lb']])
-    .to_latex(hrules=True, column_format='l' * df.shape[1])
-).rstrip()
+# Function to make rows bold if GCAs are present (conditional formatting, basically)
+def color_gcas(row):
+    if not row[columns['gcas_on_nodes']]:
+        # return [r'boldmath\bfseries:'] * len(row)
+        return ['color: {lightgray}'] * len(row)
+    else:
+        return [None] * len(row)
 
-# Form LaTeX code and add to clipboard for pasting into Overleaf
-subprocess.run('pbcopy', text=True, input=tex_code_string)
-print('LaTeX code copied to clipboard!')
+
+# Style and output .tex file
+df.rename(columns=columns).style.hide(axis='index').format(
+    {columns['time']: lambda t: '{}'.format(t.strftime('%Y-%m-%d %H:%M:%S'))}
+).format(lambda x: f'${x:.4f}$', subset=[columns['lat'], columns['lon']]).format(
+    lambda x: f'${x:g}$', subset=[columns['elev_m'], columns['weight_lb']]
+).apply(
+    color_gcas, axis='columns'
+).to_latex(
+    Path(os.environ['NODAL_FIGURE_DIR']).parent / 'shot_table.tex',
+    hrules=True,
+    column_format='l' * df.shape[1],
+)
