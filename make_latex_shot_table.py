@@ -20,6 +20,7 @@ columns = dict(
 )
 columns.update((k, rf'\textbf{{{v}}}') for k, v in columns.items())  # Make header bold
 
+
 # Color rows based on GCA presence/absence (conditional formatting, basically)
 def color_rows_by_gca_presence(row):
     if not row[columns['gcas_on_nodes']]:
