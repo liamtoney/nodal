@@ -27,7 +27,7 @@ from utils import (
 )
 from utils.utils import _outside_arrow
 
-SAVE = True  # Toggle saving PNG files
+SAVE = False  # Toggle saving PNG files
 
 # Read in shot info
 df = get_shots()
