@@ -291,3 +291,78 @@ if SAVE:
         dpi=300,
         bbox_inches='tight',
     )
+
+#%% Calculate convex hull and dot products
+
+from geopandas import GeoSeries, points_from_xy
+from obspy.geodetics.base import gps2dist_azimuth
+from shapely.geometry import MultiPoint
+
+# Get coordinates to form convex hull from (should INCLUDE the shot!)
+net = get_stations()[0]
+lons = np.array([sta.longitude for sta in net] + [shot.lon])
+lats = np.array([sta.latitude for sta in net] + [shot.lat])
+
+# Form convex hull
+convex_hull = GeoSeries(MultiPoint(points_from_xy(lons, lats))).convex_hull
+
+# Plot CH on existing figure
+convex_hull.plot(ax=fig.axes[0], zorder=-1, color='lightgray')
+plt.show()
+
+# Should be same shape!
+assert u.shape == v.shape
+
+
+# Function to mask u and v winds to hull
+def mask_winds_with_hull(wind_comp):
+
+    lons = wind_comp.longitude.values.flatten()
+    lats = wind_comp.latitude.values.flatten()
+    values = wind_comp.values.flatten()
+
+    # Step 1: Mask to rectangular bounding box of hull
+    rect_mask = (
+        (lons >= convex_hull.bounds.minx.values)
+        & (lons <= convex_hull.bounds.maxx.values)
+        & (lats >= convex_hull.bounds.miny.values)
+        & (lats <= convex_hull.bounds.maxy.values)
+    )
+    lons = lons[rect_mask]
+    lats = lats[rect_mask]
+    values = values[rect_mask]
+
+    # Step 2: Mask to specific shape of hull by checking each point
+    hull_mask = []
+    for point in points_from_xy(lons, lats):
+        hull_mask.append(convex_hull.contains(point).values)
+    hull_mask = np.array(hull_mask).squeeze()
+
+    return lons[hull_mask], lats[hull_mask], values[hull_mask]
+
+
+# Mask u and v winds to convex hull
+lons_mask, lats_mask, u_mask = mask_winds_with_hull(u)
+_, _, v_mask = mask_winds_with_hull(v)
+
+# Dot product
+dp = []
+for lon, lat, u_comp, v_comp in zip(lons_mask, lats_mask, u_mask, v_mask):
+    waz = (90 - np.rad2deg(np.arctan2(v_comp, u_comp))) % 360  # [° from N]
+    baz = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]  # [° shot-wind loc az]
+    wmag = np.sqrt(u_comp**2 + v_comp**2)
+    angle_diff = waz - baz  # Sign does not matter!
+    # dot_product = wmag * np.cos(np.deg2rad(angle_diff))  # Treating baz as unit vector
+    dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
+    dp.append(dot_product)
+dp = np.array(dp)
+
+# Plot masked wind locations on existing figure colored by dot product
+sm = fig.axes[0].scatter(lons_mask, lats_mask, c=dp, vmin=-1, vmax=1, cmap='seismic_r')
+cbar = fig.colorbar(sm, ticks=[-1, 0, 1])
+cbar.ax.set_yticklabels(['upwind', 'crosswind', 'downwind'])
+plt.show()
+
+# Print median across all points in the hull
+print(SHOT)
+print(f'{np.median(dp):.2f}')
