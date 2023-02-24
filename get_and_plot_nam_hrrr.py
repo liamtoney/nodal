@@ -308,7 +308,6 @@ convex_hull = GeoSeries(MultiPoint(points_from_xy(lons, lats))).convex_hull
 
 # Plot CH on existing figure
 convex_hull.plot(ax=fig.axes[0], zorder=-1, color='lightgray')
-plt.show()
 
 # Should be same shape!
 assert u.shape == v.shape
@@ -361,7 +360,6 @@ dp = np.array(dp)
 sm = fig.axes[0].scatter(lons_mask, lats_mask, c=dp, vmin=-1, vmax=1, cmap='seismic_r')
 cbar = fig.colorbar(sm, ticks=[-1, 0, 1])
 cbar.ax.set_yticklabels(['upwind', 'crosswind', 'downwind'])
-plt.show()
 
 # Print median across all points in the hull
 print(SHOT)
