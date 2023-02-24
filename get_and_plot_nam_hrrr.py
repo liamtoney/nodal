@@ -351,16 +351,20 @@ for lon, lat, u_comp, v_comp in zip(lons_mask, lats_mask, u_mask, v_mask):
     baz = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]  # [° shot-wind loc az]
     wmag = np.sqrt(u_comp**2 + v_comp**2)
     angle_diff = waz - baz  # Sign does not matter!
-    # dot_product = wmag * np.cos(np.deg2rad(angle_diff))  # Treating baz as unit vector
-    dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
+    dot_product = wmag * np.cos(np.deg2rad(angle_diff))  # Treating baz as unit vector
+    # dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
     dp.append(dot_product)
 dp = np.array(dp)
 
 # Plot masked wind locations on existing figure colored by dot product
-sm = fig.axes[0].scatter(lons_mask, lats_mask, c=dp, vmin=-1, vmax=1, cmap='seismic_r')
-cbar = fig.colorbar(sm, ticks=[-1, 0, 1])
-cbar.ax.set_yticklabels(['upwind', 'crosswind', 'downwind'])
+sm = fig.axes[0].scatter(
+    lons_mask, lats_mask, c=dp, vmin=-10, vmax=10, cmap='seismic_r'
+)
+cbar = fig.colorbar(sm, label='Prop. dir. wind comp. (m/s)')
+
+# Add title
+fig.axes[0].set_title(f'Median: ${np.median(dp):.2f}$ m/s')
 
 # Print median across all points in the hull
 print(SHOT)
-print(f'{np.median(dp):.2f}')
+print(f'{np.median(dp):.2f} m/s')
