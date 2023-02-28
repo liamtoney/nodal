@@ -15,5 +15,6 @@
 *.mseed
 *.mat
 *.pptx
+*.ai
 Icon?
 .DS_Store
