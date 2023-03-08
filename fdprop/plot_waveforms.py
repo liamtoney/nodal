@@ -6,7 +6,8 @@ import numpy as np
 from matplotlib.colors import LogNorm
 from obspy import Stream, Trace
 
-from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
+from utils import (NODAL_WORKING_DIR, get_shots, get_stations,
+                   get_waveforms_shot)
 
 # CHANGE ME!
 run = '10_shot_y5_wf_export_fixed'
@@ -36,6 +37,8 @@ st_syn.sort(keys=['x'])  # Sort by increasing x distance
 with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
     sta_info = json.load(f)
 st = get_waveforms_shot('Y5')
+inv = get_stations()
+st.remove_sensitivity(inv)
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
@@ -49,6 +52,8 @@ for tr in st:
     tr.stats.x = x / M_PER_KM  # [km]
     tr.stats.out_of_plane_dist = out_of_plane_dist  # [m]
 st.sort(keys=['x'])  # Sort by increasing x distance
+for tr in st:
+    tr.data *= 1e6  # Convert to μm/s
 
 #%% Plot
 
@@ -178,7 +183,7 @@ norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [0.05 * 100, 0.5e6],
+    [5, 325],  # Arbitrary / trial-and-error
     PRE_ROLL,
     [False, False],
 ):
@@ -232,7 +237,7 @@ for norm in norms:
         _cax.xaxis.set_label_position('top')
         _cax.set_xlabel('Peak-to-peak pressure (Pa)', labelpad=7)
     else:
-        _cax.set_xlabel('Peak-to-peak amplitude (counts)', labelpad=5)
+        _cax.set_xlabel('Peak-to-peak velocity (μm/s)', labelpad=5)
 
 cax.set_xlabel(
     f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=625
