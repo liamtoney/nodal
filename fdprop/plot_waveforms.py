@@ -9,7 +9,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 # CHANGE ME!
-run = '08_shot_y5_lower_freq'
+run = '10_shot_y5_wf_export_fixed'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 
@@ -53,7 +53,7 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 #%% Plot
 
 # Plotting config params
-SKIP = 100  # Plot every SKIP stations
+SKIP = 150  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
@@ -178,7 +178,7 @@ norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [0.03 * 100, 0.5e6],
+    [0.05 * 100, 0.5e6],
     PRE_ROLL,
     [True, False],
 ):
