@@ -117,7 +117,7 @@ def process_and_plot(st, ax, scale, pre_roll, log=True):
     if log:
         norm = LogNorm(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
     else:
-        norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.max(p2p_all))
+        norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.percentile(p2p_all, 80))
 
     st = Stream(compress(st, include))
     for tr in st[::-1]:  # Plot the closest waveforms on top!
@@ -180,7 +180,7 @@ for ax, st, scale, pre_roll, log in zip(
     [st_syn_plot, st_plot],
     [0.05 * 100, 0.5e6],
     PRE_ROLL,
-    [True, False],
+    [False, False],
 ):
     norm, cmap = process_and_plot(st, ax, scale, pre_roll, log=log)
     norms.append(norm)
