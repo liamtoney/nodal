@@ -350,3 +350,47 @@ for i, (shot, station) in enumerate(SHOT_STATION_PAIRS):
 ax.legend()
 
 fig.show()
+
+#%% Examine coupling on TA stations
+
+from urllib.request import urlopen
+
+# Load xcorr_coh() function from David's GitHub repo
+URL = 'https://raw.githubusercontent.com/davidfee5/seismoacoustic/master/xcorr_coh.py?token=GHSAT0AAAAAABXVS5XXMGIC2JCEUG6RU6ROZAKNRUQ'
+exec(urlopen(URL).read())
+
+# xcorr_coh() parameters
+WINLEN = 10  # [s] Data window length
+OVERLAP = 0.9  # Data window overlap
+NPER = 64  # Number of points in FFT segment
+NPEROVER = 0.8  # FFT overlap(?)
+FILT = [2, 15]  # [Hz] Bandpass corners
+SHIFTSEC = 0.2  # [s] Amount xcorr can shift
+
+for (shot, station) in SHOT_STATION_PAIRS:
+
+    dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
+
+    # Download waveform
+    kwargs = dict(
+        network='*',
+        station=station,
+        location='*',
+        channel='BDF,BHZ',
+        attach_response=True,
+    )
+    arr_time = df.loc[shot].time + dist_km / (CELERITY / 1000)
+    sig_win = (arr_time - 60, arr_time + 60 + 5)
+    st = client.get_waveforms(starttime=sig_win[0], endtime=sig_win[1], **kwargs)
+    assert st.count() == 2  # Infra and seismic!
+    st.sort(keys=['channel'])  # For proper ordered input to xcorr_coh()
+
+    # Process waveforms
+    for tr in st:
+        tr.detrend('linear')
+        tr.remove_response()
+
+    # Run xcorr_coh()
+    fig = xcorr_coh(st, WINLEN, OVERLAP, NPER, NPEROVER, FILT, SHIFTSEC, 1)
+    fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
+    fig.savefig(f'/Users/ldtoney/Downloads/{shot}-{station}.png', bbox_inches='tight')
