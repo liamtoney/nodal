@@ -196,8 +196,11 @@ fig.show()
 
 #%% Investigate the nice arrivals
 
+from multitaper import MTSpec  # pip install multitaper
 from obspy import Stream
 from python_util import plot
+from scipy.fftpack import next_fast_len
+from scipy.signal import welch, windows
 
 CELERITY = 343  # [m/s]
 
@@ -215,34 +218,135 @@ SHOT_NODE_PAIRS = [
 ]
 
 good_st = Stream()
+bad_st = Stream()
 
 for (shot, station) in SHOT_NODE_PAIRS:
 
     dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
 
     # Download waveform
-    st = client.get_waveforms(
+    kwargs = dict(
         network='*',
         station=station,
         location='*',
         channel=CHANNEL,
-        starttime=df.loc[shot].time + dist_km / (CELERITY / 1000) - 60 + noise,
-        endtime=df.loc[shot].time + dist_km / (CELERITY / 1000) + 60 + 5 + noise,
         attach_response=True,
     )
-    assert st.count() == 1
+    arr_time = df.loc[shot].time + dist_km / (CELERITY / 1000)
+    sig_win = (arr_time - 60, arr_time + 60 + 5)
+    st_sig = client.get_waveforms(starttime=sig_win[0], endtime=sig_win[1], **kwargs)
+    st_noise = client.get_waveforms(
+        starttime=sig_win[0] - 120, endtime=sig_win[1] - 120, **kwargs
+    )
+    assert st_sig.count() == 1
+    assert st_noise.count() == 1
 
-    st[0].stats.network = shot  # For record-keeping
+    st_sig[0].stats.network = shot  # For record-keeping
+    st_noise[0].stats.network = shot  # For record-keeping
 
     # Process waveform
-    st.detrend('linear')
-    st.remove_response()
+    for st in st_sig, st_noise:
+        st.detrend('linear')
+        st.remove_response()
 
-    good_st += st[0]
+    good_st += st_sig[0]
+    bad_st += st_noise[0]
 
     # Plot
-    fig = plot.spec(st[0])
+    fig = plot.spec(good_st[0])
     fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
 
-fig = plot.psd(good_st, win_dur=20, db_lim=(20, 80))
-plt.gcf().axes[0].set_xlim(0.5, 10)
+#%% Multitapers
+
+pxx_dict = dict(signal=[], noise=[])
+for st, k in zip([good_st, bad_st], pxx_dict.keys()):
+
+    fig, ax = plt.subplots(figsize=(8.6, 4.8))
+
+    for tr in st:
+
+        if False:
+            mtspec = MTSpec(
+                tr.data,
+                nw=4,  # Time-bandwidth product
+                kspec=10,  # Number of tapers (after a certain point this saturates)
+                dt=tr.stats.delta,
+                nfft=next_fast_len(tr.stats.npts),
+            )
+            f, pxx = mtspec.rspec()
+            f = f.squeeze()
+            pxx = pxx.squeeze()
+        else:
+            win_dur = 50  # [s]
+            nperseg = int(win_dur * tr.stats.sampling_rate)  # Samples
+            nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
+
+            f, pxx = welch(tr.data, tr.stats.sampling_rate, nperseg=nperseg, nfft=nfft)
+
+        # Remove DC component to avoid divide by zero errors later
+        f = f[1:]
+        pxx = pxx[1:]
+
+        ref_val = 20e-6
+        pxx_db = 10 * np.log10(
+            pxx / (ref_val**2)
+        )  # [dB rel. (ref_val <ref_val_unit>)^2 Hz^-1]
+
+        if True:
+            win = windows.hann(20)  # Use Hann window
+            pxx_db = np.convolve(pxx_db, win, mode='same') / sum(win)
+
+        shot = tr.stats.network
+        station = tr.stats.station
+        ax.semilogx(f, pxx_db, label=rf'$\bf{{{shot}}}$–{station}')
+
+        pxx_dict[k].append(pxx_db)
+
+    ax.set_xlim(0.5, 10)
+    ax.set_ylim(20, 80)
+
+    ax.set_xlabel('Frequency (Hz)')
+    ax.set_ylabel('Power (dB)')
+
+    ax.legend()
+
+    fig.show()
+
+#%% SNR
+
+fig, ax = plt.subplots(figsize=(8.6, 4.8))
+
+colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+ymax = 30
+
+for i, (shot, station) in enumerate(SHOT_NODE_PAIRS):
+
+    color = colors[i]
+
+    snr = pxx_dict['signal'][i] - pxx_dict['noise'][i]
+
+    ax.semilogx(f, snr, color=color, label=rf'$\bf{{{shot}}}$–{station}')
+
+    peak_freq = f[np.argmax(snr)]
+
+    ax.axvline(peak_freq, color=color, linestyle=':')
+
+    ax.text(
+        peak_freq,
+        ymax,
+        f'  {peak_freq:.1f} Hz',
+        ha='center',
+        va='bottom',
+        rotation=90,
+        color=color,
+    )
+
+    ax.set_xlim(0.5, 10)
+    ax.set_ylim(top=ymax)
+    ax.set_xlabel('Frequency (Hz)')
+    ax.set_ylabel('SNR (dB)')
+
+ax.legend()
+
+fig.show()
