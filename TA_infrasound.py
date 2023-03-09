@@ -209,7 +209,7 @@ PLOT_NOISE = False
 noise = -120 if PLOT_NOISE else 0  # Noise window offset to before signal arrival
 
 # These are the nice 5 arrivals
-SHOT_NODE_PAIRS = [
+SHOT_STATION_PAIRS = [
     ['Y1', 'F05D'],
     ['Y7', 'E04D'],
     ['Y6', 'E04D'],
@@ -220,7 +220,7 @@ SHOT_NODE_PAIRS = [
 good_st = Stream()
 bad_st = Stream()
 
-for (shot, station) in SHOT_NODE_PAIRS:
+for (shot, station) in SHOT_STATION_PAIRS:
 
     dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
 
@@ -320,7 +320,7 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 ymax = 30
 
-for i, (shot, station) in enumerate(SHOT_NODE_PAIRS):
+for i, (shot, station) in enumerate(SHOT_STATION_PAIRS):
 
     color = colors[i]
 
