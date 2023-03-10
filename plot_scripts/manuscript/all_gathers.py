@@ -122,8 +122,12 @@ for ax in axs[:, -1]:
 axs[-2, -1].tick_params(bottom=True, labelbottom=True)  # Label plot above removed one
 axs[-1, -2].tick_params(right=True)  # Add end ticks for bottom row right-most plot
 
+# These limits show ALL GCAs
+xlim = (0, 160)
+ylim = (5, 55)
+
 # Iterate over each shot DataArray and plot
-for qm, ax in zip(qm_list, axs.flatten()):
+for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
     qm.plot.imshow(
         ax=ax,
         add_labels=False,
@@ -142,14 +146,15 @@ for qm, ax in zip(qm_list, axs.flatten()):
         color='black' if qm.name in df[df.gcas_on_nodes].index else 'gray',
         weight='bold' if qm.name in df[df.gcas_on_nodes].index else None,
     )
-
-# Show ALL data
-# xlim = x_range
-# ylim = y_range
-
-# Show ALL GCAs
-xlim = (0, 160)
-ylim = (5, 55)
+    if da.distance.min() > ylim[1]:  # If there is nothing to plot!
+        ax.text(
+            0.5,
+            0.5,
+            f'[{da.distance.min():.1f} km]',
+            ha='center',
+            va='center',
+            transform=ax.transAxes,
+        )
 
 # Set limits
 axs[0][0].set_xlim(xlim)
