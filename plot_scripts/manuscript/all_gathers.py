@@ -112,15 +112,16 @@ for da in tqdm.tqdm(da_list):
 fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7, 9), sharex=True, sharey=True)
 axs[-1, -1].remove()  # Only 23 shots!
 for ax in axs[:-1, :].flatten():
-    ax.tick_params(bottom=False)
+    ax.tick_params(which='both', bottom=False)
 for ax in axs[0, :]:
-    ax.tick_params(top=True)
+    ax.tick_params(which='both', top=True)
 for ax in axs[:, 1:].flatten():
-    ax.tick_params(left=False)
+    ax.tick_params(which='both', left=False)
 for ax in axs[:, -1]:
-    ax.tick_params(right=True)
-axs[-2, -1].tick_params(bottom=True, labelbottom=True)  # Label plot above removed one
-axs[-1, -2].tick_params(right=True)  # Add end ticks for bottom row right-most plot
+    ax.tick_params(which='both', right=True)
+# Special cases for the removed plot
+axs[-2, -1].tick_params(which='both', bottom=True, labelbottom=True)
+axs[-1, -2].tick_params(which='both', right=True)
 
 # These limits show ALL GCAs
 xlim = (0, 160)
@@ -159,6 +160,10 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
 # Set limits
 axs[0][0].set_xlim(xlim)
 axs[0][0].set_ylim(ylim)
+
+# Minor ticks
+axs[0][0].xaxis.set_minor_locator(plt.MultipleLocator(20))
+axs[0][0].yaxis.set_minor_locator(plt.MultipleLocator(5))
 
 # Add overall axis labels
 label_ax = fig.add_subplot(111)
