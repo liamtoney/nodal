@@ -133,7 +133,7 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
         add_labels=False,
         add_colorbar=False,
         vmin=np.nanmedian(qm),
-        vmax=np.nanpercentile(qm, 99),
+        vmax=np.nanpercentile(qm, 98),
     )
     ax.text(
         0.97,
