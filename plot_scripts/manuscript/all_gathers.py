@@ -112,6 +112,7 @@ for da in tqdm.tqdm(da_list):
 fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7, 9), sharex=True, sharey=True)
 axs = axs.flatten()
 axs[-1].remove()  # Only 23 shots!
+axs[19].tick_params(labelbottom=True)  # Must label the plot above since bottom removed
 
 # Iterate over each shot DataArray and plot
 for qm, ax in zip(qm_list, axs):
@@ -123,7 +124,9 @@ for qm, ax in zip(qm_list, axs):
         # vmax=np.percentile(qm, 99),
         # cmap=cc.m_fire_r,
     )
-    ax.text(0.9, 0.9, qm.name, ha='right', va='top', transform=ax.transAxes)
+    ax.text(
+        0.9, 0.9, qm.name, ha='right', va='top', transform=ax.transAxes, weight='bold'
+    )
 
 # Show ALL data
 # xlim = x_range
@@ -141,10 +144,20 @@ ylim = (5, 40)
 axs[0].set_xlim(xlim)
 axs[0].set_ylim(ylim)
 
+# Add overall axis labels
+label_ax = fig.add_subplot(111)
+label_ax.patch.set_alpha(0)
+for spine in label_ax.spines.values():
+    spine.set_visible(False)
+label_ax.set_xticks([])
+label_ax.set_yticks([])
+label_ax.set_xlabel('Time from shot (s)', labelpad=25)
+label_ax.set_ylabel('Distance from shot (km)', labelpad=25)
+
 # Finalize
 fig.tight_layout()
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.new.png', dpi=300)
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.new.png', dpi=300, bbox_inches='tight')
