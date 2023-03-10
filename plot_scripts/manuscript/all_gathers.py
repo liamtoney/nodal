@@ -128,8 +128,8 @@ for qm, ax in zip(qm_list, axs.flatten()):
         ax=ax,
         add_labels=False,
         add_colorbar=False,
-        # vmin=np.percentile(qm, 90),
-        # vmax=np.percentile(qm, 99),
+        vmin=np.nanmedian(qm),
+        vmax=np.nanpercentile(qm, 99),
         # cmap=cc.m_fire_r,
     )
     ax.text(
