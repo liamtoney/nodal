@@ -133,7 +133,14 @@ for qm, ax in zip(qm_list, axs.flatten()):
         # cmap=cc.m_fire_r,
     )
     ax.text(
-        0.9, 0.9, qm.name, ha='right', va='top', transform=ax.transAxes, weight='bold'
+        0.97,
+        0.03,
+        qm.name,
+        ha='right',
+        va='bottom',
+        transform=ax.transAxes,
+        color='black' if qm.name in df[df.gcas_on_nodes].index else 'gray',
+        weight='bold' if qm.name in df[df.gcas_on_nodes].index else None,
     )
 
 # Show ALL data
