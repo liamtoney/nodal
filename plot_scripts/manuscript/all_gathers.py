@@ -110,12 +110,20 @@ for da in tqdm.tqdm(da_list):
 
 # Set up figure and axes
 fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7, 9), sharex=True, sharey=True)
-axs = axs.flatten()
-axs[-1].remove()  # Only 23 shots!
-axs[19].tick_params(labelbottom=True)  # Must label the plot above since bottom removed
+axs[-1, -1].remove()  # Only 23 shots!
+for ax in axs[:-1, :].flatten():
+    ax.tick_params(bottom=False)
+for ax in axs[0, :]:
+    ax.tick_params(top=True)
+for ax in axs[:, 1:].flatten():
+    ax.tick_params(left=False)
+for ax in axs[:, -1]:
+    ax.tick_params(right=True)
+axs[-2, -1].tick_params(bottom=True, labelbottom=True)  # Label plot above removed one
+axs[-1, -2].tick_params(right=True)  # Add end ticks for bottom row right-most plot
 
 # Iterate over each shot DataArray and plot
-for qm, ax in zip(qm_list, axs):
+for qm, ax in zip(qm_list, axs.flatten()):
     qm.plot.imshow(
         ax=ax,
         add_labels=False,
@@ -141,8 +149,8 @@ xlim = (-5, 100)
 ylim = (5, 40)
 
 # Set limits
-axs[0].set_xlim(xlim)
-axs[0].set_ylim(ylim)
+axs[0][0].set_xlim(xlim)
+axs[0][0].set_ylim(ylim)
 
 # Add overall axis labels
 label_ax = fig.add_subplot(111)
@@ -156,6 +164,7 @@ label_ax.set_ylabel('Distance from shot (km)', labelpad=25)
 
 # Finalize
 fig.tight_layout()
+fig.subplots_adjust(wspace=0.1, hspace=0.11)
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
