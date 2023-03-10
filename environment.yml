@@ -7,6 +7,7 @@ dependencies:
   - cdsapi
   - cfgrib
   - colorcet
+  - datashader
   - ipython
   - isort
   - numba
