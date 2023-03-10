@@ -141,12 +141,8 @@ for qm, ax in zip(qm_list, axs.flatten()):
 # ylim = y_range
 
 # Show ALL GCAs
-# xlim = (-5, 200)
-# ylim = (5, 55)
-
-# Show ALL GCAs except for X2 and Y6
-xlim = (-5, 100)
-ylim = (5, 40)
+xlim = (0, 160)
+ylim = (5, 55)
 
 # Set limits
 axs[0][0].set_xlim(xlim)
