@@ -353,11 +353,11 @@ fig.show()
 
 #%% Examine coupling on TA stations
 
-from urllib.request import urlopen
+import sys
 
-# Load xcorr_coh() function from David's GitHub repo
-URL = 'https://raw.githubusercontent.com/davidfee5/seismoacoustic/master/xcorr_coh.py?token=GHSAT0AAAAAABXVS5XXMGIC2JCEUG6RU6ROZAKNRUQ'
-exec(urlopen(URL).read())
+# Load xcorr_coh() function from my local repo
+sys.path.insert(0, '/Users/ldtoney/repos/seismoacoustic/')
+from xcorr_coh import xcorr_coh
 
 # xcorr_coh() parameters
 WINLEN = 10  # [s] Data window length
@@ -415,7 +415,7 @@ kwargs = dict(
     channel='BDF,BHZ',
     attach_response=True,
 )
-arr_time = df.loc[shot].time + dist_km / (CELERITY / 1000)
+arr_time = df.loc[SHOT].time + dist_km / (CELERITY / 1000)
 pad = 4
 sig_win = (arr_time - pad, arr_time + pad + 5)
 st = client.get_waveforms(starttime=sig_win[0], endtime=sig_win[1], **kwargs)
