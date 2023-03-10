@@ -394,3 +394,68 @@ for (shot, station) in SHOT_STATION_PAIRS:
     fig = xcorr_coh(st, WINLEN, OVERLAP, NPER, NPEROVER, FILT, SHIFTSEC, 1)
     fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
     fig.savefig(f'/Users/ldtoney/Downloads/{shot}-{station}.png', bbox_inches='tight')
+
+#%% Plot close-up of best coupled arrival and obtain "scale factor"
+
+# See Novoselov (2020), §4.3
+
+import matplotlib.dates as mdates
+from scipy.signal import hilbert
+
+SHOT = 'Y6'
+STATION = 'E04D'
+
+dist_km = ta_df[(ta_df.station == STATION) & (ta_df.shot == SHOT)].dist_km.values[0]
+
+# Download waveform
+kwargs = dict(
+    network='*',
+    station=STATION,
+    location='*',
+    channel='BDF,BHZ',
+    attach_response=True,
+)
+arr_time = df.loc[shot].time + dist_km / (CELERITY / 1000)
+pad = 4
+sig_win = (arr_time - pad, arr_time + pad + 5)
+st = client.get_waveforms(starttime=sig_win[0], endtime=sig_win[1], **kwargs)
+assert st.count() == 2  # Infra and seismic!
+
+# Process waveforms
+st.detrend('linear')
+st.remove_response()
+stf = st.copy()
+stf.taper(0.05)
+fmin = 8
+fmax = 10
+stf.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True)  # Narrow-band here!
+
+# Plot
+fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
+for tr, ax in zip(stf, (ax1, ax2)):
+    ax.plot(tr.times('matplotlib'), tr.data, color='black', lw=0.5)
+ax1.set_ylabel('Velocity (m/s)')
+ax2.set_ylabel('Pressure (Pa)')
+loc = ax2.xaxis.set_major_locator(mdates.AutoDateLocator())
+ax2.xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
+for ax in (ax1, ax2):
+    ax.autoscale(enable=True, axis='x', tight=True)
+fig.show()
+
+# Get transfer coeff
+stfe = stf.copy()
+for tr in stfe:
+    npts = tr.count()
+    # The below line is much faster than using obspy.signal.envelope()
+    # See https://github.com/scipy/scipy/issues/6324#issuecomment-425752155
+    tr.data = np.abs(hilbert(tr.data, N=next_fast_len(npts))[:npts])
+for tr, ax in zip(stfe, (ax1, ax2)):
+    ax.plot(tr.times('matplotlib'), tr.data, color='red')
+fig.show()
+
+# The coeff!
+cas = stfe[0].data.max() / stfe[1].data.max()  # [(m/s) / Pa]
+print(f'C_AS = {cas:.10f} m s^-1 Pa^-1 @ {np.mean([fmin, fmax]):g} Hz')
+
+ax2.plot(stf[0].times('matplotlib'), stf[0].data / cas, color='red', lw=0.5)
+fig.show()
