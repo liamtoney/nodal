@@ -2,7 +2,6 @@ import os
 import subprocess
 from pathlib import Path
 
-import colorcet as cc
 import datashader as ds
 import matplotlib.pyplot as plt
 import numpy as np
@@ -135,7 +134,6 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
         add_colorbar=False,
         vmin=np.nanmedian(qm),
         vmax=np.nanpercentile(qm, 99),
-        # cmap=cc.m_fire_r,
     )
     ax.text(
         0.97,
@@ -151,7 +149,7 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
         ax.text(
             0.5,
             0.5,
-            f'[{da.distance.min():.1f} km]',
+            f'[{da.distance.min():.1f} km]',  # Just show the min shot–node distance
             ha='center',
             va='center',
             transform=ax.transAxes,
@@ -182,4 +180,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.new.png', dpi=300, bbox_inches='tight')
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.png', dpi=300, bbox_inches='tight')
