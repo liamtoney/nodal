@@ -153,6 +153,7 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
             ha='center',
             va='center',
             transform=ax.transAxes,
+            color='gray',
         )
 
 # Set limits
