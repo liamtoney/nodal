@@ -9,7 +9,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 # CHANGE ME!
-run = '10_shot_y5_wf_export_fixed'
+run = '11_shot_y5_hf'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 
