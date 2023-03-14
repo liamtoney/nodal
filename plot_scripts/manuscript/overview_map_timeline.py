@@ -71,6 +71,7 @@ fig, (ax1, ax2) = plt.subplots(
 df_mean = temp_df.groupby('Date_Time').mean(numeric_only=True)
 # Below calc from https://en.wikipedia.org/wiki/Speed_of_sound#Practical_formula_for_dry_air
 c = 20.05 * np.sqrt(df_mean.air_temp_set_1 + 273.15)  # [m/s]
+LINE_KWARGS = dict(lw=1, solid_capstyle='round')
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     mask = (df_mean.index >= time_range[0]) & (df_mean.index <= time_range[1])
     clip_slice = slice(None, 2)
@@ -82,15 +83,15 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][reg_slice],
         c[mask][reg_slice],
         color='black',
-        solid_capstyle='round',
         clip_on=False,
+        **LINE_KWARGS,
     )
     ax.plot(
         [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][clip_slice],
         c[mask][clip_slice],
         color=line[0].get_color(),
-        solid_capstyle='round',
         clip_on=True,
+        **LINE_KWARGS,
     )
     ax.set_ylim(334, 348)
 ax1.set_ylabel('Estimated dry air\nsound speed (m/s)')
@@ -166,15 +167,15 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][reg_slice],
             station_df.air_temp_set_1[reg_slice],
             label=station,
-            solid_capstyle='round',
             clip_on=False,
+            **LINE_KWARGS,
         )
         ax_twin.plot(
             [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][clip_slice],
             station_df.air_temp_set_1[clip_slice],
             color=line[0].get_color(),
-            solid_capstyle='round',
             clip_on=True,
+            **LINE_KWARGS,
         )
     ax_twin.spines['top'].set_visible(False)
     ax_twin.spines['left'].set_visible(False)
