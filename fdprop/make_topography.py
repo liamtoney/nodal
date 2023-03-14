@@ -11,7 +11,7 @@ from utils import NODAL_WORKING_DIR, get_shots, get_stations
 M_PER_KM = 1000  # [m/km]
 
 # KEY: Select which transect we are running! Currently only shot Y5 and X5 supported
-TRANSECT = 'Y5'
+TRANSECT = 'X5'
 
 # Use shot location as start of profile
 if TRANSECT == 'Y5':
