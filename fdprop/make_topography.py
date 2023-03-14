@@ -26,7 +26,7 @@ profile_start = (shot.lat, shot.lon)
 if TRANSECT == 'Y5':
     profile_end = (46.224, -122.031)
 elif TRANSECT == 'X5':
-    profile_end = (np.nan, np.nan)  # Placeholder for now
+    profile_end = (46.138, -122.297)
 else:
     raise ValueError()
 
