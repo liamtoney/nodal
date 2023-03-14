@@ -145,7 +145,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         )
 
 # Plot temp data
-alpha = 0.3
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     ax_twin = ax.twinx()
     ax.set_zorder(1)
@@ -160,7 +159,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time],
             station_df.air_temp_set_1,
             label=station,
-            alpha=alpha,
             solid_capstyle='round',
             clip_on=False,
         )
@@ -168,13 +166,8 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     ax_twin.spines['left'].set_visible(False)
     ax_twin.set_ylim(5, 30)  # HARD-CODED based on data range
     if ax == ax2:
-        ax_twin.set_ylabel('Temperature (°C)', alpha=alpha)
-        for l in ax_twin.get_yticklines():
-            l.set_alpha(alpha)
-        for t in ax_twin.get_yticklabels():
-            t.set_alpha(alpha)
+        ax_twin.set_ylabel('Temperature (°C)')
         ax_twin.yaxis.set_minor_locator(plt.MultipleLocator(5))
-        ax_twin.spines['right'].set_alpha(alpha)
     else:
         ax_twin.spines['right'].set_visible(False)
         ax_twin.tick_params(right=False, labelright=False)
@@ -182,8 +175,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
 # leg = ax_twin.legend(
 #     ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False
 # )
-# for text in leg.texts:
-#     text.set_alpha(alpha)
 
 # Cleanup
 for ax in ax1, ax2:
@@ -227,6 +218,7 @@ fig.subplots_adjust(wspace=0.2)
 # Now combine (b) into the GMT figure containing (a)
 # --------------------------------------------------------------------------------------
 
+# Note: EPS does not support transparency!
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name, bbox_inches='tight')
     fig_gmt.image(
