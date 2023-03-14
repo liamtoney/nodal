@@ -195,8 +195,8 @@ ax2.set_xticklabels(
 )
 
 # Plot little diagonal lines to show broken axis
-dx = 0.03
-dy = 0.3
+dx = 0.05
+dy = 0.7
 for ax in ax1, ax2:
     if ax == ax1:
         x0 = ax.get_xlim()[1]
