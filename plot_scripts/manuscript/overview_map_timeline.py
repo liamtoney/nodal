@@ -1,10 +1,26 @@
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from obspy import UTCDateTime
 from pygmt.datasets import load_earth_relief
 
-from utils import INNER_RING_REGION, get_stations, station_map
+from utils import (
+    INNER_RING_REGION,
+    NODAL_WORKING_DIR,
+    get_shots,
+    get_stations,
+    station_map,
+)
+
+# --------------------------------------------------------------------------------------
+# (a) Overview map
+# --------------------------------------------------------------------------------------
 
 # Read in station info for plotting
 net = get_stations()[0]
@@ -15,7 +31,7 @@ dem = load_earth_relief(
 )
 
 # Plot
-fig = station_map(
+fig_gmt = station_map(
     [sta.longitude for sta in net],
     [sta.latitude for sta in net],
     [
@@ -27,19 +43,9 @@ fig = station_map(
     plot_inset=True,
 )
 
-_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
-
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map.png', dpi=600)
-
-#%% Plot shot times and temps
-
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from obspy import UTCDateTime
-
-from utils import NODAL_WORKING_DIR, get_shots
+# --------------------------------------------------------------------------------------
+# (b) Shot times and temperature time series from weather stations
+# --------------------------------------------------------------------------------------
 
 # Read in CSV files containing temp data (this code is format-specific!)
 temp_df = pd.DataFrame()
@@ -220,6 +226,24 @@ for ax in ax1, ax2:
 
 fig.tight_layout()
 fig.subplots_adjust(wspace=0.2)
-fig.show()
 
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'shot_times_temps.png', dpi=300, bbox_inches='tight')
+# --------------------------------------------------------------------------------------
+# Now combine (b) into the GMT figure containing (a)
+# --------------------------------------------------------------------------------------
+
+with tempfile.NamedTemporaryFile(suffix='.eps') as f:
+    fig.savefig(f.name, bbox_inches='tight')
+    fig_gmt.image(f.name, position='JBC+w4.5i+o0/1.3i')
+plt.close(fig)
+
+# Plot (a) and (b) tags
+tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='18p,Helvetica-Bold')
+x_offset = -0.2  # [in]
+fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
+fig_gmt.text(text='(b)', offset=f'{x_offset}i/-5.5i', **tag_kwargs)
+
+fig_gmt.show(method='external')
+
+_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
+
+# fig_gmt.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map_timeline.png', dpi=600)
