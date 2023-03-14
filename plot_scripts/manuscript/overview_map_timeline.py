@@ -236,11 +236,12 @@ fig.subplots_adjust(wspace=0.2)
 # --------------------------------------------------------------------------------------
 
 # Note: EPS does not support transparency!
+Y_OFF = 1.2  # [in] For (b), from bottom edge of (a) axes (positive down)
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name, bbox_inches='tight')
     fig_gmt.image(
         f.name,
-        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.11i/1.3i',  # "Tools -> Show Inspector" CLUTCH here!
+        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.11i/{Y_OFF}i',  # "Tools -> Show Inspector" CLUTCH here!
     )
 plt.close(fig)
 
@@ -248,7 +249,7 @@ plt.close(fig)
 tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='18p,Helvetica-Bold')
 x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
-fig_gmt.text(text='(b)', offset=f'{x_offset}i/-5i', **tag_kwargs)
+fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-3.97 - Y_OFF}i', **tag_kwargs)
 
 fig_gmt.show(method='external')
 
