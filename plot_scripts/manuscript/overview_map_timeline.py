@@ -59,11 +59,12 @@ AX1_TIME_RANGE = UTCDateTime('2014-07-24'), UTCDateTime('2014-07-26')
 AX2_TIME_RANGE = UTCDateTime('2014-08-01'), UTCDateTime('2014-08-02')
 
 # Make plot
+MPL_PLOT_WIDTH = 5.33  # [in]
 fig, (ax1, ax2) = plt.subplots(
     ncols=2,
     sharey=True,
     gridspec_kw=dict(width_ratios=(np.diff(AX1_TIME_RANGE), np.diff(AX2_TIME_RANGE))),
-    figsize=(10, 3.5),
+    figsize=(MPL_PLOT_WIDTH, 2),
 )
 
 # Plot estimated speed of sound (relies on evenly sampled temps from above to get mean)
@@ -177,12 +178,12 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     else:
         ax_twin.spines['right'].set_visible(False)
         ax_twin.tick_params(right=False, labelright=False)
-leg_x = 0.17
-leg = ax_twin.legend(
-    ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False
-)
-for text in leg.texts:
-    text.set_alpha(alpha)
+# leg_x = 0.17
+# leg = ax_twin.legend(
+#     ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False
+# )
+# for text in leg.texts:
+#     text.set_alpha(alpha)
 
 # Cleanup
 for ax in ax1, ax2:
@@ -198,14 +199,17 @@ ax2.spines['left'].set_visible(False)
 ax2.tick_params(left=False)
 ax1.set_xlim([t.matplotlib_date for t in AX1_TIME_RANGE])
 ax2.set_xlim([t.matplotlib_date for t in AX2_TIME_RANGE])
+ax2.set_xticklabels(
+    [tl._text.replace('August', 'Aug.') for tl in ax2.get_xticklabels()]
+)
 
 # Hacky legend (ensuring proper order, and that sizes reflect the 1000-lbs shots)
-h, l = ax2.get_legend_handles_labels()
-leg = ax2.legend(
-    h[::-1], l[::-1], loc='lower right', bbox_to_anchor=(leg_x, 0.05), frameon=False
-)
-for handle in leg.legendHandles:
-    handle.set_sizes([size_1000_lb])
+# h, l = ax2.get_legend_handles_labels()
+# leg = ax2.legend(
+#     h[::-1], l[::-1], loc='lower right', bbox_to_anchor=(leg_x, 0.05), frameon=False
+# )
+# for handle in leg.legendHandles:
+#     handle.set_sizes([size_1000_lb])
 
 # Plot little diagonal lines to show broken axis
 dx = 0.03
@@ -233,14 +237,17 @@ fig.subplots_adjust(wspace=0.2)
 
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name, bbox_inches='tight')
-    fig_gmt.image(f.name, position='JBC+w4.5i+o0/1.3i')
+    fig_gmt.image(
+        f.name,
+        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.11i/1.3i',  # "Tools -> Show Inspector" CLUTCH here!
+    )
 plt.close(fig)
 
 # Plot (a) and (b) tags
 tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='18p,Helvetica-Bold')
 x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
-fig_gmt.text(text='(b)', offset=f'{x_offset}i/-5.5i', **tag_kwargs)
+fig_gmt.text(text='(b)', offset=f'{x_offset}i/-5i', **tag_kwargs)
 
 fig_gmt.show(method='external')
 
