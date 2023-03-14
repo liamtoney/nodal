@@ -10,12 +10,25 @@ from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 M_PER_KM = 1000  # [m/km]
 
+# KEY: Select which transect we are running! Currently only shot Y5 and X5 supported
+TRANSECT = 'Y5'
+
 # Use shot location as start of profile
-shot = get_shots().loc['Y5']
+if TRANSECT == 'Y5':
+    shot = get_shots().loc['Y5']
+elif TRANSECT == 'X5':
+    shot = get_shots().loc['X5']
+else:
+    raise ValueError()
 
 # (latitude, longitude) coordinates of profile endpoints
 profile_start = (shot.lat, shot.lon)
-profile_end = (46.224, -122.031)
+if TRANSECT == 'Y5':
+    profile_end = (46.224, -122.031)
+elif TRANSECT == 'X5':
+    profile_end = (np.nan, np.nan)  # Placeholder for now
+else:
+    raise ValueError()
 
 # Find (latitude, longitude) of extended line (this is to pad the domain!)
 EXTEND = 500  # [m]
@@ -166,7 +179,13 @@ sta_info = dict(
         ],
     )
 )
-with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json', 'w') as f:
+if TRANSECT == 'Y5':
+    json_filename = 'imush_y5_transect_stations.json'
+elif TRANSECT == 'X5':
+    json_filename = 'imush_x5_transect_stations.json'
+else:
+    raise ValueError()
+with open(NODAL_WORKING_DIR / 'metadata' / json_filename, 'w') as f:
     json.dump(sta_info, f, indent='\t')
 
 # Print info about the profile
@@ -178,6 +197,12 @@ print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
 x = profile.distance.values
 z = (profile - profile.min()).values
 
-dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
+if TRANSECT == 'Y5':
+    dat_filename = 'imush_y5.dat'
+elif TRANSECT == 'X5':
+    dat_filename = 'imush_x5.dat'
+else:
+    raise ValueError()
+dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / dat_filename
 np.savetxt(dat_file, np.transpose([x, z]), fmt='%.2f')
 print(f'Wrote {dat_file}')
