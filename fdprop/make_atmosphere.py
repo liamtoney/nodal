@@ -8,9 +8,12 @@ from utils import ERA5_PRESSURE_LEVELS, FULL_REGION, NODAL_WORKING_DIR, get_shot
 
 M_PER_KM = 1000  # [m/km]
 
+# KEY: Select which shot to grab the atmospheric profile for!
+SHOT = 'Y5'
+
 # Get shot info
 df = get_shots()
-shot = df.loc['Y5']
+shot = df.loc[SHOT]
 time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
 
 region = FULL_REGION
@@ -59,6 +62,6 @@ v = ds_shot.v.values  # [m/s]
 d = density / 1000  # [g/cm^3] Converting density units here!
 p = ds_shot.level  # [mbar]
 
-met_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_test.met'
+met_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}.met'
 np.savetxt(met_file, np.transpose([z, t, u, v, d, p]), fmt='%.5g')
 print(f'Wrote {met_file}')
