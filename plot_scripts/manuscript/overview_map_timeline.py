@@ -64,7 +64,7 @@ fig, (ax1, ax2) = plt.subplots(
     ncols=2,
     sharey=True,
     gridspec_kw=dict(width_ratios=(np.diff(AX1_TIME_RANGE), np.diff(AX2_TIME_RANGE))),
-    figsize=(MPL_PLOT_WIDTH, 2),
+    figsize=(MPL_PLOT_WIDTH, 3),
 )
 
 # Plot estimated speed of sound (relies on evenly sampled temps from above to get mean)
@@ -96,7 +96,7 @@ ax1.set_ylabel('Estimated dry air\nsound speed (m/s)')
 # Plot shot times
 df = get_shots()
 df_sort = df.sort_values(by='time')
-df_sort['yloc'] = np.array([351, 349, 347, 345] * 6)[:-1]  # Manual stagger
+df_sort['yloc'] = np.array([357, 353, 349, 345] * 6)[:-1]  # Manual stagger
 for _, row in df_sort.iterrows():
     for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         if (row.time >= time_range[0]) & (row.time <= time_range[1]):
@@ -109,7 +109,7 @@ for _, row in df_sort.iterrows():
                 lw=0.5,
                 zorder=-5,
             )  # Connecting lines
-size_1000_lb = 130  # Marker size for the smaller, 1000-lb shots
+size_1000_lb = 100  # Marker size for the smaller, 1000-lb shots
 kwargs = dict(edgecolor='black', lw=0.5, marker='s', clip_on=False)
 scale = size_1000_lb / 1000  # [1/lb] Scale shot weights to marker sizes
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
