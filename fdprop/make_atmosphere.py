@@ -9,7 +9,7 @@ from utils import ERA5_PRESSURE_LEVELS, FULL_REGION, NODAL_WORKING_DIR, get_shot
 M_PER_KM = 1000  # [m/km]
 
 # KEY: Select which shot to grab the atmospheric profile for!
-SHOT = 'Y5'
+SHOT = 'X5'
 
 # Get shot info
 df = get_shots()
