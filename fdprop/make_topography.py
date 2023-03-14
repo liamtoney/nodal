@@ -63,22 +63,26 @@ sta_y = np.array(sta_y)
 sta_elev = np.array(sta_elev)
 sta_code = np.array(sta_code)
 
+# Compute closest distance to profile and distance along profile for each station [m]
+# (see http://jpfoss.blogspot.com/2012/04/distance-between-point-and-line.html)
+
 # Find m and b in y = mx + b for profile
 m = (profile.y[-1] - profile.y[0]) / (profile.x[-1] - profile.x[0])
 b = profile.y[0] - m * profile.x[0]
 
-# Compute closest distance to profile and distance along profile for each station [m]
+# Iterate through each station, finding distances
 out_of_plane_dists = []
 along_profile_dists = []
-for x, y in zip(sta_x, sta_y):
-    u2, v2 = x, (m * x) + b
-    u3, v3 = (y - b) / m, y
-    theta = np.arctan((v3 - v2) / (u2 - u3))
-    d = np.sin(theta) * (u2 - u3)
-    delta = np.sin(theta) * (v3 - v2)
-    dd = np.linalg.norm(np.array([u2, v2]) - np.array([profile.x[0], profile.y[0]]))
-    out_of_plane_dists.append(d)
-    along_profile_dists.append(dd - delta)
+for p, q in zip(sta_x, sta_y):
+    # Find intersection point (x, y)
+    x, y = (p + q * m - b * m) / (m**2 + 1), (b + m * (p + q * m)) / (m**2 + 1)
+    # Use distance formula to find distance, h, between (p, q) and intersection point (x, y)
+    h = np.sqrt((b + m * p - q) ** 2 / (m**2 + 1))  # Unsigned distance!
+    # Find distance from start of profile to intersection point (x, y)
+    d = np.linalg.norm(np.array([x, y]) - np.array([profile.x[0], profile.y[0]]))
+    # Append these measurements
+    out_of_plane_dists.append(h)
+    along_profile_dists.append(d)
 out_of_plane_dists = np.array(out_of_plane_dists)
 along_profile_dists = np.array(along_profile_dists)
 
@@ -87,15 +91,13 @@ along_profile_dists = np.array(along_profile_dists)
 MASK_DIST = 500
 
 if not MASK_DIST:
-    MASK_DIST = np.abs(out_of_plane_dists).max()
-outside = np.abs(out_of_plane_dists) > MASK_DIST
+    MASK_DIST = out_of_plane_dists.max()
+outside = out_of_plane_dists > MASK_DIST
 
 # Plot map view
 fig, ax = plt.subplots(figsize=(8, 7))
 dem.plot.imshow(ax=ax, cmap=cc.m_gray)
-ax.plot(
-    [profile.x[0], profile.x[-1]], [profile.y[0], profile.y[-1]], color='tab:orange'
-)
+ax.plot([profile.x[0], profile.x[-1]], [profile.y[0], profile.y[-1]], color='tab:blue')
 # Plot shot location
 ax.scatter(*proj.transform(shot.lat, shot.lon), marker='*', color='black', zorder=10)
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
@@ -106,9 +108,9 @@ sm = ax.scatter(
     c=out_of_plane_dists[~outside],
     edgecolor='black',
     linewidths=0.5,
-    vmin=-MASK_DIST,
+    vmin=0,
     vmax=MASK_DIST,
-    cmap=cc.m_CET_D13,
+    cmap=cc.m_fire_r,
     zorder=10,
 )
 ax.scatter(
@@ -124,14 +126,13 @@ ax.ticklabel_format(style='plain')
 ax.set_xlim(xlim)
 ax.set_ylim(ylim)
 ax.set_aspect('equal')
-cbar = fig.colorbar(sm, label='Distance from profile (m)', orientation='horizontal')
-cbar.ax.set_xticklabels([f'{x:g}' for x in np.abs(cbar.ax.get_xticks())])
+fig.colorbar(sm, label='Distance from profile (m)', orientation='horizontal')
 fig.tight_layout()
 fig.show()
 
 # Plot profile view
 fig, ax = plt.subplots(figsize=(20, 2.5))
-profile.plot(x='distance', ax=ax, color='tab:orange')
+profile.plot(x='distance', ax=ax, color='tab:blue')
 # Plot shot location
 ax.scatter(
     EXTEND,
@@ -147,9 +148,9 @@ sm = ax.scatter(
     c=out_of_plane_dists[~outside],
     edgecolor='black',
     linewidths=0.5,
-    vmin=-MASK_DIST,
+    vmin=0,
     vmax=MASK_DIST,
-    cmap=cc.m_CET_D13,
+    cmap=cc.m_fire_r,
     zorder=10,
 )
 ax.scatter(
@@ -162,8 +163,7 @@ ax.scatter(
     alpha=0.3,
 )
 ax.set_aspect('equal')
-cbar = fig.colorbar(sm, label='Distance from profile (m)')
-cbar.ax.set_yticklabels([f'{y:g}' for y in np.abs(cbar.ax.get_yticks())])
+fig.colorbar(sm, label='Distance from profile (m)')
 fig.tight_layout()
 fig.show()
 
@@ -174,7 +174,7 @@ sta_info = dict(
         [
             [apd, oopd]
             for apd, oopd in zip(
-                along_profile_dists[~outside], np.abs(out_of_plane_dists[~outside])
+                along_profile_dists[~outside], out_of_plane_dists[~outside]
             )
         ],
     )
