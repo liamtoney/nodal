@@ -173,7 +173,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             l.set_alpha(alpha)
         for t in ax_twin.get_yticklabels():
             t.set_alpha(alpha)
-        ax_twin.yaxis.set_major_locator(plt.MultipleLocator(5))
+        ax_twin.yaxis.set_minor_locator(plt.MultipleLocator(5))
         ax_twin.spines['right'].set_alpha(alpha)
     else:
         ax_twin.spines['right'].set_visible(False)
