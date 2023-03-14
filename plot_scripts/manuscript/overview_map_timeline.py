@@ -201,12 +201,14 @@ for ax in ax1, ax2:
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_minor_locator(mdates.HourLocator(range(0, 24, 3)))
 ax2.spines['left'].set_visible(False)
-ax2.tick_params(left=False)
+ax2.tick_params(which='both', left=False)
 ax1.set_xlim([t.matplotlib_date for t in AX1_TIME_RANGE])
 ax2.set_xlim([t.matplotlib_date for t in AX2_TIME_RANGE])
 ax2.set_xticklabels(
     [tl._text.replace('August', 'Aug.') for tl in ax2.get_xticklabels()]
 )
+ax1.yaxis.set_minor_locator(plt.MultipleLocator(2))
+ax1.yaxis.set_major_locator(plt.MultipleLocator(4))
 
 # Plot little diagonal lines to show broken axis
 dx = 0.05
