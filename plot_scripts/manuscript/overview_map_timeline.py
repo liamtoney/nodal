@@ -203,14 +203,6 @@ ax2.set_xticklabels(
     [tl._text.replace('August', 'Aug.') for tl in ax2.get_xticklabels()]
 )
 
-# Hacky legend (ensuring proper order, and that sizes reflect the 1000-lbs shots)
-# h, l = ax2.get_legend_handles_labels()
-# leg = ax2.legend(
-#     h[::-1], l[::-1], loc='lower right', bbox_to_anchor=(leg_x, 0.05), frameon=False
-# )
-# for handle in leg.legendHandles:
-#     handle.set_sizes([size_1000_lb])
-
 # Plot little diagonal lines to show broken axis
 dx = 0.03
 dy = 0.3
