@@ -73,22 +73,24 @@ df_mean = temp_df.groupby('Date_Time').mean(numeric_only=True)
 c = 20.05 * np.sqrt(df_mean.air_temp_set_1 + 273.15)  # [m/s]
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     mask = (df_mean.index >= time_range[0]) & (df_mean.index <= time_range[1])
-    reg_slice = slice(None, 2)
-    round_slice = slice(1, None)
+    clip_slice = slice(None, 2)
+    reg_slice = slice(1, None)
     if ax == ax2:
-        reg_slice = slice(None, 0)
-        round_slice = slice(None, None)
-    ax.plot(
+        clip_slice = slice(-2, None)
+        reg_slice = slice(None, -1)
+    line = ax.plot(
         [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][reg_slice],
         c[mask][reg_slice],
         color='black',
+        solid_capstyle='round',
+        clip_on=False,
     )
     ax.plot(
-        [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][round_slice],
-        c[mask][round_slice],
-        color='black',
-        clip_on=False,
+        [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][clip_slice],
+        c[mask][clip_slice],
+        color=line[0].get_color(),
         solid_capstyle='round',
+        clip_on=True,
     )
     ax.set_ylim(334, 348)
 ax1.set_ylabel('Estimated dry air\nsound speed (m/s)')
@@ -149,18 +151,30 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     ax_twin = ax.twinx()
     ax.set_zorder(1)
     ax.patch.set_alpha(0)
+    clip_slice = slice(None, 2)
+    reg_slice = slice(1, None)
+    if ax == ax2:
+        clip_slice = slice(-2, None)
+        reg_slice = slice(None, -1)
     for station in sorted(temp_df.Station_ID.unique()):
         station_df = temp_df[temp_df.Station_ID == station]
         station_df = station_df[
             (station_df.Date_Time >= time_range[0])
             & (station_df.Date_Time <= time_range[1])
         ]
-        ax_twin.plot(
-            [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time],
-            station_df.air_temp_set_1,
+        line = ax_twin.plot(
+            [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][reg_slice],
+            station_df.air_temp_set_1[reg_slice],
             label=station,
             solid_capstyle='round',
             clip_on=False,
+        )
+        ax_twin.plot(
+            [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][clip_slice],
+            station_df.air_temp_set_1[clip_slice],
+            color=line[0].get_color(),
+            solid_capstyle='round',
+            clip_on=True,
         )
     ax_twin.spines['top'].set_visible(False)
     ax_twin.spines['left'].set_visible(False)
