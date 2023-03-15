@@ -59,7 +59,7 @@ for tr in st:
 #%% Plot
 
 # Plotting config params
-SKIP = 150  # Plot every SKIP stations
+SKIP = 75  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
