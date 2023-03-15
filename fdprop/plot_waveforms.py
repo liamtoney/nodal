@@ -21,7 +21,8 @@ for file in dir0.glob('process*_waveforms_pressure.txt'):
     # Read in params from file
     dt, t0 = np.loadtxt(file, max_rows=2, usecols=2)  # [s]
     x_locs = np.loadtxt(file, skiprows=2, max_rows=1) / M_PER_KM  # [km]
-    traces = np.loadtxt(file, skiprows=3).T  # [Pa] Each row is a waveform!
+    # Row 4 is elevation, which we skip
+    traces = np.loadtxt(file, skiprows=4).T  # [Pa] Each row is a waveform!
     interval = dt * WAVEFORM_SNAPSHOT_INTERVAL  # [s] True sampling interval of data
     # Add to Stream
     for trace, x in zip(traces, x_locs):
