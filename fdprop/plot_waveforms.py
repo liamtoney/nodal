@@ -57,11 +57,9 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 for tr in st:
     tr.data *= 1e6  # Convert to μm/s
 
-#%% Plot a simple record section for synthetic waveforms
+#%% Plot simple record sections / images for synthetic waveforms
 
-MAX_RANGE = 10  # [km] How far out to go for record section
-SKIP = 50  # Plot every SKIP stations
-SCALE = 1  # Divide each waveform by this SCALE to make it fit nicely
+MAX_RANGE = 10  # [km] How far out to go for record section / image
 
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])
 source_ind = np.where(d == 0)[0][0]
@@ -70,9 +68,35 @@ end_ind = np.where(d == MAX_RANGE)[0][0]
 d_plot = d[source_ind : end_ind + 1]
 st_syn_plot = st_syn[source_ind : end_ind + 1]
 
+# Waveform plot
+SKIP = 50  # Plot every SKIP stations
+SCALE = 1  # Divide each waveform by this SCALE to make it fit nicely
 fig, ax = plt.subplots(figsize=(12, 9))
 for tr, d in zip(st_syn_plot[::SKIP], d_plot[::SKIP]):
     ax.plot(tr.times(), (tr.data / SCALE) + d)
+ax.set_xlim(0, 35)
+ax.set_ylim(-0.5, MAX_RANGE)
+ax.set_xlabel('Time (s)')
+ax.set_ylabel('Distance (km)')
+fig.tight_layout()
+fig.show()
+
+# Image plot
+fig, ax = plt.subplots(figsize=(12, 9))
+ax.imshow(
+    np.flipud(np.array([tr.data / tr.data.max() for tr in st_syn_plot])),
+    extent=(
+        st_syn_plot[0].times()[0],
+        st_syn_plot[0].times()[-1],
+        d_plot[0],
+        d_plot[-1],
+    ),
+    aspect='auto',
+    cmap='seismic',
+    vmin=-1,
+    vmax=1,
+    interpolation='none',
+)
 ax.set_xlim(0, 35)
 ax.set_ylim(-0.5, MAX_RANGE)
 ax.set_xlabel('Time (s)')
