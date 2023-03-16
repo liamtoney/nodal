@@ -109,9 +109,9 @@ fig.show()
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
 peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
 
-d_ref = 1  # [km] Reference distance
+d_ref = 4 / M_PER_KM  # [km] Reference distance
 
-tl = 20 * np.log10(peak_amp / peak_amp[d == d_ref])
+tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])
 cyl_tl = 20 * np.log10(1 / np.sqrt(d))
 sph_tl = 20 * np.log10(1 / d)
 
@@ -120,9 +120,9 @@ ax.plot(d, tl)
 ax.plot(d, cyl_tl, color='gray', linestyle='--', label='Cylindrical')
 ax.plot(d, sph_tl, color='gray', linestyle=':', label='Spherical')
 ax.set_xlabel('Distance from shot (km)')
-ax.set_ylabel(f'Ground transmission loss\n(dB rel. {d_ref} km)')
+ax.set_ylabel(f'Ground transmission loss\n(dB rel. {d_ref * M_PER_KM:g} m)')
 ax.set_xlim(0, 25)
-ax.set_ylim(-40, 50)
+ax.set_ylim(-90, 50)
 ax.xaxis.set_minor_locator(plt.MultipleLocator(1))
 ax.legend(title=r'${\bf Geometric\ spreading}$')
 fig.tight_layout()
