@@ -34,6 +34,8 @@ for file in dir0.glob('process*_waveforms_pressure.txt'):
         st_syn += tr
 st_syn.sort(keys=['x'])  # Sort by increasing x distance
 st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
+FREQ = 5  # [Hz]
+st_syn.filter('lowpass', freq=FREQ)
 
 # READ IN "REAL" DATA
 with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
