@@ -112,8 +112,8 @@ peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
 d_ref = 4 / M_PER_KM  # [km] Reference distance
 
 tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])
-cyl_tl = 20 * np.log10(1 / np.sqrt(d))
-sph_tl = 20 * np.log10(1 / d)
+cyl_tl = 20 * np.log10(np.sqrt(d_ref / d))
+sph_tl = 20 * np.log10(d_ref / d)
 
 fig, ax = plt.subplots(figsize=(9, 3))
 ax.plot(d, tl)
