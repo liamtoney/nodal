@@ -117,14 +117,33 @@ sph_tl = 20 * np.log10(d_ref / d)
 
 fig, ax = plt.subplots(figsize=(9, 3))
 ax.plot(d, tl)
-ax.plot(d, cyl_tl, color='gray', linestyle='--', label='Cylindrical')
-ax.plot(d, sph_tl, color='gray', linestyle=':', label='Spherical')
+ax.plot(
+    d,
+    cyl_tl,
+    color='gray',
+    linestyle='--',
+    zorder=-2,
+    label='Cylindrical',
+    dash_capstyle='round',
+)
+ax.plot(
+    d,
+    sph_tl,
+    color='gray',
+    linestyle=':',
+    zorder=-1,
+    dash_capstyle='round',
+    label='Spherical',
+)
 ax.set_xlabel('Distance from shot (km)')
 ax.set_ylabel(f'Ground transmission loss\n(dB rel. {d_ref * M_PER_KM:g} m)')
 ax.set_xlim(0, 25)
-ax.set_ylim(-90, 50)
+ax.set_ylim(-85, 0)
 ax.xaxis.set_minor_locator(plt.MultipleLocator(1))
-ax.legend(title=r'${\bf Geometric\ spreading}$')
+ax.yaxis.set_minor_locator(plt.MultipleLocator(5))
+for side in 'top', 'right':
+    ax.spines[side].set_visible(False)
+ax.legend(title=r'${\bf Geometric\ spreading}$', alignment='left', frameon=False)
 fig.tight_layout()
 fig.show()
 
