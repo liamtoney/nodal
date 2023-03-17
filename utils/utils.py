@@ -96,9 +96,14 @@ def get_stations():
     return inv
 
 
-def get_waveforms_shot(shot):
+def get_waveforms_shot(shot, processed=False):
     """Return ObsPy Stream containing waveforms for a given shot."""
-    st = read(str(NODAL_WORKING_DIR / 'data' / 'mseed' / f'{shot}.mseed'))
+    mseed_dir = NODAL_WORKING_DIR / 'data' / 'mseed'
+    if processed:
+        path = str(mseed_dir / 'processed' / f'{shot}_processed.mseed')
+    else:
+        path = str(mseed_dir / f'{shot}.mseed')
+    st = read(path)
     return st
 
 
