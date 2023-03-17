@@ -14,7 +14,7 @@ fig, axs = plt.subplots(
 for unique_response, count, ax_col in zip(vc.index, vc.values, axs.T):
     unique_response.plot(min_freq=0.1, axes=list(ax_col), plot_degrees=True)
     ref_val = unique_response.instrument_sensitivity.value
-    atten = -12  # [dB]
+    atten = -3  # [dB]
     atten_val = (10 ** (atten / 20)) * ref_val  # https://en.wikipedia.org/wiki/Decibel
     ax_col[0].axhline(
         atten_val, zorder=-1, color='red', linestyle='--', label=f'${atten}$ dB'
