@@ -1,11 +1,18 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import LogLocator
+from obspy import UTCDateTime
 
-from utils import NODAL_WORKING_DIR, get_stations
+from utils import NODAL_WORKING_DIR, get_stations, get_waveforms_shot
+
+# Get station info and some data from Y5
+inv = get_stations()
+st = get_waveforms_shot('Y5')
+
+#%% Plot unique responses
 
 # Get unique responses
-vc = pd.value_counts([sta[0].response for sta in get_stations()[0]])
+vc = pd.value_counts([sta[0].response for sta in inv[0]])
 
 # Plot
 fig, axs = plt.subplots(
@@ -35,3 +42,21 @@ fig.tight_layout()
 fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / 'node_response.png', dpi=300, bbox_inches='tight')
+
+#%% Response removal testing
+
+# Pick a nice waveform to test on — this is a RAW seismogram!
+tr_orig = st.select(station='4106')[0]
+
+# Trim to GCA arrival
+tr = tr_orig.copy().trim(
+    UTCDateTime(2014, 8, 1, 10, 30, 36), UTCDateTime(2014, 8, 1, 10, 30, 44)
+)
+
+# Plot response removal
+tr.remove_response(pre_filt=(0.5, 1, 50, 100), water_level=44, inventory=inv, plot=True)
+
+# Plot bandpass-filtered trace
+trf = tr.copy().filter('bandpass', freqmin=1, freqmax=50, zerophase=True)
+trf.plot(fig=plt.figure(), method='full')
+plt.show()
