@@ -106,16 +106,6 @@ if SHOT == 'Y4':
         color='black' if RAW else 'white',
         fontname=['JetBrains Mono', 'monospace'],
     )
-
-# For AGU poster (shots X5 and Y5)
-# ax.set_xlim(-10, 90)
-# ax.set_ylim(5, 26)
-# fig.savefig(
-#     f'/Users/ldtoney/work/meetings/agu_22/poster/graphics/figures/{SHOT}_section.png',
-#     dpi=300,
-#     bbox_inches='tight',
-# )
-
 fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / subdir / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
