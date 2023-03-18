@@ -18,7 +18,7 @@ df = get_shots().sort_values(by='time')  # Shot info, sorted by time
 inv = get_stations()  # Station (node) info
 
 # Processing params (TODO: Presumably these must match the other measurement scripts?)
-FREQMIN = 1  # [Hz]
+FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
@@ -29,30 +29,15 @@ print('Processing shot gather data...')
 for shot in tqdm.tqdm(df.index):
 
     # Read in data
-    st = get_waveforms_shot(shot)
+    st = get_waveforms_shot(shot, processed=True)
 
     # Assign coordinates and distances
     for tr in st:
-        # Need the "try" statement here for the shot Y4 data from Brandon
-        try:
-            coords = inv.get_coordinates(tr.id)
-        except Exception:
-            # print(f'{tr.id} not found on IRIS. Removing.')
-            st.remove(tr)
-            continue
+        coords = inv.get_coordinates(tr.id)
         dist_m = gps2dist_azimuth(
             coords['latitude'], coords['longitude'], df.loc[shot].lat, df.loc[shot].lon
         )[0]
         tr.stats.dist_km = dist_m / M_PER_KM
-
-    # TODO: Figure out Y4 data scaling issue... see "acoustic waves on nodes?" email chain
-    if shot == 'Y4':
-        fudge_factor = 87921  # Chosen to make max amp of closest station match shot Y5
-        for tr in st:
-            tr.data *= fudge_factor
-
-    # Remove sensitivity (fast but NOT accurate!) to get m/s units
-    st.remove_sensitivity(inv)
 
     # Detrend, taper, filter
     st.detrend('demean')

@@ -40,13 +40,11 @@ st_syn.filter('lowpass', freq=FREQ)
 # READ IN "REAL" DATA
 with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
     sta_info = json.load(f)
-st = get_waveforms_shot('Y5')
-inv = get_stations()
-st.remove_sensitivity(inv)
+st = get_waveforms_shot('Y5', processed=True)
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
-FREQMIN = 1  # [Hz]
+FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 include = np.array([tr.stats.station in sta_info.keys() for tr in st])

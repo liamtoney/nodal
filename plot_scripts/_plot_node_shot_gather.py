@@ -9,7 +9,7 @@ from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to plot
 
-RAW = False  # If True, then produce a "raw" gather — we just remove the sensitivity
+RAW = False  # If True, then produce a "raw" gather — we just remove the response (and apply AA filter)
 
 # Read in shot info
 df = get_shots()
@@ -18,31 +18,16 @@ df = get_shots()
 inv = get_stations()
 
 # Read in data
-st = get_waveforms_shot(SHOT)
+st = get_waveforms_shot(SHOT, processed=True)
 
 # Assign coordinates and distances
 for tr in st:
-    # Need the "try" statement here for the shot Y4 data from Brandon
-    try:
-        coords = inv.get_coordinates(tr.id)
-    except Exception:
-        print(f'{tr.id} not found on IRIS. Removing.')
-        st.remove(tr)
-        continue
+    coords = inv.get_coordinates(tr.id)
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = gps2dist_azimuth(
         tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
-
-# TODO: Figure out Y4 data scaling issue... see "acoustic waves on nodes?" email chain
-if SHOT == 'Y4':
-    fudge_factor = 87921  # Chosen to make max amp of closest station match shot Y5
-    for tr in st:
-        tr.data *= fudge_factor
-
-# Remove sensitivity (fast but NOT accurate!) to get m/s units
-st.remove_sensitivity(inv)
 
 # If we're not making a raw gather, then process
 if not RAW:
@@ -50,7 +35,7 @@ if not RAW:
     # Detrend, taper, filter
     st.detrend('demean')
     st.taper(0.05)
-    FREQMIN = 1  # [Hz]
+    FREQMIN = 5  # [Hz]
     FREQMAX = 50  # [Hz]
     st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 
@@ -114,7 +99,7 @@ if SHOT == 'Y4':
     ax.text(
         0.99,
         0.985,
-        f'{fudge_factor = }',
+        'fudge_factor = 87921',  # TODO: From process_waveforms_shot.py
         transform=ax.transAxes,
         ha='right',
         va='top',

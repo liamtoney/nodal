@@ -35,7 +35,7 @@ dem = produce_dem(grid_dem, plot_output=True)
 #%% Get and process waveforms
 
 # Read in data
-st = get_waveforms_shot(y5.name)
+st = get_waveforms_shot(y5.name, processed=True)
 
 # Assign coordinates and distances
 for tr in st:
@@ -52,7 +52,7 @@ st.sort(keys=['distance'])
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
-FREQMIN = 1  # [Hz]
+FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 
@@ -60,9 +60,6 @@ st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
 STA = 0.2  # [s]
 LTA = 2  # [s]
 st.trigger('classicstalta', sta=STA, lta=LTA)
-
-# Decimate for speed
-st.interpolate(sampling_rate=50, method='lanczos', a=20)
 
 #%% Test waveform plot
 

@@ -48,16 +48,12 @@ _ = webbrowser.open(url)
 
 # Get stations, data, shots
 inv = get_stations()
-st = get_waveforms_shot(SHOT)
+st = get_waveforms_shot(SHOT, processed=True)
 shot = get_shots().loc[SHOT]
 
 # Assign coordinates and distance [km] to traces
 for tr in st:
-    try:
-        coords = inv.get_coordinates(tr.id)
-    except Exception:
-        print(f'Removing {tr.id}')
-        st.remove(tr)
+    coords = inv.get_coordinates(tr.id)
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = (
@@ -133,11 +129,7 @@ for tr, color_rgb in zip(st_region, colors_rgb):
     tr.stats.color = to_hex(color_rgb)
 
 # Process!
-if SHOT == 'Y4':
-    for tr in st_region:
-        fudge_factor = 87921  # TODO: See _plot_node_shot_gather.py
-        tr.data *= fudge_factor
-st_region.remove_sensitivity(inventory=inv)  # [m/s] Full response removal is trickier!
+st_region.filter('highpass', freq=5, zerophase=True)
 
 # Plot
 fig, axes = plt.subplots(

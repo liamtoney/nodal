@@ -7,7 +7,7 @@ from utils import NODAL_WORKING_DIR, get_stations, get_waveforms_shot
 
 # Get station info and some data from Y5
 inv = get_stations()
-st = get_waveforms_shot('Y5')
+st = get_waveforms_shot('Y5')  # Using RAW data here, not processed
 
 #%% Plot unique responses
 

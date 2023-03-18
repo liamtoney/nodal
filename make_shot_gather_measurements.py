@@ -31,7 +31,7 @@ assert SHOT in df.index, 'Argument must be a valid shot name!'
 # -------------------------------
 # MEASUREMENT PARAMETERS TO TWEAK
 # -------------------------------
-FREQMIN = 1  # [Hz]
+FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
@@ -41,30 +41,16 @@ WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculat
 
 # Read in station info and shot data
 inv = get_stations()
-st = get_waveforms_shot(SHOT)
+st = get_waveforms_shot(SHOT, processed=True)  # Response already removed!
 
 # Assign coordinates and distances
 for tr in st:
-    # Shot Y4 data are from Brandon, so they don't match IRIS inv
-    try:
-        coords = inv.get_coordinates(tr.id)
-    except Exception:
-        print(f'{tr.id} not found in inventory. Removing.')
-        st.remove(tr)
-        continue
+    coords = inv.get_coordinates(tr.id)
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
     tr.stats.distance = gps2dist_azimuth(
         tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
-
-# Remove sensitivity — st.remove_response() is SLOW; I think just sensitivity removal is
-# OK here? Units are m/s after this step
-if SHOT == 'Y4':
-    for tr in st:
-        fudge_factor = 87921  # TODO: See _plot_node_shot_gather.py
-        tr.data *= fudge_factor
-st.remove_sensitivity(inv)
 
 # Make copy of unprocessed Stream to use for RMS window calculation
 st_rms = st.copy()

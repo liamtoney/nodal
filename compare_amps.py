@@ -20,25 +20,16 @@ fig, axes = plt.subplots(
 for SHOT, ax in zip(shot_list, axes):
 
     # Read in data
-    st = get_waveforms_shot(SHOT)
+    st = get_waveforms_shot(SHOT, processed=True)
 
     # Assign coordinates and distances
     for tr in st:
-        # Need the "try" statement here for the shot Y4 data from Brandon
-        try:
-            coords = inv.get_coordinates(tr.id)
-        except Exception:
-            print(f'{tr.id} not found on IRIS. Removing.')
-            st.remove(tr)
-            continue
+        coords = inv.get_coordinates(tr.id)
         tr.stats.latitude = coords['latitude']
         tr.stats.longitude = coords['longitude']
         tr.stats.distance = gps2dist_azimuth(
             tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
         )[0]
-
-    # Remove sensitivity (fast but NOT accurate!)
-    st.remove_sensitivity(inv)
 
     target_dist = 8  # [km]
     ind = np.argmin(
