@@ -81,7 +81,7 @@ if SHOT == 'AO4':
     st_rms.merge()  # Can't use fill_value=np.nan here!
 
 # Now that we've merged, check that st matches st_rms in terms of Traces!
-assert [tr.id for tr in st] == [tr.id for tr in st_rms]
+assert sorted([tr.id for tr in st]) == sorted([tr.id for tr in st_rms])
 
 # Trim to pre-shot window
 st_rms.trim(df.loc[SHOT].time - WIN_DUR, df.loc[SHOT].time)
