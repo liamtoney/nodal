@@ -208,7 +208,7 @@ if SHOT == 'Y4':
     ax.text(
         0.99,
         0.985,
-        f'{fudge_factor = }',
+        'fudge_factor = 87921',  # TODO: From process_waveforms_shot.py
         transform=ax.transAxes,
         ha='right',
         va='top',
