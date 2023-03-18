@@ -37,7 +37,7 @@ if not RAW:
     st.taper(0.05)
     FREQMIN = 5  # [Hz]
     FREQMAX = 50  # [Hz]
-    st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
+    st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 
     # Apply STA/LTA
     STA = 0.2  # [s]

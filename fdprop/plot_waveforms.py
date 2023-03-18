@@ -35,7 +35,7 @@ for file in dir0.glob('process*_waveforms_pressure.txt'):
 st_syn.sort(keys=['x'])  # Sort by increasing x distance
 st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
 FREQ = 5  # [Hz]
-st_syn.filter('lowpass', freq=FREQ)
+st_syn.filter('lowpass', freq=FREQ, zerophase=True)
 
 # READ IN "REAL" DATA
 with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
@@ -46,7 +46,7 @@ st.detrend('demean')
 st.taper(0.05)
 FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
-st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
+st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 include = np.array([tr.stats.station in sta_info.keys() for tr in st])
 st = Stream(compress(st, include))
 for tr in st:

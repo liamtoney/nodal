@@ -58,7 +58,7 @@ st_rms = st.copy()
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
-st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX)
+st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 
 # Apply STA/LTA
 st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
