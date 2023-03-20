@@ -122,6 +122,7 @@ def station_map(
     region=INNER_RING_REGION,
     vmin=None,  # If None, then uses minimum of sta_values
     vmax=None,  # If None, then uses maximum of sta_values
+    inc=None,  # Create discrete colormap with breaks every `inc` (continuous if `None`)
     cmap='viridis',
     reverse_cmap=False,
     plot_shot='all',  # Or a shot name or list of shot names
@@ -182,15 +183,13 @@ def station_map(
     #     pen='0.5p',
     # )
 
-    pygmt.makecpt(
-        series=[
-            sta_values.min() if vmin is None else vmin,
-            sta_values.max() if vmax is None else vmax,
-        ],
-        cmap=cmap,
-        reverse=reverse_cmap,
-        background=True,
-    )
+    series = [
+        sta_values.min() if vmin is None else vmin,
+        sta_values.max() if vmax is None else vmax,
+    ]
+    if inc:
+        series += [inc]
+    pygmt.makecpt(series=series, cmap=cmap, reverse=reverse_cmap, background=True)
     node_style = 'c0.05i'
     # Plot nodes INSIDE mask (if any!)
     if is_masked.any():
