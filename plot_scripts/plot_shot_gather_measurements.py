@@ -70,6 +70,24 @@ fig = station_map(
 if SAVE:
     fig.savefig(VALUE_MAP_DIR / 'path_diff' / f'shot_{SHOT}.png', dpi=DPI)
 
+#%% Plot peak frequencies
+
+print('Plotting peak frequencies...')
+fig = station_map(
+    df.lon,
+    df.lat,
+    df.peak_freq,
+    sta_dists=df.dist_m,
+    cbar_label='Peak frequency (Hz)',
+    plot_shot=SHOT,
+    vmin=np.percentile(df.peak_freq, 5),
+    vmax=np.percentile(df.peak_freq, 95),
+    cmap='turbo',
+    mask_distance=MASK_DISTANCE_KM,
+)
+if SAVE:
+    fig.savefig(VALUE_MAP_DIR / 'peak_freq' / f'shot_{SHOT}.png', dpi=DPI)
+
 #%% Plot pre-shot RMS velocities
 
 rms = df.pre_shot_rms * 1e6  # Converting to μm/s here
