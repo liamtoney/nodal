@@ -36,7 +36,7 @@ FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
-WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculation
+RMS_WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculation
 # -------------------------------
 
 # Read in station info and shot data
@@ -52,13 +52,13 @@ for tr in st:
         tr.stats.latitude, tr.stats.longitude, df.loc[SHOT].lat, df.loc[SHOT].lon
     )[0]
 
-# Make copy of unprocessed Stream to use for RMS window calculation
-st_rms = st.copy()
-
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
 st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
+
+# Make copy of Stream, pre-STA/LTA, to use for RMS window calculation
+st_rms = st.copy()
 
 # Apply STA/LTA
 st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
@@ -84,9 +84,9 @@ if SHOT == 'AO4':
 assert sorted([tr.id for tr in st]) == sorted([tr.id for tr in st_rms])
 
 # Trim to pre-shot window
-st_rms.trim(df.loc[SHOT].time - WIN_DUR, df.loc[SHOT].time)
+st_rms.trim(df.loc[SHOT].time - RMS_WIN_DUR, df.loc[SHOT].time)
 
-# Compute RMS (within WIN_DUR) for each Trace
+# Compute RMS (within RMS_WIN_DUR) for each Trace
 rms_vals = []
 for tr in st_rms:
     rms_vals.append(np.sqrt(np.mean(tr.data**2)))
