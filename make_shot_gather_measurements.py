@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from infresnel import calculate_paths
 from obspy.geodetics.base import gps2dist_azimuth
+from scipy.signal import welch
 
 from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
@@ -36,6 +37,7 @@ FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
+FREQ_WIN_DUR = 10  # [s] Duration of window (centered on arrival) for peak freq. calc.
 RMS_WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculation
 # -------------------------------
 
@@ -57,6 +59,9 @@ st.detrend('demean')
 st.taper(0.05)
 st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 
+# Make copy of Stream, pre-STA/LTA, to use for peak frequency calculation
+st_freq = st.copy()
+
 # Make copy of Stream, pre-STA/LTA, to use for RMS window calculation
 st_rms = st.copy()
 
@@ -73,6 +78,21 @@ for tr in st.copy():  # Copying since we're destructively trimming here
     tlim = [df.loc[SHOT].time + (tr.stats.distance / c) for c in CELERITY_LIMITS[::-1]]
     tr.trim(*tlim)
     amps.append(tr.max())  # Simply taking the maximum of the STA/LTA function...
+
+#%% Calculate peak frequencies
+
+peak_freqs = []
+for tr in st_freq.copy():  # Copying since we're destructively trimming here
+    arr_time = df.loc[SHOT].time + (tr.stats.distance / np.mean(CELERITY_LIMITS))
+    tlim = [arr_time - (FREQ_WIN_DUR / 2), arr_time + (FREQ_WIN_DUR / 2)]
+    tr.trim(*tlim)
+
+    welch_win_dur = 4  # [s]
+    nperseg = int(welch_win_dur * tr.stats.sampling_rate)  # Samples
+    nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 3)  # Pad FFT (extra padding!)
+    f, pxx = welch(tr.data, tr.stats.sampling_rate, nperseg=nperseg, nfft=nfft)
+
+    peak_freqs.append(f[pxx.argmax()])
 
 #%% Calculate RMS velocity in pre-shot windows
 
@@ -111,6 +131,7 @@ data_dict = dict(
     dist_m=[tr.stats.distance for tr in st],  # [m]
     path_length_diff_m=path_diffs,  # [m]
     sta_lta_amp=amps,
+    peak_freq=peak_freqs,  # [Hz]
     pre_shot_rms=rms_vals,  # [m/s]
 )
 data_df = pd.DataFrame(data=data_dict)
