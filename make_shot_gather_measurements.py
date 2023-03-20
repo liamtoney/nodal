@@ -81,6 +81,13 @@ for tr in st.copy():  # Copying since we're destructively trimming here
 
 #%% Calculate peak frequencies
 
+# Merge, if needed (otherwise we get an error for trying to compute spectra for slices)
+if SHOT == 'AO4':
+    st_freq.merge()
+
+# Now that we've merged, check that st matches st_freq in terms of Traces!
+assert sorted([tr.id for tr in st]) == sorted([tr.id for tr in st_freq])
+
 peak_freqs = []
 for tr in st_freq.copy():  # Copying since we're destructively trimming here
     arr_time = df.loc[SHOT].time + (tr.stats.distance / np.mean(CELERITY_LIMITS))
