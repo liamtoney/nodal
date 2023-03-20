@@ -80,9 +80,11 @@ fig = station_map(
     sta_dists=df.dist_m,
     cbar_label='Peak frequency (Hz)',
     plot_shot=SHOT,
-    vmin=np.percentile(df.peak_freq, 5),
-    vmax=np.percentile(df.peak_freq, 95),
+    vmin=5,  # [Hz]
+    vmax=45,  # [Hz]
+    inc=5,  # [Hz] Bin the colormap for ease of reading values
     cmap='turbo',
+    cbar_tick_ints='a5',
     mask_distance=MASK_DISTANCE_KM,
 )
 if SAVE:
