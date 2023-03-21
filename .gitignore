@@ -16,5 +16,6 @@
 *.mat
 *.pptx
 *.ai
+*.pdf
 Icon?
 .DS_Store
