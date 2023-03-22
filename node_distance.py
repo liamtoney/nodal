@@ -11,6 +11,7 @@ from utils import get_stations
 net = get_stations()[0]
 lats = [sta.latitude for sta in net]
 lons = [sta.longitude for sta in net]
+codes = [sta.code for sta in net]
 
 # Convert coordinates to UTM
 utm_crs = _estimate_utm_crs(np.mean(lats), np.mean(lons))
@@ -44,17 +45,21 @@ ax2.set_ylabel('Node $i$')
 fig2.colorbar(im, label='Distance between nodes $i$ and $j$ (m)')
 fig2.show()
 
-# Find smallest distance node pair and plot on map
-distance_nonzero = distance.copy()
-distance_nonzero[distance_nonzero == 0] = np.nan
-inds_min = np.where(distance_nonzero == np.nanmin(distance_nonzero))
-for i, ind_min in enumerate(inds_min):
-    ax1.scatter(
-        x[ind_min[0]],
-        y[ind_min[0]],
-        color='red',
-        s=msz,
-        label=f'{distance_nonzero[inds_min][0]:.1f} m' if i else None,  # Fun hack ;)
+# Plot a few of the most closely-spaced node pairs on the previously-created map
+distance_sorted = distance.copy()
+distance_sorted[distance_sorted == 0] = np.nan  # Nodes can't pair with themselves!
+distance_sorted = distance_sorted.flatten()
+distance_sorted = distance_sorted[~np.isnan(distance_sorted)]
+distance_sorted.sort()  # Size is "898 choose 2"
+for distance_to_plot in distance_sorted[:6]:
+    inds = np.where(distance == distance_to_plot)
+    ax1.plot(
+        [x[inds[0][0]], x[inds[1][0]]],
+        [y[inds[0][0]], y[inds[1][0]]],
+        marker='o',
+        markersize=np.sqrt(msz),
+        label=f'{distance[inds][0]:.1f} m ({codes[inds[1][0]]}–{codes[inds[0][0]]})',
     )
-ax1.legend(frameon=False)
+fig1.subplots_adjust(top=0.8)
+fig1.legend(frameon=False, loc='upper center', ncol=2, numpoints=2)
 fig1.show()
