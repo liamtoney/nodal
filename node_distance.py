@@ -18,6 +18,14 @@ utm_crs = _estimate_utm_crs(np.mean(lats), np.mean(lons))
 proj = Transformer.from_crs(utm_crs.geodetic_crs, utm_crs)
 x, y = proj.transform(lats, lons)
 
+# Mask a specific region, optionally
+if False:
+    x, y, codes = np.array(x), np.array(y), np.array(codes)
+    mask = (x > 566000) & (x < 567500) & (y > 5110500) & (y < 5111750)
+    x = x[mask]
+    y = y[mask]
+    codes = codes[mask]
+
 # Plot UTM coordinates
 fig1, ax1 = plt.subplots()
 msz = 10
@@ -90,8 +98,12 @@ for distance_to_plot in distance_sorted[:6]:
 
 from obspy import UTCDateTime
 
+# STATIONS = '4303', '4308'
+STATIONS = '4302', '4303', '4304', '4308'
+# STATIONS = '4302', '4303', '4304', '4306', '4307', '4308', '4310', '4311', '4312'
+
 st = get_waveforms_shot('X4', processed=True)
-for station in '4308', '4303':
+for station in STATIONS:
     tr = st.select(station=station)[0]
     tr.trim(UTCDateTime(2014, 7, 25, 10, 10, 30), UTCDateTime(2014, 7, 25, 10, 11, 10))
     plot.spec(tr, win_dur=0.5, wf_lim=(-3, 3), spec_lim=(10, 50), db_lim=(-160, -130))
