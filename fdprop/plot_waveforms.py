@@ -9,7 +9,7 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 # CHANGE ME!
-run = '11_shot_y5_hf'
+run = '14_shot_y5_smaller_dx'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 X_SRC = 500  # [m] TODO from main.cpp
@@ -34,8 +34,8 @@ for file in dir0.glob('process*_waveforms_pressure.txt'):
         st_syn += tr
 st_syn.sort(keys=['x'])  # Sort by increasing x distance
 st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
-FREQ = 5  # [Hz]
-st_syn.filter('lowpass', freq=FREQ, zerophase=True)
+# FREQ = 5  # [Hz]
+# st_syn.filter('lowpass', freq=FREQ, zerophase=True)
 
 # READ IN "REAL" DATA
 with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
@@ -69,8 +69,8 @@ d_plot = d[source_ind : end_ind + 1]
 st_syn_plot = st_syn[source_ind : end_ind + 1]
 
 # Waveform plot
-SKIP = 50  # Plot every SKIP stations
-SCALE = 1  # Divide each waveform by this SCALE to make it fit nicely
+SKIP = 100  # Plot every SKIP stations
+SCALE = 0.3  # Divide each waveform by this SCALE to make it fit nicely
 fig, ax = plt.subplots(figsize=(12, 9))
 for tr, d in zip(st_syn_plot[::SKIP], d_plot[::SKIP]):
     ax.plot(tr.times(), (tr.data / SCALE) + d)
@@ -150,7 +150,7 @@ fig.show()
 #%% Plot comparison between synthetics and observed GCAs
 
 # Plotting config params
-SKIP = 75  # Plot every SKIP stations
+SKIP = 150  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
@@ -169,6 +169,7 @@ PRE_ROLL = [
 # Form [subsetted] plotting Stream for FAKE data
 starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
 st_syn_plot = st_syn.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
+st_syn_plot = st_syn_plot[:77]  # For this particular run, farther traces are blown up
 
 # Form plotting Stream for REAL data
 starttime = get_shots().loc['Y5'].time
@@ -274,7 +275,7 @@ norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [5, 325],  # Arbitrary / trial-and-error
+    [10, 325],  # Arbitrary / trial-and-error
     PRE_ROLL,
     [False, False],
 ):
