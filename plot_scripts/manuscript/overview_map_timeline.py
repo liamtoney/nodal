@@ -40,7 +40,7 @@ fig_gmt = station_map(
         for sta in net
     ],
     cbar_label='Node elevation (m)',
-    cmap='dem1',
+    cmap=Path().home() / 'Documents' / 'CETperceptual_GMT' / 'CET-L10.cpt',
     plot_inset=True,
 )
 
