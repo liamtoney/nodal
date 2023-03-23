@@ -196,8 +196,10 @@ print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
 
 #%% Write .dat file
 
+Z_BUFFER = 100  # [m]
+
 x = profile.distance.values
-z = (profile - profile.min()).values
+z = (profile - profile.min()).values + Z_BUFFER
 
 if TRANSECT == 'Y5':
     dat_filename = 'imush_y5_buffer.dat'
