@@ -99,14 +99,14 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         time = [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time]
         line = ax.plot(
             time[reg_slice],
-            station_df.c[reg_slice],
+            station_df.c.iloc[reg_slice],
             label=station,
             clip_on=False,
             **LINE_KWARGS,
         )
         ax.plot(
             time[clip_slice],
-            station_df.c[clip_slice],
+            station_df.c.iloc[clip_slice],
             color=line[0].get_color(),
             clip_on=True,
             **LINE_KWARGS,
@@ -180,7 +180,7 @@ for ax in ax1, ax2:
     ax.spines['top'].set_visible(False)
     locator = ax.xaxis.set_major_locator(mdates.HourLocator(range(0, 24, 12)))
     formatter = mdates.ConciseDateFormatter(locator, show_offset=False)
-    formatter.zero_formats[3] = '%-d\n%B'
+    formatter.zero_formats[3] = '%-d\n%b.'
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_minor_locator(mdates.HourLocator(range(0, 24, 3)))
 ax1.spines['right'].set_visible(False)
@@ -188,9 +188,6 @@ ax2.spines['left'].set_visible(False)
 ax2.tick_params(which='both', left=False, right=True)
 ax1.set_xlim([t.matplotlib_date for t in AX1_TIME_RANGE])
 ax2.set_xlim([t.matplotlib_date for t in AX2_TIME_RANGE])
-ax2.set_xticklabels(
-    [tl._text.replace('August', 'Aug.') for tl in ax2.get_xticklabels()]
-)
 ax1.yaxis.set_minor_locator(plt.MultipleLocator(2))
 ax1.yaxis.set_major_locator(plt.MultipleLocator(4))
 
