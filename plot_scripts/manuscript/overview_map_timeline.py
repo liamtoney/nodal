@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import to_hex
 from obspy import UTCDateTime
 from pygmt.datasets import load_earth_relief
 
@@ -50,8 +51,13 @@ fig_gmt = station_map(
 # Read in CSV files containing temp data (this code is format-specific!)
 # https://explore.synopticdata.com/metadata/map/4619,-12228,10?vars=air_temp&bbox=-122.42,46.06,-121.98,46.36&status=ACTIVE
 temp_df = pd.DataFrame()
+met_station_coords = {}  # (lat, lon)
 for file in (NODAL_WORKING_DIR / 'data' / 'weather').glob('*.csv'):
-    temp_df = pd.concat([temp_df, pd.read_csv(file, comment='#')])
+    temp_df_station = pd.read_csv(file, comment='#')
+    met_station_coords[temp_df_station.Station_ID[1]] = np.loadtxt(
+        file, skiprows=6, max_rows=2, comments=None, usecols=2
+    )
+    temp_df = pd.concat([temp_df, temp_df_station])
 temp_df.dropna(inplace=True)
 temp_df.air_temp_set_1 = temp_df.air_temp_set_1.astype(float)
 
@@ -84,6 +90,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         clip_slice = slice(-2, None)
         reg_slice = slice(None, -1)
     for station in sorted(temp_df.Station_ID.unique()):
+        # Plot speed of sound on panel (b)
         station_df = temp_df[temp_df.Station_ID == station]
         station_df = station_df[
             (station_df.Date_Time >= time_range[0])
@@ -103,6 +110,14 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             color=line[0].get_color(),
             clip_on=True,
             **LINE_KWARGS,
+        )
+        # Plot station location on panel (a)
+        fig_gmt.plot(
+            x=met_station_coords[station][1],
+            y=met_station_coords[station][0],
+            style='i0.15i',
+            color=to_hex(line[0].get_color()),
+            pen=True,
         )
 ax1.set_ylim(334, 348)
 ax1.set_ylabel('Static sound\nspeed (m/s)')
