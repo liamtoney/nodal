@@ -30,11 +30,13 @@ elif TRANSECT == 'X5':
 else:
     raise ValueError()
 
-# Find (latitude, longitude) of extended line (this is to pad the domain!)
-EXTEND = 500  # [m]
+# Find (latitude, longitude) of buffered / extended terrain
+EXTEND = 500  # [m] Distance of shot from domain boundary
+BUFFER = 1000  # [m] Additional amount of topography to include outside of domain
 g = Geod(ellps='WGS84')
-az_end_to_start = g.inv(*profile_end[::-1], *profile_start[::-1])[0]
-profile_start = g.fwd(*profile_start[::-1], az_end_to_start, EXTEND)[:2][::-1]
+az_end_to_start, az_start_to_end, _ = g.inv(*profile_end[::-1], *profile_start[::-1])
+profile_start = g.fwd(*profile_start[::-1], az_end_to_start, EXTEND + BUFFER)[:2][::-1]
+profile_end = g.fwd(*profile_end[::-1], az_start_to_end, BUFFER)[:2][::-1]
 
 # Get elevation profile
 ds_list, dem = calculate_paths(
@@ -135,8 +137,8 @@ fig, ax = plt.subplots(figsize=(20, 2.5))
 profile.plot(x='distance', ax=ax, color='tab:blue')
 # Plot shot location
 ax.scatter(
-    EXTEND,
-    profile.sel(distance=EXTEND, method='nearest'),
+    EXTEND + BUFFER,
+    profile.sel(distance=EXTEND + BUFFER, method='nearest'),
     marker='*',
     color='black',
     zorder=10,
@@ -198,9 +200,9 @@ x = profile.distance.values
 z = (profile - profile.min()).values
 
 if TRANSECT == 'Y5':
-    dat_filename = 'imush_y5.dat'
+    dat_filename = 'imush_y5_buffer.dat'
 elif TRANSECT == 'X5':
-    dat_filename = 'imush_x5.dat'
+    dat_filename = 'imush_x5_buffer.dat'
 else:
     raise ValueError()
 dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / dat_filename
