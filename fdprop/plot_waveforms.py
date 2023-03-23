@@ -9,10 +9,10 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 # CHANGE ME!
-run = '14_shot_y5_smaller_dx'
+run = '15_shot_x5_buffer_terrain'
 dir0 = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / run / 'OUTPUT_FILES'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
-X_SRC = 500  # [m] TODO from main.cpp
+X_SRC = 1500  # [m] TODO from main.cpp
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 
@@ -38,9 +38,9 @@ st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
 # st_syn.filter('lowpass', freq=FREQ, zerophase=True)
 
 # READ IN "REAL" DATA
-with open(NODAL_WORKING_DIR / 'metadata' / 'imush_y5_transect_stations.json') as f:
+with open(NODAL_WORKING_DIR / 'metadata' / 'imush_x5_transect_stations.json') as f:
     sta_info = json.load(f)
-st = get_waveforms_shot('Y5', processed=True)
+st = get_waveforms_shot('X5', processed=True)
 # Detrend, taper, filter
 st.detrend('demean')
 st.taper(0.05)
@@ -69,8 +69,8 @@ d_plot = d[source_ind : end_ind + 1]
 st_syn_plot = st_syn[source_ind : end_ind + 1]
 
 # Waveform plot
-SKIP = 100  # Plot every SKIP stations
-SCALE = 0.3  # Divide each waveform by this SCALE to make it fit nicely
+SKIP = 50  # Plot every SKIP stations
+SCALE = 1.5  # Divide each waveform by this SCALE to make it fit nicely
 fig, ax = plt.subplots(figsize=(12, 9))
 for tr, d in zip(st_syn_plot[::SKIP], d_plot[::SKIP]):
     ax.plot(tr.times(), (tr.data / SCALE) + d)
@@ -109,7 +109,7 @@ fig.show()
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
 peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
 
-d_ref = 4 / M_PER_KM  # [km] Reference distance
+d_ref = 8 / M_PER_KM  # [km] Reference distance
 
 tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])
 cyl_tl = 20 * np.log10(np.sqrt(d_ref / d))
@@ -150,13 +150,13 @@ fig.show()
 #%% Plot comparison between synthetics and observed GCAs
 
 # Plotting config params
-SKIP = 150  # Plot every SKIP stations
+SKIP = 75  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
 POST_ROLL = 10  # [s]
 TOPO_FILE = (
-    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_y5.dat'
+    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / 'imush_x5_buffer.dat'
 )  # TODO from main.cpp
 REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
 
@@ -169,10 +169,9 @@ PRE_ROLL = [
 # Form [subsetted] plotting Stream for FAKE data
 starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
 st_syn_plot = st_syn.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)[::SKIP]
-st_syn_plot = st_syn_plot[:77]  # For this particular run, farther traces are blown up
 
 # Form plotting Stream for REAL data
-starttime = get_shots().loc['Y5'].time
+starttime = get_shots().loc['X5'].time
 st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)
 
 
@@ -269,13 +268,13 @@ for topo_ax in topo_ax1, topo_ax2:
     for side in 'top', 'right', 'bottom':
         topo_ax.spines[side].set_visible(False)
 topo_ax2.axis('off')
-topo_ax1.set_ylabel('Distance from shot Y5 (km)', labelpad=20, rotation=-90)
+topo_ax1.set_ylabel('Distance from shot X5 (km)', labelpad=20, rotation=-90)
 
 norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [10, 325],  # Arbitrary / trial-and-error
+    [10, 1500],  # Arbitrary / trial-and-error
     PRE_ROLL,
     [False, False],
 ):
