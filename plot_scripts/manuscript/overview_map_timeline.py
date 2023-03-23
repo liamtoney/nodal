@@ -48,6 +48,7 @@ fig_gmt = station_map(
 # --------------------------------------------------------------------------------------
 
 # Read in CSV files containing temp data (this code is format-specific!)
+# https://explore.synopticdata.com/metadata/map/4619,-12228,10?vars=air_temp&bbox=-122.42,46.06,-121.98,46.36&status=ACTIVE
 temp_df = pd.DataFrame()
 for file in (NODAL_WORKING_DIR / 'data' / 'weather').glob('*.csv'):
     temp_df = pd.concat([temp_df, pd.read_csv(file, comment='#')])
@@ -59,7 +60,7 @@ AX1_TIME_RANGE = UTCDateTime('2014-07-24'), UTCDateTime('2014-07-26')
 AX2_TIME_RANGE = UTCDateTime('2014-08-01'), UTCDateTime('2014-08-02')
 
 # Make plot
-MPL_PLOT_WIDTH = 5.33  # [in]
+MPL_PLOT_WIDTH = 5.03  # [in]
 fig, (ax1, ax2) = plt.subplots(
     ncols=2,
     sharey=True,
@@ -67,34 +68,46 @@ fig, (ax1, ax2) = plt.subplots(
     figsize=(MPL_PLOT_WIDTH, 3),
 )
 
-# Plot estimated speed of sound (relies on evenly sampled temps from above to get mean)
-df_mean = temp_df.groupby('Date_Time').mean(numeric_only=True)
-# Below calc from https://en.wikipedia.org/wiki/Speed_of_sound#Practical_formula_for_dry_air
-c = 20.05 * np.sqrt(df_mean.air_temp_set_1 + 273.15)  # [m/s]
+# Compute static [dry air] sound speed, see first equation for c_air in
+# https://en.wikipedia.org/wiki/Speed_of_sound#Speed_of_sound_in_ideal_gases_and_air
+gamma = 1.4
+R = 8.31446  # [J/(mol*K)]
+M_air = 0.02896  # [kg/mol]
+temp_df['c'] = np.sqrt(gamma * (R / M_air) * (temp_df.air_temp_set_1 + 273.15))  # [m/s]
+
+# Plot estimated speed of sound
 LINE_KWARGS = dict(lw=1, solid_capstyle='round')
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
-    mask = (df_mean.index >= time_range[0]) & (df_mean.index <= time_range[1])
     clip_slice = slice(None, 2)
     reg_slice = slice(1, None)
     if ax == ax2:
         clip_slice = slice(-2, None)
         reg_slice = slice(None, -1)
-    line = ax.plot(
-        [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][reg_slice],
-        c[mask][reg_slice],
-        color='black',
-        clip_on=False,
-        **LINE_KWARGS,
-    )
-    ax.plot(
-        [UTCDateTime(t).matplotlib_date for t in df_mean[mask].index][clip_slice],
-        c[mask][clip_slice],
-        color=line[0].get_color(),
-        clip_on=True,
-        **LINE_KWARGS,
-    )
-    ax.set_ylim(334, 348)
-ax1.set_ylabel('Estimated dry air\nsound speed (m/s)')
+    for station in sorted(temp_df.Station_ID.unique()):
+        station_df = temp_df[temp_df.Station_ID == station]
+        station_df = station_df[
+            (station_df.Date_Time >= time_range[0])
+            & (station_df.Date_Time <= time_range[1])
+        ]
+        time = [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time]
+        line = ax.plot(
+            time[reg_slice],
+            station_df.c[reg_slice],
+            label=station,
+            clip_on=False,
+            **LINE_KWARGS,
+        )
+        ax.plot(
+            time[clip_slice],
+            station_df.c[clip_slice],
+            color=line[0].get_color(),
+            clip_on=True,
+            **LINE_KWARGS,
+        )
+ax1.set_ylim(334, 348)
+ax1.set_ylabel('Static sound\nspeed (m/s)')
+# leg_x = 0.17
+# leg = ax.legend(ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False)
 
 # Plot shot times
 df = get_shots()
@@ -147,62 +160,17 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             clip_on=False,
         )
 
-# Plot temp data
-for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
-    ax_twin = ax.twinx()
-    ax.set_zorder(1)
-    ax.patch.set_alpha(0)
-    clip_slice = slice(None, 2)
-    reg_slice = slice(1, None)
-    if ax == ax2:
-        clip_slice = slice(-2, None)
-        reg_slice = slice(None, -1)
-    for station in sorted(temp_df.Station_ID.unique()):
-        station_df = temp_df[temp_df.Station_ID == station]
-        station_df = station_df[
-            (station_df.Date_Time >= time_range[0])
-            & (station_df.Date_Time <= time_range[1])
-        ]
-        line = ax_twin.plot(
-            [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][reg_slice],
-            station_df.air_temp_set_1[reg_slice],
-            label=station,
-            clip_on=False,
-            **LINE_KWARGS,
-        )
-        ax_twin.plot(
-            [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time][clip_slice],
-            station_df.air_temp_set_1[clip_slice],
-            color=line[0].get_color(),
-            clip_on=True,
-            **LINE_KWARGS,
-        )
-    ax_twin.spines['top'].set_visible(False)
-    ax_twin.spines['left'].set_visible(False)
-    ax_twin.set_ylim(5, 30)  # HARD-CODED based on data range
-    if ax == ax2:
-        ax_twin.set_ylabel('Temperature (°C)')
-        ax_twin.yaxis.set_minor_locator(plt.MultipleLocator(5))
-    else:
-        ax_twin.spines['right'].set_visible(False)
-        ax_twin.tick_params(right=False, labelright=False)
-# leg_x = 0.17
-# leg = ax_twin.legend(
-#     ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False
-# )
-
 # Cleanup
 for ax in ax1, ax2:
     ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
     locator = ax.xaxis.set_major_locator(mdates.HourLocator(range(0, 24, 12)))
     formatter = mdates.ConciseDateFormatter(locator, show_offset=False)
     formatter.zero_formats[3] = '%-d\n%B'
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_minor_locator(mdates.HourLocator(range(0, 24, 3)))
+ax1.spines['right'].set_visible(False)
 ax2.spines['left'].set_visible(False)
-ax2.tick_params(which='both', left=False)
+ax2.tick_params(which='both', left=False, right=True)
 ax1.set_xlim([t.matplotlib_date for t in AX1_TIME_RANGE])
 ax2.set_xlim([t.matplotlib_date for t in AX2_TIME_RANGE])
 ax2.set_xticklabels(
@@ -241,7 +209,7 @@ with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name, bbox_inches='tight')
     fig_gmt.image(
         f.name,
-        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.11i/{Y_OFF}i',  # "Tools -> Show Inspector" CLUTCH here!
+        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.27i/{Y_OFF}i',  # "Tools -> Show Inspector" CLUTCH here!
     )
 plt.close(fig)
 
