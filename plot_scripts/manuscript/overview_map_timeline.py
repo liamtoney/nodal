@@ -51,15 +51,21 @@ fig_gmt = station_map(
 # Read in CSV files containing temp data (this code is format-specific!)
 # https://explore.synopticdata.com/metadata/map/4619,-12228,10?vars=air_temp&bbox=-122.42,46.06,-121.98,46.36&status=ACTIVE
 temp_df = pd.DataFrame()
-met_station_coords = {}  # (lat, lon)
+met_station_coords = {}  # Each value is a list of [lat, lon, elevation in feet]
 for file in (NODAL_WORKING_DIR / 'data' / 'weather').glob('*.csv'):
     temp_df_station = pd.read_csv(file, comment='#')
     met_station_coords[temp_df_station.Station_ID[1]] = np.loadtxt(
         file, skiprows=6, max_rows=2, comments=None, usecols=2
-    )
+    ).tolist()
+    met_station_coords[temp_df_station.Station_ID[1]] += [
+        np.loadtxt(file, skiprows=8, max_rows=1, comments=None, usecols=3).tolist()
+    ]
     temp_df = pd.concat([temp_df, temp_df_station])
 temp_df.dropna(inplace=True)
 temp_df.air_temp_set_1 = temp_df.air_temp_set_1.astype(float)
+
+# Sort dictionary of met stations by increasing elevation
+met_station_coords = dict(sorted(met_station_coords.items(), key=lambda x: x[1][2]))
 
 # Time ranges for two sections of plot
 AX1_TIME_RANGE = UTCDateTime('2014-07-24'), UTCDateTime('2014-07-26')
@@ -83,13 +89,14 @@ temp_df['c'] = np.sqrt(gamma * (R / M_air) * (temp_df.air_temp_set_1 + 273.15)) 
 
 # Plot estimated speed of sound
 LINE_KWARGS = dict(lw=1, solid_capstyle='round')
+shades = plt.get_cmap('tab20b').colors  # First 4 are increasingly lighter purples
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     clip_slice = slice(None, 2)
     reg_slice = slice(1, None)
     if ax == ax2:
         clip_slice = slice(-2, None)
         reg_slice = slice(None, -1)
-    for station in sorted(temp_df.Station_ID.unique()):
+    for station, shade in zip(met_station_coords.keys(), shades):
         # Plot speed of sound on panel (b)
         station_df = temp_df[temp_df.Station_ID == station]
         station_df = station_df[
@@ -97,17 +104,18 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             & (station_df.Date_Time <= time_range[1])
         ]
         time = [UTCDateTime(t).matplotlib_date for t in station_df.Date_Time]
-        line = ax.plot(
+        ax.plot(
             time[reg_slice],
             station_df.c.iloc[reg_slice],
             label=station,
+            color=shade,
             clip_on=False,
             **LINE_KWARGS,
         )
         ax.plot(
             time[clip_slice],
             station_df.c.iloc[clip_slice],
-            color=line[0].get_color(),
+            color=shade,
             clip_on=True,
             **LINE_KWARGS,
         )
@@ -116,7 +124,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             x=met_station_coords[station][1],
             y=met_station_coords[station][0],
             style='i0.15i',
-            color=to_hex(line[0].get_color()),
+            color=to_hex(shade),
             pen=True,
         )
 ax1.set_ylim(334, 348)
