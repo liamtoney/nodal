@@ -234,7 +234,7 @@ with tempfile.NamedTemporaryFile(suffix='.eps') as f:
 plt.close(fig)
 
 # Plot (a) and (b) tags
-tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='18p,Helvetica-Bold')
+tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='16p,Helvetica-Bold')
 x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
 fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-3.97 - Y_OFF}i', **tag_kwargs)
