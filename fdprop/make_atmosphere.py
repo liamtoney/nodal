@@ -55,7 +55,10 @@ ds_shot['alt_km'] = (ds_shot.z / g) / M_PER_KM  # [km] Convert to geopotential h
 R = 287.058  # [J/kg * K]
 density = (ds_shot.level * 100) / (R * ds_shot.t)  # [kg/m^3] Converting pressure to Pa
 
-z = ds_shot.alt_km.values - 0.6033  # [km] TODO: Adjusted for topo minimum!
+# TODO: z = 0 in the simulation corresponds to Z_BUFFER below the topographic minimum!
+Z_ADJ = -681  # [m] `-profile.min() + Z_BUFFER`
+
+z = ds_shot.alt_km.values + Z_ADJ / M_PER_KM  # [km]
 t = ds_shot.t.values  # [K]
 u = ds_shot.u.values  # [m/s]
 v = ds_shot.v.values  # [m/s]
