@@ -4,6 +4,7 @@ import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
 from infresnel import calculate_paths
+from matplotlib.patches import Rectangle
 from pyproj import CRS, Geod, Transformer
 
 from utils import NODAL_WORKING_DIR, get_shots, get_stations
@@ -210,3 +211,39 @@ else:
 dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / dat_filename
 np.savetxt(dat_file, np.transpose([x, z]), fmt='%.2f')
 print(f'Wrote {dat_file}')
+
+#%% Plot what the FDTD simulation is "seeing" in the domain coordinate system
+
+# TODO: These all must be copied from main.cpp
+x_bnds_g = (1000, 26000)  # [m]
+z_bnds_g = (0, 6000)  # [m]
+x_src = 1500  # [m]
+z_src = 464  # [m] X5
+# z_src = 734  # [m] Y5
+
+# This plot is using the domain coordinate system!
+fig, ax = plt.subplots(figsize=(15, 5))
+ax.add_patch(  # Domain
+    Rectangle(
+        (x_bnds_g[0], z_bnds_g[0]),
+        np.diff(x_bnds_g)[0],
+        np.diff(z_bnds_g)[0],
+        color='lightgray',
+        lw=0,
+        zorder=-1,
+    )
+)
+minor_int = 500  # [m]
+ax.xaxis.set_minor_locator(plt.MultipleLocator(minor_int))
+ax.yaxis.set_minor_locator(plt.MultipleLocator(minor_int))
+ax.grid(which='both', linestyle=':', color='gray', zorder=0)
+ax.plot(x, z, color='tab:brown', zorder=3)  # Terrain
+ax.scatter(x_src, z_src, color='tab:orange', zorder=4)  # Source
+# for issue_coords in (26059, 413), (941, 703):  # Issue areas
+#     ax.axvline(issue_coords[0], color='red', zorder=5)
+#     ax.scatter(*issue_coords, edgecolor='red', facecolor='none', zorder=5)
+ax.set_aspect('equal')
+ax.set_xlabel('$x$ (m)')
+ax.set_ylabel('$z$ (m)')
+fig.tight_layout()
+fig.show()
