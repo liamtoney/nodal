@@ -125,9 +125,16 @@ lats = [tr.stats.latitude for tr in st]
 lons = [tr.stats.longitude for tr in st]
 
 # Just using ~30 m resolution SRTM data here
-path_diffs = calculate_paths(
-    src_lat=df.loc[SHOT].lat, src_lon=df.loc[SHOT].lon, rec_lat=lats, rec_lon=lons
+ds_list, _ = calculate_paths(
+    src_lat=df.loc[SHOT].lat,
+    src_lon=df.loc[SHOT].lon,
+    rec_lat=lats,
+    rec_lon=lons,
+    full_output=True,
 )
+path_diffs = [ds.path_length_difference for ds in ds_list]
+direct_path_length = [ds.direct_path.length for ds in ds_list]
+diffracted_path_length = [ds.diffracted_path.length for ds in ds_list]
 
 #%% Export everything as CSV (we only have rows for stations with data!)
 
@@ -137,6 +144,8 @@ data_dict = dict(
     lon=lons,
     dist_m=[tr.stats.distance for tr in st],  # [m]
     path_length_diff_m=path_diffs,  # [m]
+    direct_path_length=direct_path_length,  # [m]
+    diffracted_path_length=diffracted_path_length,  # [m]
     sta_lta_amp=amps,
     peak_freq=peak_freqs,  # [Hz]
     pre_shot_rms=rms_vals,  # [m/s]
