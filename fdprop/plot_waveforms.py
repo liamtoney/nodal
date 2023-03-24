@@ -162,7 +162,12 @@ POST_ROLL = 10  # [s]
 TOPO_FILE = (
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
 )  # TODO from main.cpp
-REMOVAL_CELERITY = 0.343  # [km/s] For reduced time
+# Shot-dependent celerity for reduced time!
+if SHOT == 'X5':
+    removal_celerity = 0.336  # [km/s]
+elif SHOT == 'Y5':
+    removal_celerity = 0.342  # [km/s]
+
 
 # Hacky params
 PRE_ROLL = [
@@ -183,7 +188,7 @@ st_plot = st.copy().trim(starttime + MIN_TIME, starttime + MAX_TIME)
 def _get_onset_time(tr):
     dist_km = tr.stats.x - X_SRC / M_PER_KM
     if dist_km >= 0:
-        return tr.stats.starttime + dist_km / REMOVAL_CELERITY
+        return tr.stats.starttime + dist_km / removal_celerity
     else:
         print(f'Removed station with x = {tr.stats.x - X_SRC / M_PER_KM:.2} km')
         return None  # We're on the wrong side of the source
@@ -335,7 +340,7 @@ for norm in norms:
         _cax.set_xlabel('Peak-to-peak velocity (μm/s)', labelpad=5)
 
 cax.set_xlabel(
-    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=625
+    f'Time (s), reduced by {removal_celerity * M_PER_KM:g} m/s', labelpad=625
 )
 
 fig.show()
