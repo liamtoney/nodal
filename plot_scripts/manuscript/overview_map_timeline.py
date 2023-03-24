@@ -7,42 +7,135 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pygmt
 from matplotlib.colors import to_hex
 from obspy import UTCDateTime
 from pygmt.datasets import load_earth_relief
 
 from utils import (
+    FULL_REGION,
     INNER_RING_REGION,
     NODAL_WORKING_DIR,
     get_shots,
     get_stations,
-    station_map,
 )
 
 # --------------------------------------------------------------------------------------
 # (a) Overview map
 # --------------------------------------------------------------------------------------
 
-# Read in station info for plotting
-net = get_stations()[0]
+# Set PyGMT defaults
+pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
+
+# Get shot info
+df = get_shots()
 
 # Get DEM to use for obtaining real station elevations
 dem = load_earth_relief(
     resolution='01s', registration='gridline', region=INNER_RING_REGION
 )
 
+# Get node lat/lon/elevation
+net = get_stations()[0]
+sta_lons = [sta.longitude for sta in net]
+sta_lats = [sta.latitude for sta in net]
+elevations = [
+    dem.sel(lon=sta.longitude, lat=sta.latitude, method='nearest').values.tolist()
+    for sta in net
+]
+
 # Plot
-fig_gmt = station_map(
-    [sta.longitude for sta in net],
-    [sta.latitude for sta in net],
-    [
-        dem.sel(lon=sta.longitude, lat=sta.latitude, method='nearest').values
-        for sta in net
-    ],
-    cbar_label='Node elevation (m)',
-    cmap=Path().home() / 'Documents' / 'CETperceptual_GMT' / 'CET-L10.cpt',
-    plot_inset=True,
+fig_gmt = pygmt.Figure()
+shaded_relief = pygmt.grdgradient(
+    '@earth_relief_01s_g', region=INNER_RING_REGION, azimuth=-45.0, normalize='t1+a0'
 )
+pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nice(?)
+fig_gmt.grdimage(
+    shaded_relief,
+    cmap=True,
+    projection='M4i',
+    region=INNER_RING_REGION,
+    frame=False,
+    transparency=30,
+)
+# Plot nodes
+pygmt.makecpt(
+    series=[np.min(elevations), np.max(elevations)],
+    cmap=Path().home() / 'Documents' / 'CETperceptual_GMT' / 'CET-L10.cpt',
+)
+fig_gmt.plot(
+    x=sta_lons, y=sta_lats, color=elevations, style='c0.05i', cmap=True, pen='black'
+)
+# Plot shots
+size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
+kwargs = dict(style='si', pen=True)
+scale = size_1000_lb / 1000  # [in/lb] Scale shot weights to marker sizes
+fig_gmt.plot(
+    x=df.lon[df.gcas_on_nodes],
+    y=df.lat[df.gcas_on_nodes],
+    size=df[df.gcas_on_nodes].weight_lb * scale,
+    color='black',
+    label=f'GCAs observed+S{size_1000_lb}i',
+    **kwargs,
+)
+fig_gmt.plot(
+    x=df.lon[~df.gcas_on_nodes],
+    y=df.lat[~df.gcas_on_nodes],
+    size=df[~df.gcas_on_nodes].weight_lb * scale,
+    color='white',
+    label=f'GCAs not observed+S{size_1000_lb}i',
+    **kwargs,
+)
+# Plot shot names
+justify = 'CM'
+fontsize = 5  # [pts]
+fig_gmt.text(
+    x=df.lon[df.gcas_on_nodes],
+    y=df.lat[df.gcas_on_nodes],
+    text=df[df.gcas_on_nodes].index,
+    font=f'{fontsize}p,white',
+    justify=justify,
+)
+fig_gmt.text(
+    x=df.lon[~df.gcas_on_nodes],
+    y=df.lat[~df.gcas_on_nodes],
+    text=df[~df.gcas_on_nodes].index,
+    font=f'{fontsize}p',
+    justify=justify,
+)
+# Add frame on top
+fig_gmt.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
+# Colorbar, shifted to the left
+fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jML+o0/-0.5i+h')
+# Inset map showing all shots
+with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
+    fig_gmt.plot(
+        x=sta_lons,
+        y=sta_lats,
+        color='black',
+        style='c0.01i',
+        region=FULL_REGION,
+        projection='M?',
+    )
+    kwargs = dict(style='si', pen=True)
+    scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
+    fig_gmt.plot(
+        x=df[df.gcas_on_nodes].lon,
+        y=df[df.gcas_on_nodes].lat,
+        size=df[df.gcas_on_nodes].weight_lb * scale,
+        color='black',
+        **kwargs,
+    )
+    fig_gmt.plot(
+        x=df[~df.gcas_on_nodes].lon,
+        y=df[~df.gcas_on_nodes].lat,
+        size=df[~df.gcas_on_nodes].weight_lb * scale,
+        color='white',
+        **kwargs,
+    )
+    fig_gmt.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
+# Make legend
+fig_gmt.legend(position='JBR+jML+o-0.6i/-0.5i+l1.5')  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
 # (b) Shot times and temperature time series from weather stations
@@ -239,7 +332,7 @@ x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
 fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-3.97 - Y_OFF}i', **tag_kwargs)
 
-fig_gmt.show(method='external')
+fig_gmt.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
