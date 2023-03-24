@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.colors import LogNorm
 from obspy import Stream, Trace
 
-from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
+from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 # CHANGE ME!
 RUN = '16_shot_y5_buffer_terrain'
