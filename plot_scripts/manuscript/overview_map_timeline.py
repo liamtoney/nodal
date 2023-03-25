@@ -120,16 +120,11 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         ],
         style='r+s',
         color='lightgray',
-    )
-    # Plot nodes as tiny black dots
-    fig_gmt.plot(
-        x=sta_lons,
-        y=sta_lats,
-        color='black',
-        style='c0.01i',
         region=FULL_REGION,
         projection='M?',
     )
+    # Plot nodes as tiny black dots
+    fig_gmt.plot(x=sta_lons, y=sta_lats, color='black', style='c0.01i')
     # Plot shots
     scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
     fig_gmt.plot(
