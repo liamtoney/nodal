@@ -2,6 +2,7 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -68,23 +69,21 @@ fig_gmt.plot(
 )
 # Plot shots
 size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
-kwargs = dict(style='si', pen=True)
+shot_kw = dict(style='si', pen='0.25p')
 scale = size_1000_lb / 1000  # [in/lb] Scale shot weights to marker sizes
 fig_gmt.plot(
     x=df.lon[df.gcas_on_nodes],
     y=df.lat[df.gcas_on_nodes],
     size=df[df.gcas_on_nodes].weight_lb * scale,
     color='black',
-    label=f'Shot w/ GCAs+S{size_1000_lb}i',
-    **kwargs,
+    **shot_kw,
 )
 fig_gmt.plot(
     x=df.lon[~df.gcas_on_nodes],
     y=df.lat[~df.gcas_on_nodes],
     size=df[~df.gcas_on_nodes].weight_lb * scale,
     color='white',
-    label=f'Shot w/o GCAs+S{size_1000_lb}i',
-    **kwargs,
+    **shot_kw,
 )
 # Plot shot names
 justify = 'CM'
@@ -132,21 +131,20 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         projection='M?',
     )
     # Plot shots
-    kwargs = dict(style='si', pen=True)
     scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
     fig_gmt.plot(
         x=df[df.gcas_on_nodes].lon,
         y=df[df.gcas_on_nodes].lat,
         size=df[df.gcas_on_nodes].weight_lb * scale,
         color='black',
-        **kwargs,
+        **shot_kw,
     )
     fig_gmt.plot(
         x=df[~df.gcas_on_nodes].lon,
         y=df[~df.gcas_on_nodes].lat,
         size=df[~df.gcas_on_nodes].weight_lb * scale,
         color='white',
-        **kwargs,
+        **shot_kw,
     )
     # Plot shot names (only those not appearing in main map!)
     inner_ring = (
@@ -195,9 +193,21 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         )
     fig_gmt.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
 # Make legend
-MET_STAT_KW = dict(style='i0.15i', pen=True)
-fig_gmt.plot(x=np.nan, y=np.nan, label='Weather station', **MET_STAT_KW)
-fig_gmt.legend(position='JBR+jML+o-0.6i/-0.65i+l1.5')  # +l controls line spacing!
+met_sta_kw = dict(style='i0.15i', pen='0.25p')
+with NamedTemporaryFile(mode='w') as f:
+    f.write(
+        f'S - {shot_kw["style"][0]} {size_1000_lb}i black {shot_kw["pen"]} - Shot w/ GCAs\n'
+    )
+    f.write(
+        f'S - {shot_kw["style"][0]} {size_1000_lb}i white {shot_kw["pen"]} - Shot w/o GCAs\n'
+    )
+    f.write(
+        f'S - {met_sta_kw["style"][0]} {met_sta_kw["style"][1:]} - {met_sta_kw["pen"]} - Weather station\n'
+    )
+    f.flush()
+    fig_gmt.legend(
+        f.name, position='JBR+jML+o-0.6i/-0.65i+l1.5'
+    )  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
 # (b) Shot times and temperature time series from weather stations
@@ -278,7 +288,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
             x=met_station_coords[station][1],
             y=met_station_coords[station][0],
             color=to_hex(shade),
-            **MET_STAT_KW,
+            **met_sta_kw,
         )
 ax1.set_ylim(334, 348)
 ax1.set_ylabel('Static sound\nspeed (m/s)')
