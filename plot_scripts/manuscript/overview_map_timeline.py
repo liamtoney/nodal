@@ -109,6 +109,20 @@ fig_gmt.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
 fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jML+o0/-0.5i+h')
 # Inset map showing all shots
 with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
+    # Plot patch corresponding to main map extent
+    fig_gmt.plot(
+        data=[
+            [
+                INNER_RING_REGION[0],
+                INNER_RING_REGION[2],
+                INNER_RING_REGION[1],
+                INNER_RING_REGION[3],
+            ]
+        ],
+        style='r+s',
+        color='lightgray',
+    )
+    # Plot nodes as tiny black dots
     fig_gmt.plot(
         x=sta_lons,
         y=sta_lats,
@@ -117,6 +131,7 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         region=FULL_REGION,
         projection='M?',
     )
+    # Plot shots
     kwargs = dict(style='si', pen=True)
     scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
     fig_gmt.plot(
@@ -133,6 +148,51 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         color='white',
         **kwargs,
     )
+    # Plot shot names (only those not appearing in main map!)
+    inner_ring = (
+        (df.lon > INNER_RING_REGION[0])
+        & (df.lon < INNER_RING_REGION[1])
+        & (df.lat > INNER_RING_REGION[2])
+        & (df.lat < INNER_RING_REGION[3])
+    )
+    df_label = df[~inner_ring]
+    # Place labels INSIDE the big shots
+    df_big = df_label[df_label.weight_lb == 2000]
+    justify = 'CM'
+    fig_gmt.text(
+        x=df_big[df_big.gcas_on_nodes].lon,
+        y=df_big[df_big.gcas_on_nodes].lat,
+        text=df_big[df_big.gcas_on_nodes].index,
+        justify=justify,
+        font='5p,white',
+    )
+    fig_gmt.text(
+        x=df_big[~df_big.gcas_on_nodes].lon,
+        y=df_big[~df_big.gcas_on_nodes].lat,
+        text=df_big[~df_big.gcas_on_nodes].index,
+        justify=justify,
+        font='5p',
+    )
+    # Place labels OUTSIDE of the small shots - custom locations
+    df_small = df_label[df_label.weight_lb == 1000]
+    is_top = dict(AO2=False, AO3=True, AO4=True, X3=False, X6=True, Y3=True, Y6=False)
+    assert list(is_top.keys()) == df_small.index.tolist()  # Trivial check
+    for _, shot in df_small.iterrows():
+        top = is_top[shot.name]
+        if top:
+            justify = 'CB'
+            offset = '0/0.04i'
+        else:
+            justify = 'CT'
+            offset = '0/-0.04i'
+        fig_gmt.text(
+            x=shot.lon,
+            y=shot.lat,
+            text=shot.name,
+            justify=justify,
+            offset=offset,
+            font='5p',
+        )
     fig_gmt.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
 # Make legend
 fig_gmt.legend(position='JBR+jML+o-0.6i/-0.5i+l1.5')  # +l controls line spacing!
