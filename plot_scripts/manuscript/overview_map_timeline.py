@@ -197,7 +197,13 @@ met_size = 0.15  # [inches] Overall symbol size (diameter of circumscribing circ
 width = (met_size / 2) * np.sqrt(3) / 2  # [inches] Side length of subtriangle
 kwargs = dict(x=0, y=0, no_clip=True)  # Common params for all plotted symbol components
 fig_symbol = pygmt.Figure()
-fig_symbol.plot(region=[-1, 1, -1, 1], style=f'c{met_size}i', color='white', **kwargs)
+fig_symbol.plot(  # Transparent background circle to set the proper exported symbol size
+    region=[-1, 1, -1, 1],
+    style=f'c{met_size}i',
+    color='white',
+    transparency=100,
+    **kwargs,
+)
 fig_symbol.plot(  # RIGHT SUBTRIANGLE
     style=f'i{met_size / 2}i',
     color=shades[0],
