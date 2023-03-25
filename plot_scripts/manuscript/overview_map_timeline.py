@@ -187,22 +187,62 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
             font='5p',
         )
     fig_gmt.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
+
+# --------------------------------------------------------------------------------------
+# Make fancy symbol for weather stations showing all colors
+# --------------------------------------------------------------------------------------
+shades = [to_hex(color) for color in plt.get_cmap('tab20b').colors[:4]]  # 4 stations!
+met_pen = '0.25p'  # Overall symbol pen thickness
+met_size = 0.15  # [inches] Overall symbol size (diameter of circumscribing circle)
+width = (met_size / 2) * np.sqrt(3) / 2  # [inches] Side length of subtriangle
+kwargs = dict(x=0, y=0, no_clip=True)  # Common params for all plotted symbol components
+fig_symbol = pygmt.Figure()
+fig_symbol.basemap(region=[-1, 1, -1, 1], frame='+n')  # No frame for canvas here
+fig_symbol.plot(  # RIGHT SUBTRIANGLE
+    style=f'i{met_size / 2}i',
+    color=shades[0],
+    xshift=f'a{width / 2}i',
+    yshift=f'a{(met_size / 2) / 4}i',
+    **kwargs,
+)
+fig_symbol.plot(  # CENTER SUBTRIANGLE
+    style=f't{met_size / 2}i',
+    color=shades[1],
+    **kwargs,
+)
+fig_symbol.plot(  # LEFT SUBTRIANGLE
+    style=f'i{met_size / 2}i',
+    color=shades[2],
+    xshift=f'a{-width / 2}i',
+    yshift=f'a{(met_size / 2) / 4}i',
+    **kwargs,
+)
+fig_symbol.plot(  # BOTTOM SUBTRIANGLE
+    style=f'i{met_size / 2}i',
+    color=shades[3],
+    yshift=f'a{-(met_size / 2) / 2}i',
+    **kwargs,
+)
+fig_symbol.plot(style=f'i{met_size}i', pen=met_pen, **kwargs)  # Actual overall symbol!
+# --------------------------------------------------------------------------------------
+
 # Make legend
-met_sta_kw = dict(style='i0.15i', pen='0.25p')
-with NamedTemporaryFile(mode='w') as f:
-    f.write(
-        f'S - {shot_kw["style"][0]} {size_1000_lb}i black {shot_kw["pen"]} - Shot w/ GCAs\n'
-    )
-    f.write(
-        f'S - {shot_kw["style"][0]} {size_1000_lb}i white {shot_kw["pen"]} - Shot w/o GCAs\n'
-    )
-    f.write(
-        f'S - {met_sta_kw["style"][0]} {met_sta_kw["style"][1:]} - {met_sta_kw["pen"]} - Weather station\n'
-    )
-    f.flush()
-    fig_gmt.legend(
-        f.name, position='JBR+jML+o-0.6i/-0.65i+l1.5'
-    )  # +l controls line spacing!
+with NamedTemporaryFile(dir=Path.home() / '.gmt', suffix='.eps') as sym_f:
+    prefix = os.path.splitext(sym_f.name)[0]  # Remove '.eps'
+    fig_symbol.psconvert(prefix=prefix, fmt='e')
+    symbolname = Path(sym_f.name).stem
+    with NamedTemporaryFile(mode='w') as f:
+        f.write(
+            f'S - {shot_kw["style"][0]} {size_1000_lb}i black {shot_kw["pen"]} - Shot w/ GCAs\n'
+        )
+        f.write(
+            f'S - {shot_kw["style"][0]} {size_1000_lb}i white {shot_kw["pen"]} - Shot w/o GCAs\n'
+        )
+        f.write(f'S - k{symbolname} {met_size}i - - - Weather station\n')
+        f.flush()
+        fig_gmt.legend(
+            f.name, position='JBR+jML+o-0.6i/-0.65i+l1.5'
+        )  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
 # (b) Shot times and temperature time series from weather stations
@@ -249,7 +289,6 @@ temp_df['c'] = np.sqrt(gamma * (R / M_air) * (temp_df.air_temp_set_1 + 273.15)) 
 
 # Plot estimated speed of sound
 LINE_KWARGS = dict(lw=1, solid_capstyle='round')
-shades = plt.get_cmap('tab20b').colors  # First 4 are increasingly lighter purples
 for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
     clip_slice = slice(None, 2)
     reg_slice = slice(1, None)
@@ -282,8 +321,9 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         fig_gmt.plot(
             x=met_station_coords[station][1],
             y=met_station_coords[station][0],
-            color=to_hex(shade),
-            **met_sta_kw,
+            color=shade,
+            style=f'i{met_size}i',
+            pen=met_pen,
         )
 ax1.set_ylim(334, 348)
 ax1.set_ylabel('Static sound\nspeed (m/s)')
