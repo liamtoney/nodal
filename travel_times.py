@@ -95,6 +95,13 @@ tr.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 tr_sta_lta = tr.copy()
 tr_sta_lta.trigger('classicstalta', sta=STA, lta=LTA)
 
+# Window around acoustic and get peak
+rel_win = [(distance / c) for c in CELERITY_LIMITS[::-1]]
+tr_sta_lta_win = tr_sta_lta.copy().trim(*[shot.time + t for t in rel_win])
+max_val = tr_sta_lta_win.max()
+argmax = tr_sta_lta_win.data.argmax()
+rel_t_max = tr_sta_lta_win.times(reftime=shot.time)[argmax]
+
 # Plot
 fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(14, 5))
 ax1.plot(tr.times(reftime=shot.time), tr.data)
@@ -105,12 +112,8 @@ ax1.set_ylabel('Velocity (m/s)')
 ax2.set_ylabel('STA/LTA amplitude')
 ax2.set_xlabel('Time from shot (s)')
 for ax in ax1, ax2:
-    ax.axvspan(
-        *[(distance / c) for c in CELERITY_LIMITS[::-1]],
-        zorder=-1,
-        color='gray',
-        alpha=0.3,
-        lw=0,
-    )
+    ax.axvspan(*rel_win, zorder=-1, color='gray', alpha=0.3, lw=0)
+    ax.axvline(rel_t_max, color='red', zorder=3)
+ax2.scatter(rel_t_max, max_val, color='red', zorder=3)
 fig.tight_layout()
 fig.show()
