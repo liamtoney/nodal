@@ -84,7 +84,9 @@ LTA = 2  # [s]
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
 
 st = get_waveforms_shot(shot.name, processed=True)
-tr = st.select(station='4106')[0]
+station = '4106'
+tr = st.select(station=station)[0]
+distance = df[df.station == int(station)].dist_m.values[0]
 
 # Process as in make_shot_gather_measurements.py
 tr.detrend('demean')
@@ -96,10 +98,19 @@ tr_sta_lta.trigger('classicstalta', sta=STA, lta=LTA)
 # Plot
 fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(14, 5))
 ax1.plot(tr.times(reftime=shot.time), tr.data)
-ax2.plot(tr_sta_lta.times(reftime=shot.time), tr_sta_lta.data)
+ax2.fill_between(tr_sta_lta.times(reftime=shot.time), tr_sta_lta.data, lw=0)
+ax2.set_xlim(0, 80)
 ax2.set_ylim(bottom=0)
 ax1.set_ylabel('Velocity (m/s)')
 ax2.set_ylabel('STA/LTA amplitude')
 ax2.set_xlabel('Time from shot (s)')
+for ax in ax1, ax2:
+    ax.axvspan(
+        *[(distance / c) for c in CELERITY_LIMITS[::-1]],
+        zorder=-1,
+        color='gray',
+        alpha=0.3,
+        lw=0,
+    )
 fig.tight_layout()
 fig.show()
