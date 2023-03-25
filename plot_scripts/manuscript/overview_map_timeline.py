@@ -75,7 +75,7 @@ fig_gmt.plot(
     y=df.lat[df.gcas_on_nodes],
     size=df[df.gcas_on_nodes].weight_lb * scale,
     color='black',
-    label=f'GCAs observed+S{size_1000_lb}i',
+    label=f'Shot w/ GCAs+S{size_1000_lb}i',
     **kwargs,
 )
 fig_gmt.plot(
@@ -83,7 +83,7 @@ fig_gmt.plot(
     y=df.lat[~df.gcas_on_nodes],
     size=df[~df.gcas_on_nodes].weight_lb * scale,
     color='white',
-    label=f'GCAs not observed+S{size_1000_lb}i',
+    label=f'Shot w/o GCAs+S{size_1000_lb}i',
     **kwargs,
 )
 # Plot shot names
@@ -195,7 +195,9 @@ with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
         )
     fig_gmt.basemap(map_scale=f'g{np.mean(FULL_REGION[:2])}/45.75+w50')
 # Make legend
-fig_gmt.legend(position='JBR+jML+o-0.6i/-0.5i+l1.5')  # +l controls line spacing!
+MET_STAT_KW = dict(style='i0.15i', pen=True)
+fig_gmt.plot(x=np.nan, y=np.nan, label='Weather station', **MET_STAT_KW)
+fig_gmt.legend(position='JBR+jML+o-0.6i/-0.65i+l1.5')  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
 # (b) Shot times and temperature time series from weather stations
@@ -260,7 +262,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         ax.plot(
             time[reg_slice],
             station_df.c.iloc[reg_slice],
-            label=station,
             color=shade,
             clip_on=False,
             **LINE_KWARGS,
@@ -276,14 +277,11 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         fig_gmt.plot(
             x=met_station_coords[station][1],
             y=met_station_coords[station][0],
-            style='i0.15i',
             color=to_hex(shade),
-            pen=True,
+            **MET_STAT_KW,
         )
 ax1.set_ylim(334, 348)
 ax1.set_ylabel('Static sound\nspeed (m/s)')
-# leg_x = 0.17
-# leg = ax.legend(ncol=2, loc='lower right', bbox_to_anchor=(leg_x, 1), frameon=False)
 
 # Plot shot times
 df = get_shots()
@@ -313,7 +311,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         df_section[~df_section.gcas_on_nodes].yloc,
         s=df_section[~df_section.gcas_on_nodes].weight_lb * scale,
         color='white',
-        label='GCAs not observed',
         **kwargs,
     )
     ax.scatter(
@@ -321,7 +318,6 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         df_section[df_section.gcas_on_nodes].yloc,
         s=df_section[df_section.gcas_on_nodes].weight_lb * scale,
         color='black',
-        label='GCAs observed',
         **kwargs,
     )
     for _, row in df_section.iterrows():
