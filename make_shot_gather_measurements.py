@@ -71,13 +71,15 @@ st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
 # Merge, as some stations have multiple Traces (doing this as late as possible)
 st.merge(fill_value=np.nan)
 
-#%% Calculate amplitudes (STA/LTA maxima)
+#%% Calculate amplitudes (STA/LTA maxima) and arrival times (from the maxima)
 
 amps = []
+arr_times = []
 for tr in st.copy():  # Copying since we're destructively trimming here
     tlim = [df.loc[SHOT].time + (tr.stats.distance / c) for c in CELERITY_LIMITS[::-1]]
     tr.trim(*tlim)
     amps.append(tr.max())  # Simply taking the maximum of the STA/LTA function...
+    arr_times.append(tr.times(reftime=df.loc[SHOT].time)[tr.data.argmax()])  # t of peak
 
 #%% Calculate peak frequencies
 
@@ -149,6 +151,7 @@ data_dict = dict(
     sta_lta_amp=amps,
     peak_freq=peak_freqs,  # [Hz]
     pre_shot_rms=rms_vals,  # [m/s]
+    arr_time=arr_times,  # [s] Time (measured from shot time) of peak of STA/LTA
 )
 data_df = pd.DataFrame(data=data_dict)
 data_df.to_csv(
