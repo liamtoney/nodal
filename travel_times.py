@@ -156,9 +156,8 @@ fig.colorbar(sm, label='STA/LTA amplitude')
 fig.tight_layout()
 fig.show()
 
-#%% (C2) Encode STA/LTA to transparency so we can color markers by another quantity
+#%% (C2) Encode STA/LTA to transparency so we can color markers by azimuth
 
-COLOR_QTY = 'azimuth'  # 'azimuth' or 'path_length_diff_m'
 USE_DIFF_PATH = False  # Toggle using diffracted path length or great circle distance
 GAMMA = 2  # Exponent for accentuating higher STA/LTA values
 
@@ -184,7 +183,7 @@ _.remove()
 sm = ax.scatter(
     df_sorted.arr_time - (d / removal_celerity),
     d,
-    c=df_sorted[COLOR_QTY],
+    c=df_sorted.azimuth,
     cmap=cc.m_CET_I1,
     alpha=norm(df_sorted.sta_lta_amp),
     lw=0,
@@ -234,8 +233,8 @@ cax1.pcolormesh(
 cax1.set_xticks([])
 cax1.set_ylabel('STA/LTA amplitude')
 
-# Colorbar 2: COLOR_QTY
-fig.colorbar(sm, cax=cax2, label=COLOR_QTY)
+# Colorbar 2: Shot–node azimuth
+fig.colorbar(sm, cax=cax2, label='Shot–node azimuth (°)')
 
 for side in 'top', 'right':
     ax.spines[side].set_visible(False)
