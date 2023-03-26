@@ -148,7 +148,7 @@ ax.fill_betweenx(
     lw=0,
     label='{}–{} m/s\ncelerity range'.format(*CELERITY_LIMITS),
 )
-ax.set_xlabel(f'Time from shot (s) reduced by {removal_celerity} m/s')
+ax.set_xlabel(f'Time from shot (s), reduced by {removal_celerity} m/s')
 ax.set_ylabel('Great circle distance (m)')
 ax.set_title(f'Shot {shot.name}')
 ax.legend(frameon=False)
@@ -188,7 +188,7 @@ sm = ax.scatter(
     alpha=norm(df_sorted.sta_lta_amp),
     lw=0,
 )
-ax.set_xlabel(f'Time from shot (s) reduced by {removal_celerity} m/s')
+ax.set_xlabel(f'Time from shot (s), reduced by {removal_celerity} m/s')
 if USE_DIFF_PATH:
     ylabel = 'Diffracted path length (m)'
 else:
