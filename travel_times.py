@@ -195,7 +195,7 @@ if USE_DIFF_PATH:
 else:
     ylabel = 'Great circle distance (m)'
 ax.set_ylabel(ylabel)
-ax.set_title(f'Shot {shot.name}')
+ax.set_title(f'Shot {shot.name}', loc='left', weight='bold')
 
 # Plot celerity guides
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
@@ -205,7 +205,7 @@ for celerity in celerities_to_plot:
         [0, (ylim[1] / celerity) - (ylim[1] / removal_celerity)],
         [0, ylim[1]],
         zorder=-1,
-        lw=1,
+        lw=plt.rcParams['axes.linewidth'],
         color='black',
     )
     ax.text(
@@ -237,6 +237,8 @@ cax1.set_ylabel('STA/LTA amplitude')
 # Colorbar 2: COLOR_QTY
 fig.colorbar(sm, cax=cax2, label=COLOR_QTY)
 
+for side in 'top', 'right':
+    ax.spines[side].set_visible(False)
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
 fig.show()
