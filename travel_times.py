@@ -3,12 +3,15 @@ Travel time analysis for observed/infresnel-modeled/FDTD-modeled results...
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from obspy import UTCDateTime
 
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to analyze
+
+CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
 
 # Get shot data
 shot = get_shots().loc[SHOT]
@@ -26,7 +29,7 @@ def celerity_estimate(shot):
         return 342  # [m/s]
 
 
-#%% infresnel stuff
+#%% (A) infresnel stuff
 
 # Compute time delays owing to propagation over (rather than thru) topography
 celerity = celerity_estimate(shot)
@@ -73,7 +76,7 @@ ax.set_title(title, weight='bold')
 fig.tight_layout()
 fig.show()
 
-#%% Sandbox for comparing STA/LTA time picks with waveform arrivals
+#%% (B) Sandbox for comparing STA/LTA time picks with waveform arrivals
 
 # These are the params used in make_shot_gather_measurements.py, or...
 # TODO new parameters to experiment with!!!
@@ -81,7 +84,6 @@ FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
-CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
 
 st = get_waveforms_shot(shot.name, processed=True)
 station = '4106'
@@ -115,5 +117,38 @@ for ax in ax1, ax2:
     ax.axvspan(*rel_win, zorder=-1, color='gray', alpha=0.3, lw=0)
     ax.axvline(rel_t_max, color='red', zorder=3)
 ax2.scatter(rel_t_max, max_val, color='red', zorder=3)
+fig.tight_layout()
+fig.show()
+
+#%% (C) Observed arrival time plotting and analysis
+
+removal_celerity = np.max(CELERITY_LIMITS)  # [m/s]
+
+# "Confidence check" scatter plot
+fig, ax = plt.subplots()
+df_sorted = df.sort_values(by='sta_lta_amp')  # Plot highest STA/LTA values on top
+sm = ax.scatter(
+    df_sorted.arr_time - (df_sorted.dist_m / removal_celerity),
+    df_sorted.dist_m,
+    c=df_sorted.sta_lta_amp,
+)
+dmin, dmax = df_sorted.dist_m.min(), df_sorted.dist_m.max()
+ax.fill_betweenx(
+    [dmin, dmax],
+    *[
+        [(dmin / c) - (dmin / removal_celerity), (dmax / c) - (dmax / removal_celerity)]
+        for c in CELERITY_LIMITS
+    ],
+    zorder=-1,
+    color='gray',
+    alpha=0.3,
+    lw=0,
+    label='{}–{} m/s\ncelerity range'.format(*CELERITY_LIMITS),
+)
+ax.set_xlabel(f'Time from shot (s) removed by {removal_celerity} m/s')
+ax.set_ylabel('Great circle distance (m)')
+ax.set_title(f'Shot {shot.name}')
+ax.legend(frameon=False)
+fig.colorbar(sm, label='STA/LTA amplitude')
 fig.tight_layout()
 fig.show()
