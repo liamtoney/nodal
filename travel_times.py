@@ -199,13 +199,20 @@ ax.set_title(f'Shot {shot.name}', loc='left', weight='bold')
 # Plot celerity guides
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
 celerities_to_plot = (338, 340, 342)
+guide_color = 'tab:gray'
 for celerity in celerities_to_plot:
     ax.plot(
-        [0, (ylim[1] / celerity) - (ylim[1] / removal_celerity)],
-        [0, ylim[1]],
+        [
+            (ylim[0] / celerity) - (ylim[0] / removal_celerity),
+            (ylim[1] / celerity) - (ylim[1] / removal_celerity),
+        ],
+        [ylim[0], ylim[1]],
         zorder=-1,
         lw=plt.rcParams['axes.linewidth'],
-        color='black',
+        color=guide_color,
+        linestyle='--',
+        dash_capstyle='round',
+        clip_on=False,
     )
     ax.text(
         (ylim[1] / celerity) - (ylim[1] / removal_celerity),
@@ -215,6 +222,7 @@ for celerity in celerities_to_plot:
         ha='right',
         rotation_mode='anchor',
         transform_rotates_text=True,
+        color=guide_color,
         rotation=np.rad2deg(np.arctan(1 / ((1 / celerity) - (1 / removal_celerity)))),
     )
 ax.set_xlim(xlim)
