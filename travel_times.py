@@ -2,10 +2,12 @@
 Travel time analysis for observed/infresnel-modeled/FDTD-modeled results...
 """
 
+import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from obspy import UTCDateTime
+from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
@@ -150,5 +152,37 @@ ax.set_ylabel('Great circle distance (m)')
 ax.set_title(f'Shot {shot.name}')
 ax.legend(frameon=False)
 fig.colorbar(sm, label='STA/LTA amplitude')
+fig.tight_layout()
+fig.show()
+
+# Compute the shot–node azimuth and add to df_sorted
+df_sorted['azimuth'] = [
+    gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]
+    for (lat, lon) in zip(df_sorted.lat, df_sorted.lon)
+]
+
+COLOR_QTY = 'azimuth'  # 'azimuth' or 'path_length_diff_m'
+USE_DIFF_PATH = True  # Toggle using diffracted path length or great circle distance
+
+d = df_sorted.diffracted_path_length if USE_DIFF_PATH else df_sorted.dist_m
+
+# Encode STA/LTA to transparency so we can color markers by another quantity
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    df_sorted.arr_time - (d / removal_celerity),
+    d,
+    c=df_sorted[COLOR_QTY],
+    cmap=cc.m_CET_I1,
+    alpha=plt.Normalize()(df_sorted.sta_lta_amp.values**2),  # Emphasize highs!
+    lw=0,
+)
+ax.set_xlabel(f'Time from shot (s) removed by {removal_celerity} m/s')
+if USE_DIFF_PATH:
+    ylabel = 'Diffracted path length (m)'
+else:
+    ylabel = 'Great circle distance (m)'
+ax.set_ylabel(ylabel)
+ax.set_title(f'Shot {shot.name}')
+fig.colorbar(sm, label=COLOR_QTY)
 fig.tight_layout()
 fig.show()
