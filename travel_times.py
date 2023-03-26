@@ -197,6 +197,30 @@ else:
 ax.set_ylabel(ylabel)
 ax.set_title(f'Shot {shot.name}')
 
+# Plot celerity guides
+xlim, ylim = ax.get_xlim(), ax.get_ylim()
+celerities_to_plot = (338, 340, 342)
+for celerity in celerities_to_plot:
+    ax.plot(
+        [0, (ylim[1] / celerity) - (ylim[1] / removal_celerity)],
+        [0, ylim[1]],
+        zorder=-1,
+        lw=1,
+        color='black',
+    )
+    ax.text(
+        (ylim[1] / celerity) - (ylim[1] / removal_celerity),
+        ylim[1],
+        f'{celerity} m/s',
+        va='bottom',
+        ha='right',
+        rotation_mode='anchor',
+        transform_rotates_text=True,
+        rotation=np.rad2deg(np.arctan(1 / ((1 / celerity) - (1 / removal_celerity)))),
+    )
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+
 # Colorbar 1: STA/LTA value (transparency)
 ylim = norm.vmin, norm.vmax
 npts = 1000
