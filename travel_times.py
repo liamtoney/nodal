@@ -16,6 +16,8 @@ SHOT = 'Y5'  # Shot to analyze
 
 CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
 
+M_PER_KM = 1000  # [m/km] CONSTANT
+
 # Get shot data
 shot = get_shots().loc[SHOT]
 
@@ -189,10 +191,11 @@ sm = ax.scatter(
     lw=0,
 )
 ax.set_xlabel(f'Time from shot (s), reduced by {removal_celerity} m/s')
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f'{x / M_PER_KM:g}'))
 if USE_DIFF_PATH:
-    ylabel = 'Diffracted path length (m)'
+    ylabel = 'Diffracted path length (km)'
 else:
-    ylabel = 'Great circle distance (m)'
+    ylabel = 'Great circle distance (km)'
 ax.set_ylabel(ylabel)
 ax.set_title(f'Shot {shot.name}', loc='left', weight='bold')
 
