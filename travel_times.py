@@ -198,7 +198,7 @@ ax.set_title(f'Shot {shot.name}', loc='left', weight='bold')
 
 # Plot celerity guides
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
-celerities_to_plot = (338, 340, 342)
+celerities_to_plot = (336, 338, 340, 342, 344)
 guide_color = 'tab:gray'
 for celerity in celerities_to_plot:
     ax.plot(
