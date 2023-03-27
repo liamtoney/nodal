@@ -6,7 +6,7 @@ import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import PowerNorm
+from matplotlib.colors import BoundaryNorm, PowerNorm
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 
@@ -252,4 +252,48 @@ for side in 'top', 'right':
     ax.spines[side].set_visible(False)
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
+fig.show()
+
+#%% (C3) Map view plots of quantities w/ STA/LTA shading
+
+# Azimuth
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    df_sorted.lon,
+    df_sorted.lat,
+    c=df_sorted.azimuth,
+    cmap=cc.m_CET_I1,
+    alpha=norm(df_sorted.sta_lta_amp),
+    lw=0,
+)
+ax.scatter(shot.lon, shot.lat, color='lightgray', marker='s', s=50, ec='black')
+ax.set_title(f'Shot {shot.name}', weight='bold')
+fig.colorbar(sm, label='Shot–node azimuth (°)')
+fig.tight_layout()
+fig.show()
+
+# Delays — like in (A) but with STA/LTA transparency added in [this shows how the delays
+# due to topography are not measurable as they are small!)
+cmap = cc.m_CET_I1
+inc = 0.05
+bnorm = BoundaryNorm(np.arange(0, 0.15 + inc, inc), cmap.N)
+celerity = celerity_estimate(shot)
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    df_sorted.lon,
+    df_sorted.lat,
+    c=df_sorted.path_length_diff_m / celerity,  # [s],
+    norm=bnorm,
+    cmap=cmap,
+    alpha=norm(df_sorted.sta_lta_amp),
+    lw=0,
+)
+ax.scatter(shot.lon, shot.lat, color='lightgray', marker='s', s=50, ec='black')
+ax.set_title(f'Shot {shot.name}, {celerity} m/s', weight='bold')
+fig.colorbar(
+    sm,
+    label='$infresnel\,$-sourced travel time delay (s)',
+    ticks=plt.MultipleLocator(inc),
+)
+fig.tight_layout()
 fig.show()
