@@ -1,4 +1,5 @@
 import cdsapi
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pooch
@@ -49,6 +50,29 @@ ds = xr.open_dataset(
 ds_shot = ds.sel(latitude=shot.lat, longitude=shot.lon, method='nearest')
 g = 9.81  # [m/s^2]
 ds_shot['alt_km'] = (ds_shot.z / g) / M_PER_KM  # [km] Convert to geopotential height
+
+# Plot
+lw = 2
+fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True, figsize=(7, 10))
+ax1.plot(ds_shot.u, ds_shot.alt_km, lw=lw, color='tab:red', label='Eastward')
+ax1.plot(ds_shot.v, ds_shot.alt_km, lw=lw, color='tab:blue', label='Northward')
+ax2.plot(ds_shot.t, ds_shot.alt_km, lw=lw, color='tab:gray')
+ax1.set_xlabel('Wind speed (m/s)')
+ax1.set_ylabel('Geopotential height (km)')
+ax2.set_xlabel('Temperature (K)')
+ax1.set_xlim(-25, 25)
+ax1.set_ylim(0, 10)
+ax1.legend(frameon=False, title=r'${\bf Wind\ component}$')
+for ax in ax1, ax2:
+    ax.grid(linestyle=':', color='gray', zorder=-1, alpha=0.5)
+    xlim = ax.get_xlim()
+    ax.fill_between(
+        xlim, np.ones(2) * shot.elev_m / M_PER_KM, color='tab:brown', zorder=2
+    )
+    ax.set_xlim(xlim)
+fig.suptitle(f'Shot {shot.name}', weight='bold')
+fig.tight_layout()
+fig.show()
 
 #%% Write .met file
 
