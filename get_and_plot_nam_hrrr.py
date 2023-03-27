@@ -27,15 +27,17 @@ from utils import (
 )
 from utils.utils import _outside_arrow
 
-SAVE = False  # Toggle saving PNG files
+if __name__ == '__main__':
 
-# Read in shot info
-df = get_shots()
+    SAVE = False  # Toggle saving PNG files
 
-# Input checks
-assert len(sys.argv) == 2, 'Must provide exactly one argument!'
-SHOT = sys.argv[1]
-assert SHOT in df.index, 'Argument must be a valid shot name!'
+    # Read in shot info
+    df = get_shots()
+
+    # Input checks
+    assert len(sys.argv) == 2, 'Must provide exactly one argument!'
+    SHOT = sys.argv[1]
+    assert SHOT in df.index, 'Argument must be a valid shot name!'
 
 
 def build_url(year, month, day, hour, measurement):
@@ -255,116 +257,120 @@ def plot_wind_speed_direction(
     return fig
 
 
-#%% Get 10-m wind grid for a given shot
+#%% Script stuff below
 
-TYPE = 'nam'  # 'nam' or 'hrrr'
+if __name__ == '__main__':
 
-# Get shot info
-shot = df.loc[SHOT]
-time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
+    #%% Get 10-m wind grid for a given shot
 
-# TODO: Interpolate to exact shot time?
-if TYPE == 'hrrr':
-    url = f'https://storage.googleapis.com/high-resolution-rapid-refresh/hrrr.{time.year}{time.month:02}{time.day:02}/conus/hrrr.t{time.hour:02}z.wrfprsf00.grib2'
-    u, v = ingest_grib_hrrr(url)
-    grid_name = 'HRRR'
-elif TYPE == 'nam':
-    u = ingest_grib_nam(
-        build_url(time.year, time.month, time.day, time.hour, measurement='UGRD')
-    )
-    v = ingest_grib_nam(
-        build_url(time.year, time.month, time.day, time.hour, measurement='VGRD')
-    )
-    grid_name = 'NAM NEST CONUS'
-else:
-    raise ValueError("TYPE must be either 'hrrr' or 'nam'")
+    TYPE = 'nam'  # 'nam' or 'hrrr'
 
-#%% Plot grid
+    # Get shot info
+    shot = df.loc[SHOT]
+    time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
 
-fig = plot_wind_speed_direction(
-    u, v, grid_name, shot, region=INNER_RING_REGION, combo_plot=True
-)
+    # TODO: Interpolate to exact shot time?
+    if TYPE == 'hrrr':
+        url = f'https://storage.googleapis.com/high-resolution-rapid-refresh/hrrr.{time.year}{time.month:02}{time.day:02}/conus/hrrr.t{time.hour:02}z.wrfprsf00.grib2'
+        u, v = ingest_grib_hrrr(url)
+        grid_name = 'HRRR'
+    elif TYPE == 'nam':
+        u = ingest_grib_nam(
+            build_url(time.year, time.month, time.day, time.hour, measurement='UGRD')
+        )
+        v = ingest_grib_nam(
+            build_url(time.year, time.month, time.day, time.hour, measurement='VGRD')
+        )
+        grid_name = 'NAM NEST CONUS'
+    else:
+        raise ValueError("TYPE must be either 'hrrr' or 'nam'")
 
-if SAVE:
-    fig.savefig(
-        NODAL_WORKING_DIR / 'figures' / '10_m_wind_grids' / f'shot_{SHOT}.png',
-        dpi=300,
-        bbox_inches='tight',
+    #%% Plot grid
+
+    fig = plot_wind_speed_direction(
+        u, v, grid_name, shot, region=INNER_RING_REGION, combo_plot=True
     )
 
-#%% Calculate convex hull and dot products
+    if SAVE:
+        fig.savefig(
+            NODAL_WORKING_DIR / 'figures' / '10_m_wind_grids' / f'shot_{SHOT}.png',
+            dpi=300,
+            bbox_inches='tight',
+        )
 
-from geopandas import GeoSeries, points_from_xy
-from obspy.geodetics.base import gps2dist_azimuth
-from shapely.geometry import MultiPoint
+    #%% Calculate convex hull and dot products
 
-# Get coordinates to form convex hull from (should INCLUDE the shot!)
-net = get_stations()[0]
-lons = np.array([sta.longitude for sta in net] + [shot.lon])
-lats = np.array([sta.latitude for sta in net] + [shot.lat])
+    from geopandas import GeoSeries, points_from_xy
+    from obspy.geodetics.base import gps2dist_azimuth
+    from shapely.geometry import MultiPoint
 
-# Form convex hull
-convex_hull = GeoSeries(MultiPoint(points_from_xy(lons, lats))).convex_hull
+    # Get coordinates to form convex hull from (should INCLUDE the shot!)
+    net = get_stations()[0]
+    lons = np.array([sta.longitude for sta in net] + [shot.lon])
+    lats = np.array([sta.latitude for sta in net] + [shot.lat])
 
-# Plot CH on existing figure
-convex_hull.plot(ax=fig.axes[0], zorder=-1, color='lightgray')
+    # Form convex hull
+    convex_hull = GeoSeries(MultiPoint(points_from_xy(lons, lats))).convex_hull
 
-# Should be same shape!
-assert u.shape == v.shape
+    # Plot CH on existing figure
+    convex_hull.plot(ax=fig.axes[0], zorder=-1, color='lightgray')
 
+    # Should be same shape!
+    assert u.shape == v.shape
 
-# Function to mask u and v winds to hull
-def mask_winds_with_hull(wind_comp):
+    # Function to mask u and v winds to hull
+    def mask_winds_with_hull(wind_comp):
 
-    lons = wind_comp.longitude.values.flatten()
-    lats = wind_comp.latitude.values.flatten()
-    values = wind_comp.values.flatten()
+        lons = wind_comp.longitude.values.flatten()
+        lats = wind_comp.latitude.values.flatten()
+        values = wind_comp.values.flatten()
 
-    # Step 1: Mask to rectangular bounding box of hull
-    rect_mask = (
-        (lons >= convex_hull.bounds.minx.values)
-        & (lons <= convex_hull.bounds.maxx.values)
-        & (lats >= convex_hull.bounds.miny.values)
-        & (lats <= convex_hull.bounds.maxy.values)
+        # Step 1: Mask to rectangular bounding box of hull
+        rect_mask = (
+            (lons >= convex_hull.bounds.minx.values)
+            & (lons <= convex_hull.bounds.maxx.values)
+            & (lats >= convex_hull.bounds.miny.values)
+            & (lats <= convex_hull.bounds.maxy.values)
+        )
+        lons = lons[rect_mask]
+        lats = lats[rect_mask]
+        values = values[rect_mask]
+
+        # Step 2: Mask to specific shape of hull by checking each point
+        hull_mask = []
+        for point in points_from_xy(lons, lats):
+            hull_mask.append(convex_hull.contains(point).values)
+        hull_mask = np.array(hull_mask).squeeze()
+
+        return lons[hull_mask], lats[hull_mask], values[hull_mask]
+
+    # Mask u and v winds to convex hull
+    lons_mask, lats_mask, u_mask = mask_winds_with_hull(u)
+    _, _, v_mask = mask_winds_with_hull(v)
+
+    # Dot product
+    dp = []
+    for lon, lat, u_comp, v_comp in zip(lons_mask, lats_mask, u_mask, v_mask):
+        waz = (90 - np.rad2deg(np.arctan2(v_comp, u_comp))) % 360  # [° from N]
+        baz = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]  # [° shot-wind loc az]
+        wmag = np.sqrt(u_comp**2 + v_comp**2)
+        angle_diff = waz - baz  # Sign does not matter!
+        dot_product = wmag * np.cos(
+            np.deg2rad(angle_diff)
+        )  # Treating baz as unit vector
+        # dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
+        dp.append(dot_product)
+    dp = np.array(dp)
+
+    # Plot masked wind locations on existing figure colored by dot product
+    sm = fig.axes[0].scatter(
+        lons_mask, lats_mask, c=dp, vmin=-10, vmax=10, cmap='seismic_r'
     )
-    lons = lons[rect_mask]
-    lats = lats[rect_mask]
-    values = values[rect_mask]
+    cbar = fig.colorbar(sm, label='Prop. dir. wind comp. (m/s)')
 
-    # Step 2: Mask to specific shape of hull by checking each point
-    hull_mask = []
-    for point in points_from_xy(lons, lats):
-        hull_mask.append(convex_hull.contains(point).values)
-    hull_mask = np.array(hull_mask).squeeze()
+    # Add title
+    fig.axes[0].set_title(f'Median: ${np.median(dp):.2f}$ m/s')
 
-    return lons[hull_mask], lats[hull_mask], values[hull_mask]
-
-
-# Mask u and v winds to convex hull
-lons_mask, lats_mask, u_mask = mask_winds_with_hull(u)
-_, _, v_mask = mask_winds_with_hull(v)
-
-# Dot product
-dp = []
-for lon, lat, u_comp, v_comp in zip(lons_mask, lats_mask, u_mask, v_mask):
-    waz = (90 - np.rad2deg(np.arctan2(v_comp, u_comp))) % 360  # [° from N]
-    baz = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]  # [° shot-wind loc az]
-    wmag = np.sqrt(u_comp**2 + v_comp**2)
-    angle_diff = waz - baz  # Sign does not matter!
-    dot_product = wmag * np.cos(np.deg2rad(angle_diff))  # Treating baz as unit vector
-    # dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
-    dp.append(dot_product)
-dp = np.array(dp)
-
-# Plot masked wind locations on existing figure colored by dot product
-sm = fig.axes[0].scatter(
-    lons_mask, lats_mask, c=dp, vmin=-10, vmax=10, cmap='seismic_r'
-)
-cbar = fig.colorbar(sm, label='Prop. dir. wind comp. (m/s)')
-
-# Add title
-fig.axes[0].set_title(f'Median: ${np.median(dp):.2f}$ m/s')
-
-# Print median across all points in the hull
-print(SHOT)
-print(f'{np.median(dp):.2f} m/s')
+    # Print median across all points in the hull
+    print(SHOT)
+    print(f'{np.median(dp):.2f} m/s')
