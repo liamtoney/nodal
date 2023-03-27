@@ -158,7 +158,7 @@ fig.show()
 
 #%% (C2) Encode STA/LTA to transparency so we can color markers by azimuth
 
-USE_DIFF_PATH = False  # Toggle using diffracted path length or great circle distance
+USE_DIFF_PATH = True  # Toggle using diffracted path length or great circle distance
 GAMMA = 2  # Exponent for accentuating higher STA/LTA values
 
 # Compute the shot–node azimuth and add to df_sorted
