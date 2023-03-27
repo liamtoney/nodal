@@ -257,6 +257,8 @@ fig.show()
 
 #%% (C3) Map view plots of quantities w/ STA/LTA shading
 
+shot_kw = dict(color='black', marker='s', s=50, zorder=10)
+
 # Azimuth
 fig, ax = plt.subplots()
 sm = ax.scatter(
@@ -267,7 +269,7 @@ sm = ax.scatter(
     alpha=norm(df_sorted.sta_lta_amp),
     lw=0,
 )
-ax.scatter(shot.lon, shot.lat, color='lightgray', marker='s', s=50, ec='black')
+ax.scatter(shot.lon, shot.lat, **shot_kw)
 ax.set_title(f'Shot {shot.name}', weight='bold')
 fig.colorbar(sm, label='Shot–node azimuth (°)')
 fig.tight_layout()
@@ -289,7 +291,7 @@ sm = ax.scatter(
     alpha=norm(df_sorted.sta_lta_amp),
     lw=0,
 )
-ax.scatter(shot.lon, shot.lat, color='lightgray', marker='s', s=50, ec='black')
+ax.scatter(shot.lon, shot.lat, **shot_kw)
 ax.set_title(f'Shot {shot.name}, {celerity} m/s', weight='bold')
 fig.colorbar(
     sm,
@@ -322,7 +324,7 @@ sm = ax.scatter(
     alpha=norm(df_sorted.sta_lta_amp),
     lw=0,
 )
-ax.scatter(shot.lon, shot.lat, color='black', marker='s', s=50, zorder=10)
+ax.scatter(shot.lon, shot.lat, **shot_kw)
 fig.colorbar(
     sm,
     label='Measured, $infresnel\,$-adjusted celerity (m/s)',
