@@ -10,6 +10,7 @@ from matplotlib.colors import BoundaryNorm, PowerNorm
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 
+from get_and_plot_nam_hrrr import build_url, ingest_grib_nam
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to analyze
@@ -295,5 +296,67 @@ fig.colorbar(
     label='$infresnel\,$-sourced travel time delay (s)',
     ticks=plt.MultipleLocator(inc),
 )
+fig.tight_layout()
+fig.show()
+
+#%% (C4) Celerity map view w/ wind arrows overlain
+
+# Celerity [measured] accounting for topography via infresnel!
+measured_celerity = df_sorted.diffracted_path_length / df_sorted.arr_time
+
+# Boundary norm setup
+CEL_MIN = 339  # [m/s]
+CEL_MAX = 341.5  # [m/s]
+CEL_INC = 0.5  # [m/s]
+cmap = cc.m_CET_D11
+bnorm = BoundaryNorm(np.arange(CEL_MIN, CEL_MAX + CEL_INC, CEL_INC), cmap.N)
+
+# Plot
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    df_sorted.lon,
+    df_sorted.lat,
+    c=measured_celerity,
+    cmap=cmap,
+    norm=bnorm,
+    alpha=norm(df_sorted.sta_lta_amp),
+    lw=0,
+)
+ax.scatter(shot.lon, shot.lat, color='black', marker='s', s=50, zorder=10)
+fig.colorbar(
+    sm,
+    label='Measured, $infresnel\,$-adjusted celerity (m/s)',
+    ticks=plt.MultipleLocator(CEL_INC),
+)
+
+# Get wind data!
+time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
+u = ingest_grib_nam(
+    build_url(time.year, time.month, time.day, time.hour, measurement='UGRD')
+)
+v = ingest_grib_nam(
+    build_url(time.year, time.month, time.day, time.hour, measurement='VGRD')
+)
+
+# Crop each DataArray to data lims
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+minx, maxx, miny, maxy = *xlim, *ylim
+mask_lon = (u.longitude >= minx) & (u.longitude <= maxx)
+mask_lat = (u.latitude >= miny) & (u.latitude <= maxy)
+u = u.where(mask_lon & mask_lat, drop=True)
+mask_lon = (v.longitude >= minx) & (v.longitude <= maxx)
+mask_lat = (v.latitude >= miny) & (v.latitude <= maxy)
+v = v.where(mask_lon & mask_lat, drop=True)
+
+# Plot arrows
+sm = ax.quiver(u.longitude, u.latitude, u, v, zorder=4, width=0.004)
+reference_speed = 5  # [m/s]
+ax.quiverkey(
+    sm, 0.05, 1.02, reference_speed, label=f'{reference_speed} m/s', coordinates='axes'
+)
+ax.set_title(f'Shot {shot.name}', weight='bold')
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
 fig.tight_layout()
 fig.show()
