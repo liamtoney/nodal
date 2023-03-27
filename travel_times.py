@@ -201,7 +201,8 @@ ax.set_title(f'Shot {shot.name}', loc='left', weight='bold')
 
 # Plot celerity guides
 xlim, ylim = ax.get_xlim(), ax.get_ylim()
-celerities_to_plot = (336, 338, 340, 342, 344)
+est_celerity = celerity_estimate(shot)
+celerities_to_plot = np.array([-4, -2, 0, 2, 4]) + est_celerity
 guide_color = 'tab:gray'
 for celerity in celerities_to_plot:
     ax.plot(
