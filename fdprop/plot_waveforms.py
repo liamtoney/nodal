@@ -265,15 +265,14 @@ ax1.sharey(ax2)
 
 for topo_ax in topo_ax1, topo_ax2:
     topo_ax.fill_betweenx(
-        topo_x, topo_z.min(), topo_z, lw=0, color='tab:gray', clip_on=False
+        topo_x, topo_z.min(), topo_z, lw=0, color='lightgray', clip_on=False
     )
     topo_ax.set_xlim(
         topo_z.min(), topo_z[0]
     )  # Axis technically ends at elevation of shot
     # topo_ax.set_aspect('equal')  # WHY DOES THIS NOT WORK!??
-    topo_ax.set_zorder(5)
+    topo_ax.set_zorder(-5)
     topo_ax.tick_params(bottom=False, labelbottom=False)
-    topo_ax.patch.set_alpha(0)
     for side in 'top', 'right', 'bottom':
         topo_ax.spines[side].set_visible(False)
 topo_ax2.axis('off')
@@ -311,6 +310,15 @@ for ax, topo_ax in zip([ax1, ax2], [topo_ax1, topo_ax2]):
             topo_ax_pos.height,
         ]
     )
+
+# Add spine to cover wf ends
+_spine = fig.add_subplot(111)
+_spine.set_position(topo_ax1.get_position())
+for side in 'top', 'bottom', 'right':
+    _spine.spines[side].set_visible(False)
+_spine.patch.set_alpha(0)
+_spine.set_xticks([])
+_spine.set_yticks([])
 
 cax = fig.add_subplot(111)
 ax1_pos = ax1.get_position()
