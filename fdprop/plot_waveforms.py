@@ -9,9 +9,9 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 # CHANGE ME!
-RUN = '16_shot_y5_buffer_terrain'
-SHOT = 'Y5'
-WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
+RUN = '17_shot_x5_finer_dx_dt'
+SHOT = 'X5'
+WAVEFORM_SNAPSHOT_INTERVAL = 10  # TODO from main.cpp
 X_SRC = 1500  # [m] TODO from main.cpp
 
 M_PER_KM = 1000  # [m/km] CONSTANT
@@ -73,8 +73,8 @@ d_plot = d[source_ind : end_ind + 1]
 st_syn_plot = st_syn[source_ind : end_ind + 1]
 
 # Waveform plot
-SKIP = 50  # TODO: Plot every SKIP stations
-SCALE = 1.5  # TODO: Divide each waveform by this SCALE to make it fit nicely
+SKIP = 100  # TODO: Plot every SKIP stations
+SCALE = 0.5  # TODO: Divide each waveform by this SCALE to make it fit nicely
 fig, ax = plt.subplots(figsize=(12, 9))
 for tr, d in zip(st_syn_plot[::SKIP], d_plot[::SKIP]):
     ax.plot(tr.times(), (tr.data / SCALE) + d)
@@ -113,7 +113,7 @@ fig.show()
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
 peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
 
-d_ref = 24 / M_PER_KM  # [km] TODO: Reference distance
+d_ref = 14 / M_PER_KM  # [km] TODO: Reference distance
 
 tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])
 cyl_tl = 20 * np.log10(np.sqrt(d_ref / d))
@@ -154,7 +154,7 @@ fig.show()
 #%% Plot comparison between synthetics and observed GCAs
 
 # Plotting config params
-SKIP = 75  # Plot every SKIP stations
+SKIP = 150  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
 MIN_DIST, MAX_DIST = 0, 25  # [km]
@@ -282,7 +282,7 @@ norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [5, 325],  # TODO: Arbitrary / trial-and-error scaling factors
+    [10, 1000],  # TODO: Arbitrary / trial-and-error scaling factors
     PRE_ROLL,
     [False, False],
 ):
