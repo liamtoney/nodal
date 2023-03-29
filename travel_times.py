@@ -93,7 +93,8 @@ STA = 0.2  # [s]
 LTA = 2  # [s]
 
 # This is *just* for the travel time picks
-TRIGGER_THRESH = 9
+TRIGGER_ON = 6
+TRIGGER_OFF = 4
 
 st = get_waveforms_shot(shot.name, processed=True)
 station = '4106'
@@ -106,6 +107,7 @@ tr.taper(0.05)
 tr.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
 tr_sta_lta = tr.copy()
 tr_sta_lta.trigger('classicstalta', sta=STA, lta=LTA)
+tr_sta_lta.taper(0.05)
 
 # Window around acoustic and get peak
 rel_win = [(distance / c) for c in CELERITY_LIMITS[::-1]]
@@ -114,8 +116,8 @@ max_val = tr_sta_lta_win.max()
 argmax = tr_sta_lta_win.data.argmax()
 rel_t_max = tr_sta_lta_win.times(reftime=shot.time)[argmax]
 
-# Formally trigger the STA/LTA (on/off at same thresh...)
-trig_wins = trigger_onset(tr_sta_lta.data, TRIGGER_THRESH, TRIGGER_THRESH)
+# Formally trigger the STA/LTA
+trig_wins = trigger_onset(tr_sta_lta.data, TRIGGER_ON, TRIGGER_OFF)
 print(f'{len(trig_wins)} trigger(s)')
 
 # Plot
@@ -138,7 +140,7 @@ for ax in ax1, ax2:
         )
 ax2.scatter(rel_t_max, max_val, color='red', zorder=3)
 ax1.set_title(
-    f'Station {station}, STA/LTA threshold = {TRIGGER_THRESH} ({len(trig_wins)} triggers)'
+    f'Station {station} — STA/LTA (on, off) = {TRIGGER_ON, TRIGGER_OFF} — {len(trig_wins)} trigger(s)'
 )
 fig.tight_layout()
 fig.show()
