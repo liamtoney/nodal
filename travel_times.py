@@ -254,13 +254,23 @@ ax.set_ylim(ylim)
 
 # Colorbar 1: STA/LTA value (transparency)
 ylim = norm.vmin, norm.vmax
+check_shape = (110, 4)  # Currently just hard-coded to produce square "checks"
+cax1.pcolormesh(
+    np.linspace(0, 1, check_shape[1] + 1),
+    np.linspace(*ylim, check_shape[0] + 1),
+    np.indices(check_shape).sum(axis=0) % 2,  # The checker pattern
+    cmap=cc.m_gray_r,
+    vmax=8,  # Effectively controls how gray the checkerboard is (`vmax=1` is black)
+    shading='flat',
+)
 npts = 1000
 cax1.pcolormesh(
     [0, 1],  # Just to stretch the image
     np.linspace(*ylim, npts),  # Linear y-axis
-    np.power(np.expand_dims(np.linspace(*ylim, npts - 1), 1), norm.gamma),
-    cmap=cc.m_gray_r,
-    rasterized=True,
+    np.ones((npts - 1, 1)),  # Solid black
+    alpha=norm(np.expand_dims(np.linspace(*ylim, npts - 1), 1)),
+    cmap=cc.m_gray,
+    rasterized=True,  # Avoids unsightly horizontal stripes
 )
 cax1.set_xticks([])
 cax1.set_ylabel('STA/LTA amplitude')
