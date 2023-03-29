@@ -9,6 +9,7 @@ import pandas as pd
 from matplotlib.colors import BoundaryNorm, PowerNorm
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
+from obspy.signal.trigger import trigger_onset
 
 from get_and_plot_nam_hrrr import build_url, ingest_grib_nam
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
@@ -91,6 +92,9 @@ FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
 
+# This is *just* for the travel time picks
+TRIGGER_THRESH = 9
+
 st = get_waveforms_shot(shot.name, processed=True)
 station = '4106'
 tr = st.select(station=station)[0]
@@ -110,6 +114,10 @@ max_val = tr_sta_lta_win.max()
 argmax = tr_sta_lta_win.data.argmax()
 rel_t_max = tr_sta_lta_win.times(reftime=shot.time)[argmax]
 
+# Formally trigger the STA/LTA (on/off at same thresh...)
+trig_wins = trigger_onset(tr_sta_lta.data, TRIGGER_THRESH, TRIGGER_THRESH)
+print(f'{len(trig_wins)} trigger(s)')
+
 # Plot
 fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(14, 5))
 ax1.plot(tr.times(reftime=shot.time), tr.data)
@@ -122,7 +130,16 @@ ax2.set_xlabel('Time from shot (s)')
 for ax in ax1, ax2:
     ax.axvspan(*rel_win, zorder=-1, color='gray', alpha=0.3, lw=0)
     ax.axvline(rel_t_max, color='red', zorder=3)
+    for trig_win in trig_wins:
+        ax.axvline(
+            tr_sta_lta.times(reftime=shot.time)[trig_win[0]],  # Place line at ONSET!
+            color='limegreen',
+            zorder=3,
+        )
 ax2.scatter(rel_t_max, max_val, color='red', zorder=3)
+ax1.set_title(
+    f'Station {station}, STA/LTA threshold = {TRIGGER_THRESH} ({len(trig_wins)} triggers)'
+)
 fig.tight_layout()
 fig.show()
 
