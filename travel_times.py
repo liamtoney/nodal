@@ -93,8 +93,8 @@ STA = 0.2  # [s]
 LTA = 2  # [s]
 
 # This is *just* for the travel time picks
-TRIGGER_ON = 6
-TRIGGER_OFF = 4
+TRIGGER_ON = 4
+TRIGGER_OFF = 2
 
 st = get_waveforms_shot(shot.name, processed=True)
 station = '4106'
