@@ -117,8 +117,8 @@ argmax = tr_sta_lta_win.data.argmax()
 rel_t_max = tr_sta_lta_win.times(reftime=shot.time)[argmax]
 
 # Formally trigger the STA/LTA
-trig_wins = trigger_onset(tr_sta_lta.data, TRIGGER_ON, TRIGGER_OFF)
-print(f'{len(trig_wins)} trigger(s)')
+trig_wins = trigger_onset(tr_sta_lta_win.data, TRIGGER_ON, TRIGGER_OFF)
+print(f'{len(trig_wins)} trigger(s) within celerity window')
 
 # Plot
 fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(14, 5))
@@ -134,13 +134,13 @@ for ax in ax1, ax2:
     ax.axvline(rel_t_max, color='red', zorder=3)
     for trig_win in trig_wins:
         ax.axvline(
-            tr_sta_lta.times(reftime=shot.time)[trig_win[0]],  # Place line at ONSET!
+            tr_sta_lta_win.times(reftime=shot.time)[trig_win[0]],  # Line at ONSET!
             color='limegreen',
             zorder=3,
         )
 ax2.scatter(rel_t_max, max_val, color='red', zorder=3)
 ax1.set_title(
-    f'Station {station} — STA/LTA (on, off) = {TRIGGER_ON, TRIGGER_OFF} — {len(trig_wins)} trigger(s)'
+    f'Station {station} — STA/LTA (on, off) = {TRIGGER_ON, TRIGGER_OFF} — {len(trig_wins)} trigger(s) within celerity window'
 )
 fig.tight_layout()
 fig.show()
