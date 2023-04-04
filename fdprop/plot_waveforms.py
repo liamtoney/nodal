@@ -9,8 +9,8 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 # CHANGE ME!
-RUN = '18_shot_x5_new_stf'
-SHOT = 'X5'
+RUN = '19_shot_y5_new_stf'
+SHOT = 'Y5'
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 X_SRC = 1500  # [m] TODO from main.cpp
 
@@ -113,7 +113,7 @@ fig.show()
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
 peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
 
-d_ref = 8 / M_PER_KM  # [km] TODO: Reference distance
+d_ref = 24 / M_PER_KM  # [km] TODO: Reference distance
 
 tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])
 cyl_tl = 20 * np.log10(np.sqrt(d_ref / d))
@@ -282,7 +282,7 @@ norms = []
 for ax, st, scale, pre_roll, log in zip(
     [ax1, ax2],
     [st_syn_plot, st_plot],
-    [10, 1000],  # TODO: Arbitrary / trial-and-error scaling factors
+    [5, 300],  # TODO: Arbitrary / trial-and-error scaling factors
     PRE_ROLL,
     [False, False],
 ):
