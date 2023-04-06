@@ -6,13 +6,16 @@ import numpy as np
 import pandas as pd
 import pygmt
 
-from utils import INNER_RING_REGION, MASK_DISTANCE_KM, NODAL_WORKING_DIR, get_shots
+from utils import MASK_DISTANCE_KM, NODAL_WORKING_DIR, get_shots
 
 # Get Y5 info
 shot = get_shots().loc['Y5']
 
 # Set PyGMT defaults
 pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
+
+# Shared region for maps (buffer around nodes + shot Y5, to nearest 0.02°
+REGION = (-122.36, -122.02, 46.08, 46.32)
 
 # CONSTANT
 M_PER_KM = 1000
@@ -47,7 +50,7 @@ def plot_node_values(
     # Plot
     shaded_relief = pygmt.grdgradient(
         '@earth_relief_01s_g',
-        region=INNER_RING_REGION,
+        region=REGION,
         azimuth=-45.0,
         normalize='t1+a0',
     )
@@ -56,7 +59,7 @@ def plot_node_values(
         shaded_relief,
         cmap=True,
         projection='M4i',
-        region=INNER_RING_REGION,
+        region=REGION,
         frame=False,
         transparency=30,
     )
@@ -97,7 +100,7 @@ def plot_node_values(
         pen=True,
     )
     fig.text(x=shot.lon, y=shot.lat, text=shot.name, font='5p,white', justify='CM')
-    fig.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=[frame, 'a0.1f0.02'])
+    fig.basemap(map_scale='g-122.1/46.1+w5+f+l', frame=[frame, 'a0.1f0.02'])
     fig.colorbar(
         frame=f'{cbar_tick_ints}+l"{cbar_label}"', position='JBC+jMC+o0/-0.5i+h'
     )
@@ -112,7 +115,7 @@ plot_node_values(
     mask_distance=MASK_DISTANCE_KM,
     frame='WeSN',
 )
-xshift = 4.4  # [in]
+xshift = 4.45  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
 plot_node_values(
     fig,
