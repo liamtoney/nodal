@@ -101,8 +101,18 @@ def plot_node_values(
     )
     fig.text(x=shot.lon, y=shot.lat, text=shot.name, font='5p,white', justify='CM')
     fig.basemap(map_scale='g-122.1/46.1+w5+f+l', frame=[frame, 'a0.1f0.02'])
+    clip_low = series[0] > sta_values.min()
+    clip_high = series[1] < sta_values.max()
+    if clip_low and clip_high:
+        tri = '+ebf'
+    elif clip_low and not clip_high:
+        tri = '+eb'
+    elif not clip_low and clip_high:
+        tri = '+ef'
+    else:
+        tri = ''
     fig.colorbar(
-        frame=f'{cbar_tick_ints}+l"{cbar_label}"', position='JBC+jMC+o0/-0.5i+h'
+        frame=f'{cbar_tick_ints}+l"{cbar_label}"', position='JBC+jMC+o0/-0.5i+h' + tri
     )
 
 
@@ -112,6 +122,7 @@ plot_node_values(
     df.sta_lta_amp,
     sta_dists=df.dist_m,
     cbar_label='STA/LTA amplitude',
+    vmin=2,
     mask_distance=MASK_DISTANCE_KM,
     frame='WeSN',
 )
@@ -121,9 +132,7 @@ plot_node_values(
     fig,
     df.path_length_diff_m,
     cbar_label='Difference between shortest diffracted path and direct path (m)',
-    vmin=15,  # [m]
-    vmax=40,  # [m] Making this smaller highlights the differences better!
-    cbar_tick_ints='a5f1',
+    vmax=35,  # [m]
     reverse_cmap=True,
     frame='wESN',
 )
