@@ -36,17 +36,14 @@ columns = dict(
 )
 
 # Re-format any newlines present in the column names so LaTeX can handle them properly
-# (also make the header bold!)
-max_lines = max([len(v.split('\n')) for v in columns.values()])
+# (also make the header bold!) — note that `\thead{}` requires `\usepackage{makecell}`
 for k in columns.keys():
     lines = columns[k].split('\n')
     lines_bold = [rf'\textbf{{{line}}}' for line in lines]
-    empty_lines_to_add = max_lines - len(lines_bold)
-    columns[k] = tuple(empty_lines_to_add * [''] + lines_bold)
+    columns[k] = r'\thead{{{}}}'.format(r' \\ '.join(lines_bold))
 
-# Subset table and assign the [potentially multi-line] formatted column names
+# Subset table
 df = df[columns.keys()]
-df.columns = pd.MultiIndex.from_tuples(columns.values())
 
 
 # Color rows based on GCA presence/absence (conditional formatting, basically)
@@ -58,7 +55,7 @@ def color_rows_by_gca_presence(row):
 
 
 # Style and output .tex file
-df.style.hide(axis='index').format(
+df.rename(columns=columns).style.hide(axis='index').format(
     {
         columns['time']: lambda t: '{}'.format(t.strftime('%m-%d %H:%M:%S')),
         columns['gcas_on_nodes']: lambda x: rf'\texttt{{{x}}}',
