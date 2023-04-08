@@ -29,10 +29,10 @@ df = df.reset_index(level=0)  # Convert the index (which is shot name) to a colu
 columns = dict(
     shot='Shot',
     time='UTC time\n(MM-DD hh:mm:ss)',
-    weight_kg='Weight (kg)',  # Note we *are* actually doing the unit conversion!
+    weight_kg='Weight\n(kg)',
     pre_shot_rms='Median RMS\nvelocity (\\textmu m/s)',
     median_dist='Median shot--node\ndistance (km)',
-    gcas_on_nodes='GCAs?',
+    gcas_on_nodes='Coupled\narrivals?',
 )
 
 # Re-format any newlines present in the column names so LaTeX can handle them properly
