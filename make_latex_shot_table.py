@@ -28,7 +28,7 @@ df = df.reset_index(level=0)  # Convert the index (which is shot name) to a colu
 # Format column names for table heading (also determines the order AND which columns!)
 columns = dict(
     shot='Shot',
-    time='UTC time\n(MM-DD hh:mm:ss)',
+    time='UTC time in 2014\n(MM-DD hh:mm:ss)',
     weight_kg='Weight\n(kg)',
     pre_shot_rms='Median RMS\nvelocity (\\textmu m/s)',
     median_dist='Median shot--node\ndistance (km)',
