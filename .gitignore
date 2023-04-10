@@ -17,5 +17,6 @@
 *.pptx
 *.ai
 *.pdf
+*.npy
 Icon?
 .DS_Store
