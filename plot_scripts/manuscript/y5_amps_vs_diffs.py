@@ -58,7 +58,7 @@ def plot_node_values(
     fig.grdimage(
         shaded_relief,
         cmap=True,
-        projection='M4i',
+        projection='M2.98i',
         region=REGION,
         frame=False,
         transparency=30,
@@ -126,19 +126,19 @@ plot_node_values(
     mask_distance=MASK_DISTANCE_KM,
     frame='WeSN',
 )
-xshift = 4.45  # [in]
+xshift = 3.32  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
 plot_node_values(
     fig,
     df.path_length_diff_m,
-    cbar_label='Difference between shortest diffracted path and direct path (m)',
+    cbar_label='Path length difference (m)',
     vmax=35,  # [m]
     reverse_cmap=True,
     frame='wESN',
 )
 
 # Plot (a) and (b) tags
-tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='16p,Helvetica-Bold')
+tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='12p,Helvetica-Bold')
 x_offset = -0.05  # [in]
 fig.text(text='(a)', offset=f'{x_offset - xshift}i/0', **tag_kwargs)
 fig.text(text='(b)', offset=f'{x_offset}i/0', **tag_kwargs)
@@ -147,4 +147,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'y5_amps_vs_diffs.png', dpi=600)
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'y5_amps_vs_diffs.png', dpi=600, resize='+m2p')
