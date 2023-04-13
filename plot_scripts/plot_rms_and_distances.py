@@ -26,7 +26,7 @@ ylabel_list = [
     'Median shot–node distance (km)',
 ]
 
-#%% 1. Make two bar plots
+#%% Make two bar plots
 
 for values, ylabel in zip(values_list, ylabel_list):
     fig, ax = plt.subplots(figsize=(12, 3.5))
@@ -55,40 +55,3 @@ for values, ylabel in zip(values_list, ylabel_list):
     fig.show()
 
     # fig.savefig(NODAL_WORKING_DIR / 'figures' / ('_'.join(ylabel.split(' ')[:3]).lower() + '.png'), dpi=300, bbox_inches='tight')
-
-#%% 2. Make one scatter plot
-
-size_1000_lb = 100  # Marker size for the smaller, 1000-lb shots
-scale = size_1000_lb / 1000  # [1/lb] Scale shot weights to marker sizes
-
-fig, ax = plt.subplots(figsize=(10, 8))
-ax.scatter(
-    x=values_list[0],
-    y=values_list[1],
-    c=df.gcas_on_nodes,
-    s=df.weight_lb * scale,
-    marker='s',
-    cmap='Greys',
-    edgecolors='black',
-)
-for x, y, shot in zip(values_list[0], values_list[1], list(df.index)):
-    ax.text(
-        x=x,
-        y=y,
-        s=shot,
-        color='white' if df.loc[shot].gcas_on_nodes else 'black',
-        va='center',
-        ha='center',
-        fontsize=5,
-    )
-ax.set_xlabel(ylabel_list[0])
-ax.set_ylabel(ylabel_list[1])
-
-# Make pretty
-for side in 'top', 'right':
-    ax.spines[side].set_visible(False)
-
-fig.tight_layout()
-fig.show()
-
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'dist_vs_rms.png', dpi=300, bbox_inches='tight')
