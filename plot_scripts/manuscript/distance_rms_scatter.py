@@ -117,7 +117,7 @@ for ticks, func in zip([xticks_all[:-1], ax.get_yticks()], [ax.axvline, ax.axhli
 for side in 'top', 'right':
     ax.spines[side].set_visible(False)
 
-fig.tight_layout()
+fig.tight_layout(pad=0.2)
 
 # Inset colorbar (after tight_layout) call!
 cbar_height = 0.25  # As fraction of total axis height
