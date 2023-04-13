@@ -12,6 +12,9 @@ from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import get_shots, get_stations, get_waveforms_shot
 
+FONT_SIZE = 10  # [pt]
+plt.rcParams.update({'font.size': FONT_SIZE})
+
 M_PER_KM = 1000  # [m/km]
 
 df = get_shots().sort_values(by='time')  # Shot info, sorted by time
@@ -93,7 +96,7 @@ for da in tqdm.tqdm(da_list):
 #%% Make plot
 
 # Set up figure and axes
-fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7, 9), sharex=True, sharey=True)
+fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7.17, 9), sharex=True, sharey=True)
 axs[-1, -1].remove()  # Only 23 shots!
 for ax in axs[:-1, :].flatten():
     ax.tick_params(which='both', bottom=False)
@@ -160,10 +163,13 @@ label_ax.set_xlabel('Time from shot (s)', labelpad=25)
 label_ax.set_ylabel('Distance from shot (km)', labelpad=25)
 
 # Finalize
-fig.tight_layout()
-fig.subplots_adjust(wspace=0.1, hspace=0.11)
+fig.tight_layout(pad=0.2, rect=(-0.03, -0.025, 1, 1))
+fig.subplots_adjust(
+    wspace=0.08,
+    hspace=0.1,
+)
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.png', dpi=300, bbox_inches='tight')
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.png', dpi=300)
