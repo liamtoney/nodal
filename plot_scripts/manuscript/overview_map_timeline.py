@@ -21,6 +21,9 @@ from utils import (
     get_stations,
 )
 
+FONT_SIZE = 10  # [pt]
+plt.rcParams.update({'font.size': FONT_SIZE})
+
 # --------------------------------------------------------------------------------------
 # (a) Overview map
 # --------------------------------------------------------------------------------------
@@ -54,7 +57,7 @@ pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nic
 fig_gmt.grdimage(
     shaded_relief,
     cmap=True,
-    projection='M4i',
+    projection='M5.2i',
     region=INNER_RING_REGION,
     frame=False,
     transparency=30,
@@ -107,7 +110,7 @@ fig_gmt.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
 # Colorbar, shifted to the left
 fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jML+o0/-0.5i+h')
 # Inset map showing all shots
-with fig_gmt.inset(position='JTR+w1.5i+o-0.5i/-1i', box='+gwhite+p1p'):
+with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
     # Plot patch corresponding to main map extent
     fig_gmt.plot(
         data=[
@@ -278,12 +281,12 @@ AX1_TIME_RANGE = UTCDateTime('2014-07-24'), UTCDateTime('2014-07-26')
 AX2_TIME_RANGE = UTCDateTime('2014-08-01'), UTCDateTime('2014-08-02')
 
 # Make plot
-MPL_PLOT_WIDTH = 5.03  # [in]
+MPL_PLOT_WIDTH = 6  # [in]
 fig, (ax1, ax2) = plt.subplots(
     ncols=2,
     sharey=True,
     gridspec_kw=dict(width_ratios=(np.diff(AX1_TIME_RANGE), np.diff(AX2_TIME_RANGE))),
-    figsize=(MPL_PLOT_WIDTH, 3),
+    figsize=(MPL_PLOT_WIDTH, 1.9),
 )
 
 # Compute static [dry air] sound speed, see first equation for c_air in
@@ -337,7 +340,7 @@ ax1.set_ylabel('Static sound\nspeed (m/s)')
 # Plot shot times
 df = get_shots()
 df_sort = df.sort_values(by='time')
-df_sort['yloc'] = np.array([357, 353, 349, 345] * 6)[:-1]  # Manual stagger
+df_sort['yloc'] = np.array([354, 351, 348, 345] * 6)[:-1]  # Manual stagger
 for _, row in df_sort.iterrows():
     for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         if (row.time >= time_range[0]) & (row.time <= time_range[1]):
@@ -416,8 +419,8 @@ for ax in ax1, ax2:
         lw=plt.rcParams['axes.linewidth'],
     )
 
-fig.tight_layout()
-fig.subplots_adjust(wspace=0.2)
+fig.tight_layout(pad=0)
+fig.subplots_adjust(wspace=0.15, top=0.71)
 
 # --------------------------------------------------------------------------------------
 # Now combine (b) into the GMT figure containing (a)
@@ -426,21 +429,21 @@ fig.subplots_adjust(wspace=0.2)
 # Note: EPS does not support transparency!
 Y_OFF = 1.2  # [in] For (b), from bottom edge of (a) axes (positive down)
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
-    fig.savefig(f.name, bbox_inches='tight')
+    fig.savefig(f.name)
     fig_gmt.image(
         f.name,
-        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.27i/{Y_OFF}i',  # "Tools -> Show Inspector" CLUTCH here!
+        position=f'JBC+w{MPL_PLOT_WIDTH}i+o-0.26i/{Y_OFF}i',  # "Tools -> Show Inspector" CLUTCH here!
     )
 plt.close(fig)
 
 # Plot (a) and (b) tags
-tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='16p,Helvetica-Bold')
+tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='12p,Helvetica-Bold')
 x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
-fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-3.97 - Y_OFF}i', **tag_kwargs)
+fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-5.15 - Y_OFF}i', **tag_kwargs)
 
 fig_gmt.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig_gmt.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map_timeline.png', dpi=600)
+# fig_gmt.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map_timeline.png', dpi=600, resize='+m2p')
