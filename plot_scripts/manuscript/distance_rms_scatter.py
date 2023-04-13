@@ -11,6 +11,9 @@ from obspy import UTCDateTime
 
 from utils import NODAL_WORKING_DIR, get_shots
 
+FONT_SIZE = 10  # [pt]
+plt.rcParams.update({'font.size': FONT_SIZE})
+
 # Sort shots in time
 df = get_shots()
 df.time = [pd.Timestamp(t.isoformat()) for t in df.time]
@@ -38,10 +41,10 @@ boundaries_num = [t.matplotlib_date for t in boundaries]
 cmap = ListedColormap(['#4e79a7', '#f28e2b', '#59a14f'])  # TABLEAU 10
 bnorm = BoundaryNorm(boundaries_num, cmap.N)
 
-size_1000_lb = 100  # Marker size for the smaller, 1000-lb shots
+size_1000_lb = 90  # Marker size for the smaller, 1000-lb shots
 scale = size_1000_lb / 1000  # [1/lb] Scale shot weights to marker sizes
 
-fig, ax = plt.subplots(figsize=(4.9, 4.6))
+fig, ax = plt.subplots(figsize=(3.47, 3.3))
 sm = ax.scatter(
     x=rms,
     y=distance,
@@ -66,7 +69,7 @@ ax.scatter(
     clip_on=False,
     lw=0.5,
 )
-x_offsets = dict(AO4=0.025, Y8=0.03, Y2=-0.03)
+x_offsets = dict(AO4=0.035, Y8=0.045, Y2=-0.045)
 for x, y, shot in zip(rms, distance, list(df.index)):
     ha = 'center'
     shot_str = shot
@@ -87,7 +90,7 @@ for x, y, shot in zip(rms, distance, list(df.index)):
         color='white' if df.loc[shot].gcas_on_nodes else 'black',
         va='center',
         ha=ha,
-        fontsize=5,
+        fontsize=4.5,
         clip_on=False,
     )
 ax.set_xlabel('Median RMS velocity (μm/s),\n20 s window pre-shot')  # WIN_DUR
@@ -96,10 +99,11 @@ ax.set_ylabel('Median shot–node distance (km)')
 ax.set_xlim(right=0.8)
 ax.set_ylim(top=80)
 
-ax.yaxis.set_minor_locator(plt.MultipleLocator(5))
+ax.xaxis.set_minor_locator(plt.MultipleLocator(0.1))
 
 # Add grid
-for ticks, func in zip([ax.get_xticks(), ax.get_yticks()], [ax.axvline, ax.axhline]):
+xticks_all = sorted(ax.get_xticks().tolist() + ax.xaxis.get_minorticklocs().tolist())
+for ticks, func in zip([xticks_all[:-1], ax.get_yticks()], [ax.axvline, ax.axhline]):
     for loc in ticks[:-1]:
         func(
             loc,
@@ -116,12 +120,12 @@ for side in 'top', 'right':
 fig.tight_layout()
 
 # Inset colorbar (after tight_layout) call!
-cbar_height = 0.2  # As fraction of total axis height
+cbar_height = 0.25  # As fraction of total axis height
 cbar_aspect = 8
-cbar_x = 0.8  # In axis coordinates
+cbar_x = 0.745  # In axis coordinates
 cax = inset_axes(
     ax,
-    bbox_to_anchor=(cbar_x, 1 - cbar_height, cbar_height / cbar_aspect, cbar_height),
+    bbox_to_anchor=(cbar_x, 1.02 - cbar_height, cbar_height / cbar_aspect, cbar_height),
     bbox_transform=ax.transAxes,
     width='100%',
     height='100%',
@@ -141,4 +145,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'distance_rms_scatter.png', dpi=300, bbox_inches='tight')
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'distance_rms_scatter.png', dpi=300)
