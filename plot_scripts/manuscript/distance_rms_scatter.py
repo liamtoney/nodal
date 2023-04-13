@@ -24,11 +24,9 @@ for shot in df.index:
         NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{shot}.csv'
     )
 
-# Define values
-values_list = [
-    [data.pre_shot_rms.median() * 1e6 for data in shot_data.values()],  # [μm/s]
-    [data.dist_m.median() / 1000 for data in shot_data.values()],  # [km]
-]
+# Define values to plot
+rms = [data.pre_shot_rms.median() * 1e6 for data in shot_data.values()]  # [μm/s]
+distance = [data.dist_m.median() / 1000 for data in shot_data.values()]  # [km]
 
 boundaries = [
     UTCDateTime(2014, 7, 24),  # 1st day of shots!
@@ -45,8 +43,8 @@ scale = size_1000_lb / 1000  # [1/lb] Scale shot weights to marker sizes
 
 fig, ax = plt.subplots(figsize=(4.9, 4.6))
 sm = ax.scatter(
-    x=values_list[0],
-    y=values_list[1],
+    x=rms,
+    y=distance,
     c=[t.matplotlib_date for t in df.time],
     s=df.weight_lb * scale * 1.6,
     marker='s',
@@ -58,8 +56,8 @@ sm = ax.scatter(
     zorder=-5,
 )
 ax.scatter(
-    x=values_list[0],
-    y=values_list[1],
+    x=rms,
+    y=distance,
     c=df.gcas_on_nodes,
     s=df.weight_lb * scale,
     marker='s',
@@ -69,7 +67,7 @@ ax.scatter(
     lw=0.5,
 )
 x_offsets = dict(AO4=0.025, Y8=0.03, Y2=-0.03)
-for x, y, shot in zip(values_list[0], values_list[1], list(df.index)):
+for x, y, shot in zip(rms, distance, list(df.index)):
     ha = 'center'
     shot_str = shot
     if shot in x_offsets.keys():
