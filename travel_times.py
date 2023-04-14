@@ -10,9 +10,10 @@ from matplotlib.colors import BoundaryNorm, PowerNorm
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.signal.trigger import trigger_onset
+from scipy.interpolate import griddata
 
 from get_and_plot_nam_hrrr import build_url, ingest_grib_nam
-from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
+from utils import INNER_RING_REGION, NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 SHOT = 'Y5'  # Shot to analyze
 
@@ -354,11 +355,7 @@ sm = ax.scatter(
     lw=0,
 )
 ax.scatter(shot.lon, shot.lat, **shot_kw)
-fig.colorbar(
-    sm,
-    label='Measured, $infresnel\,$-adjusted celerity (m/s)',
-    ticks=plt.MultipleLocator(CEL_INC),
-)
+fig.colorbar(sm, label='Measured, $infresnel\,$-adjusted celerity (m/s)')
 
 # Get wind data!
 time = pd.Timestamp(shot.time.datetime).round('1h').to_pydatetime()  # Nearest hour!
@@ -369,16 +366,83 @@ v = ingest_grib_nam(
     build_url(time.year, time.month, time.day, time.hour, measurement='VGRD')
 )
 
-# Crop each DataArray to data lims
-xlim = ax.get_xlim()
-ylim = ax.get_ylim()
-minx, maxx, miny, maxy = *xlim, *ylim
+# Crop each DataArray for speed
+minx, maxx, miny, maxy = INNER_RING_REGION
 mask_lon = (u.longitude >= minx) & (u.longitude <= maxx)
 mask_lat = (u.latitude >= miny) & (u.latitude <= maxy)
 u = u.where(mask_lon & mask_lat, drop=True)
 mask_lon = (v.longitude >= minx) & (v.longitude <= maxx)
 mask_lat = (v.latitude >= miny) & (v.latitude <= maxy)
 v = v.where(mask_lon & mask_lat, drop=True)
+
+# Plot arrows
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+sm = ax.quiver(u.longitude, u.latitude, u, v, zorder=4, width=0.004)
+reference_speed = 5  # [m/s]
+ax.quiverkey(
+    sm, 0.05, 1.02, reference_speed, label=f'{reference_speed} m/s', coordinates='axes'
+)
+ax.set_title(f'Shot {shot.name}', weight='bold')
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+fig.tight_layout()
+fig.show()
+
+#%% (C5) Interpolate winds along path from shot to each node and plot like in C4
+
+interpolation_method = 'linear'
+
+dot_product_medians = []
+for lon, lat in zip(df_sorted.lon, df_sorted.lat):
+
+    # Define path to interpolate along
+    npts = 100  # TODO should this vary with the shot–node distance?
+    x = np.linspace(shot.lon, lon, npts)
+    y = np.linspace(shot.lat, lat, npts)
+
+    # Interpolate the wind grids
+    u_profile = griddata(
+        (u.longitude.values.flatten(), u.latitude.values.flatten()),
+        u.values.flatten(),
+        (x, y),
+        method=interpolation_method,
+    )
+    v_profile = griddata(
+        (v.longitude.values.flatten(), v.latitude.values.flatten()),
+        v.values.flatten(),
+        (x, y),
+        method=interpolation_method,
+    )
+    waz = (90 - np.rad2deg(np.arctan2(v_profile, u_profile))) % 360  # [° from N]
+    baz = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[1]  # [° shot-node az]
+    wmag = np.sqrt(u_profile**2 + v_profile**2)
+    angle_diff = waz - baz  # Sign does not matter!
+    dot_product = wmag * np.cos(np.deg2rad(angle_diff))  # Treating baz as unit vector
+    # dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
+
+    dot_product_medians.append(np.median(dot_product))
+
+# Boundary norm setup
+MIN = -3.5  # [m/s]
+MAX = -2  # [m/s]
+INC = 0.3  # [m/s]
+cmap = cc.m_CET_D11
+bnorm = BoundaryNorm(np.arange(MIN, MAX + INC, INC), cmap.N)
+
+# Plot
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    df_sorted.lon,
+    df_sorted.lat,
+    c=dot_product_medians,
+    cmap=cmap,
+    norm=bnorm,
+    alpha=norm(df_sorted.sta_lta_amp),
+    lw=0,
+)
+ax.scatter(shot.lon, shot.lat, **shot_kw)
+fig.colorbar(sm, label='Median prop. dir. wind comp. (m/s)')
 
 # Plot arrows
 sm = ax.quiver(u.longitude, u.latitude, u, v, zorder=4, width=0.004)
