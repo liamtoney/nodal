@@ -2,6 +2,7 @@
 For each shot, process the data and then use the shortest diffracted paths to find the
 celerity which gives the largest stack value (via a simple 1D search).
 """
+import json
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -168,3 +169,14 @@ fig.tight_layout()
 yticks = ax.get_yticks()
 ax.spines['left'].set_bounds(yticks[1], yticks[-2])
 fig.show()
+
+#%% Export as JSON
+
+celerity_estimates = {}
+for shot, stack_function in shot_stacks.items():
+    celerity_estimates[shot] = trial_celerities[stack_function.argmax()]
+
+with open(
+    NODAL_WORKING_DIR / 'shot_gather_measurements' / 'celerity_estimates.json', 'w'
+) as f:
+    json.dump(celerity_estimates, f, indent='\t')
