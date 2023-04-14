@@ -422,6 +422,7 @@ for lon, lat in zip(df_sorted.lon, df_sorted.lat):
     # dot_product = np.cos(np.deg2rad(angle_diff))  # Treating BOTH as unit vectors
 
     dot_product_medians.append(np.median(dot_product))
+dot_product_medians = np.array(dot_product_medians)
 
 # Boundary norm setup
 MIN = -3.5  # [m/s]
@@ -445,6 +446,8 @@ ax.scatter(shot.lon, shot.lat, **shot_kw)
 fig.colorbar(sm, label='Median prop. dir. wind comp. (m/s)')
 
 # Plot arrows
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
 sm = ax.quiver(u.longitude, u.latitude, u, v, zorder=4, width=0.004)
 reference_speed = 5  # [m/s]
 ax.quiverkey(
@@ -454,4 +457,31 @@ ax.set_title(f'Shot {shot.name}', weight='bold')
 ax.set_xlim(xlim)
 ax.set_ylim(ylim)
 fig.tight_layout()
+fig.show()
+
+#%% (C6) Plot measured vs. modeled celerities against each other
+
+static_sound_speed = 342  # [m/s]
+
+fig, ax = plt.subplots()
+sm = ax.scatter(
+    measured_celerity,
+    dot_product_medians + static_sound_speed,
+    alpha=norm(df_sorted.sta_lta_amp),
+    c=df_sorted.azimuth,
+    cmap=cc.m_CET_I1,
+    lw=0,
+)
+fig.colorbar(sm, label='Shot–node azimuth (°)')
+ax.set_xlabel('Measured, $infresnel\,$-adjusted celerity (m/s)')
+ax.set_ylabel(f'Median prop. dir. wind comp. + {static_sound_speed} m/s (m/s)')
+ax.set_xlim(338, 343)
+ax.set_ylim(338, 343)
+ax.set_aspect('equal')
+c_equal = np.linspace(330, 350, 2)
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+ax.plot(c_equal, c_equal, linestyle='--', zorder=-5, color='lightgray')
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
 fig.show()
