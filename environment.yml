@@ -8,6 +8,7 @@ dependencies:
   - cfgrib
   - colorcet
   - datashader
+  - geopandas
   - ipython
   - isort
   - numba

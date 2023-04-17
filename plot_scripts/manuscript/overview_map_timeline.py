@@ -4,14 +4,18 @@ import tempfile
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import geopandas
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pygmt
+from infresnel._georeference import _estimate_utm_crs
 from matplotlib.colors import to_hex
 from obspy import UTCDateTime
 from pygmt.datasets import load_earth_relief
+from pyproj import Geod, Transformer
+from shapely.geometry import LineString
 
 from utils import (
     FULL_REGION,
@@ -62,6 +66,27 @@ fig_gmt.grdimage(
     frame=False,
     transparency=30,
 )
+# Plot the two FDTD transects (TODO: Cropped according to the xlim in the snapshot code)
+for transect, profile_end in zip(
+    ['Y5', 'X5'], [(46.224, -122.031), (46.138, -122.297)]
+):
+    profile_start = (df.loc[transect].lat, df.loc[transect].lon)
+    g = Geod(ellps='WGS84')
+    az_start_to_end = g.inv(*profile_start[::-1], *profile_end[::-1])[0]
+    profile_end_crop = g.fwd(*profile_start[::-1], az_start_to_end, 24 * 1000)[:2][::-1]
+    crs = _estimate_utm_crs(*profile_start)
+    proj = Transformer.from_crs(crs.geodetic_crs, crs)
+    s = geopandas.GeoSeries(
+        LineString([proj.transform(*profile_start), proj.transform(*profile_end_crop)])
+    )
+    buffer = s.buffer(500, cap_style=2)  # [m] TODO: Must match `MASK_DIST`
+    lats, lons = proj.transform(*buffer[0].exterior.coords.xy, direction='INVERSE')
+    fig_gmt.plot(x=lons, y=lats, close=True, color='black', transparency=70)
+    fig_gmt.plot(
+        x=[profile_start[1], profile_end_crop[1]],
+        y=[profile_start[0], profile_end_crop[0]],
+        pen='0.5p',
+    )
 # Plot nodes
 pygmt.makecpt(
     series=[np.min(elevations), np.max(elevations)],
