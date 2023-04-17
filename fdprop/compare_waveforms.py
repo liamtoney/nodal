@@ -8,9 +8,7 @@ from utils import NODAL_WORKING_DIR
 # Read in synthetics for several runs (takes a bit!)
 st_dict = {}
 for run, waveform_snapshot_interval, x_src in zip(
-    ['11_shot_y5_hf', '13_shot_y5_hf_smaller_dt', '14_shot_y5_smaller_dx'],
-    [5, 5, 5],
-    [500, 500, 500],
+    ['20_shot_y5_new_stf_hf', '22_shot_x5_new_stf_hf'], [5, 5], [1500, 1500]
 ):
     st = Stream()
     for file in (
@@ -35,6 +33,22 @@ for run, waveform_snapshot_interval, x_src in zip(
     st = st[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
     st_dict[run] = st
 
+#%% Plot a series of waveforms at different distances
+
+for run in '20_shot_y5_new_stf_hf', '22_shot_x5_new_stf_hf':
+    fig, ax = plt.subplots()
+    for tr in st_dict[run][2155:2290:10]:
+        ax.plot(tr.times(), tr.data, label=f'{tr.stats.x:g} m')
+    ax.set_xlim(22, 28)
+    ax.set_ylim(-0.25, 0.25)
+    ax.legend(loc='upper left')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Pressure (Pa)')
+    ax.set_title(run)
+    ax.grid(linestyle=':')
+    ax.set_axisbelow(True)
+    fig.show()
+
 #%% Plot time and frequency domain comparison between runs
 
 TARGET_DISTANCE = 4000  # [m]
@@ -52,7 +66,7 @@ for run, st in st_dict.items():
 
     # Obtain slice of waveform [ostensibly] containing the first peak
     arrival_time = tr.stats.starttime + tr.stats.x / CELERITY
-    first_peak_win = arrival_time - 0.5, arrival_time + 0.3
+    first_peak_win = arrival_time - 0.5, arrival_time + 1
     tr_first_peak = tr.copy().trim(*first_peak_win)
 
     # Plot waveforms normalized to the amplitude of their first peak
