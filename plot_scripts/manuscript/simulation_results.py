@@ -1,3 +1,7 @@
+import os
+import subprocess
+from pathlib import Path
+
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,7 +9,10 @@ from tqdm import tqdm
 
 from utils import NODAL_WORKING_DIR
 
-# Choose 'Y5' or 'X5'
+FONT_SIZE = 10  # [pt]
+plt.rcParams.update({'font.size': FONT_SIZE})
+
+# Choose 'Y5' or 'X5' — need to run this script once for each, and save figure!
 SHOT = 'Y5'
 
 # Some logic to load the remaining transect-specific params correctly
@@ -65,7 +72,7 @@ terrain_contour = np.loadtxt(
 
 #%% Plot
 
-fig, ax = plt.subplots(figsize=(13.5, 3))
+fig, ax = plt.subplots(figsize=(7.17, 1.9))
 
 # Plot pressure
 extent = [
@@ -95,12 +102,12 @@ text = ax.text(
     transform=ax.transAxes,
 )
 text.set_path_effects(
-    [path_effects.Stroke(linewidth=3, foreground='white'), path_effects.Normal()]
+    [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()]
 )
 
 # Axis params
 ax.set_xlabel(f'Distance from shot {SHOT} (km)')
-ax.set_ylabel(f'Elevation relative to shot {SHOT} (km)')
+ax.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
 ax.set_xlim(XLIM)
 ax.set_ylim(YLIM)
 major_tick_interval = 2  # [km]
@@ -112,11 +119,19 @@ ax.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
 ax.set_aspect('equal')
 ax.tick_params(top=True, right=True, which='both')
 
+# Layout adjustment (note we're making room for the colorbar here!)
+fig.tight_layout(pad=0.2, rect=(0, 0, 0.91, 1))
+
 # Colorbar
+cax = fig.add_subplot(111)
+ax_pos = ax.get_position()
+cax.set_position([ax_pos.xmax + 0.03, ax_pos.ymin, 0.01, ax_pos.height])
 fig.colorbar(
-    im, ticks=(im.norm.vmin, 0, im.norm.vmax), pad=0.02, label='Normalized pressure'
+    im, cax=cax, ticks=(im.norm.vmin, 0, im.norm.vmax), label='Normalized pressure'
 )
 
-# Show the figure
-fig.tight_layout()
 fig.show()
+
+_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
+
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / f'simulation_results_{SHOT.lower()}.png', dpi=400)
