@@ -1,0 +1,122 @@
+import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
+from utils import NODAL_WORKING_DIR
+
+# Choose 'Y5' or 'X5'
+SHOT = 'Y5'
+
+# Some logic to load the remaining transect-specific params correctly
+if SHOT == 'Y5':
+    RUN = '20_shot_y5_new_stf_hf'
+    Z_SRC = 734  # [m]
+elif SHOT == 'X5':
+    RUN = '22_shot_x5_new_stf_hf'
+    Z_SRC = 464  # [m]
+else:
+    raise ValueError
+PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_snapshots'
+TIMESTAMPS = np.arange(0, 20000 + 1000, 1000)  # Same for both transects
+XLIM = (0, 24)  # [km] Relative to shot x-position
+YLIM = (-0.5, 5)  # [km] Relative to shot z-position
+DT = 0.004  # [s]
+X_SRC = 1500  # [m]
+
+# Constants
+M_PER_KM = 1000  # [m/km]
+
+
+# Helper function to read in pressure matrix for a specified run and timestamp
+def _p_matrix_from_timestamp(run, timestamp):
+    file_pattern = f'{run}__*_*_*_*_*_{timestamp}.npy'
+    files = list(PRESSURE_SNAPSHOT_DIR.glob(file_pattern))
+    assert len(files) == 1
+    file = files[0]
+    p = np.load(file).T
+    param = file.stem.replace(RUN + '__', '')  # String of 6 integers
+    hoz_min, hoz_max, vert_min, vert_max, dx, _ = np.array(param.split('_')).astype(int)
+    # Only include the portion of the matrix that's IN the plotted zone!
+    left_trim = ((XLIM[0] * M_PER_KM) + X_SRC) - hoz_min  # [m]
+    top_trim = vert_max - ((YLIM[1] * M_PER_KM) + Z_SRC)  # [m]
+    right_trim = hoz_max - ((XLIM[1] * M_PER_KM) + X_SRC)  # [m]
+    p_trim = p[: -top_trim // dx, left_trim // dx : -right_trim // dx]
+    if p_trim.max() > 0:
+        p /= p_trim.max()
+    return p, hoz_min, hoz_max, vert_min, vert_max, dx
+
+
+# Load in aggregate pressure matrix
+p_agg, hoz_min, hoz_max, vert_min, vert_max, dx = _p_matrix_from_timestamp(
+    RUN, TIMESTAMPS[0]
+)
+for timestamp in tqdm(TIMESTAMPS[1:], initial=1, total=TIMESTAMPS.size):
+    p_agg += _p_matrix_from_timestamp(RUN, timestamp)[0]
+
+# Form axes
+hoz_axis = np.arange(hoz_min, hoz_max + dx, dx) / M_PER_KM
+vert_axis = np.arange(vert_min, vert_max + dx, dx) / M_PER_KM
+
+# Terrain .dat file for this run
+terrain_contour = np.loadtxt(
+    NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
+)
+
+#%% Plot
+
+fig, ax = plt.subplots(figsize=(13.5, 3))
+
+# Plot pressure
+extent = [
+    hoz_axis[0] - X_SRC / M_PER_KM,
+    hoz_axis[-1] - X_SRC / M_PER_KM,
+    vert_axis[0] - Z_SRC / M_PER_KM,
+    vert_axis[-1] - Z_SRC / M_PER_KM,
+]
+im = ax.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
+
+# Plot terrain
+ax.fill_between(
+    (terrain_contour[:, 0] - X_SRC) / M_PER_KM,
+    -1,
+    (terrain_contour[:, 1] - Z_SRC) / M_PER_KM,
+    lw=0.5,  # Makes pressure–terrain interface a little smoother-looking
+    color='tab:gray',
+)
+
+# Timestamp labels
+text = ax.text(
+    0.99,
+    0.95,
+    ', '.join([f'{timestamp * DT:g}' for timestamp in TIMESTAMPS]) + ' s',
+    ha='right',
+    va='top',
+    transform=ax.transAxes,
+)
+text.set_path_effects(
+    [path_effects.Stroke(linewidth=3, foreground='white'), path_effects.Normal()]
+)
+
+# Axis params
+ax.set_xlabel(f'Distance from shot {SHOT} (km)')
+ax.set_ylabel(f'Elevation relative to shot {SHOT} (km)')
+ax.set_xlim(XLIM)
+ax.set_ylim(YLIM)
+major_tick_interval = 2  # [km]
+minor_tick_interval = 1  # [km[
+ax.xaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax.xaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax.yaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax.set_aspect('equal')
+ax.tick_params(top=True, right=True, which='both')
+
+# Colorbar
+fig.colorbar(
+    im, ticks=(im.norm.vmin, 0, im.norm.vmax), pad=0.02, label='Normalized pressure'
+)
+
+# Show the figure
+fig.tight_layout()
+fig.show()
