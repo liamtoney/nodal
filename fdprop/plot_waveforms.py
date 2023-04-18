@@ -9,8 +9,19 @@ from obspy import Stream, Trace
 from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 # CHANGE ME!
-RUN = '19_shot_y5_new_stf'
 SHOT = 'Y5'
+
+# Some logic to load the remaining transect-specific params correctly
+if SHOT == 'Y5':
+    RUN = '20_shot_y5_new_stf_hf'
+    SYN_SCALE = 5
+    OBS_SCALE = 300
+elif SHOT == 'X5':
+    RUN = '22_shot_x5_new_stf_hf'
+    SYN_SCALE = 10
+    OBS_SCALE = 1200
+else:
+    raise ValueError
 WAVEFORM_SNAPSHOT_INTERVAL = 5  # TODO from main.cpp
 X_SRC = 1500  # [m] TODO from main.cpp
 
@@ -36,8 +47,7 @@ for file in (
         st_syn += tr
 st_syn.sort(keys=['x'])  # Sort by increasing x distance
 st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
-# FREQ = 5  # [Hz]
-# st_syn.filter('lowpass', freq=FREQ, zerophase=True)
+st_syn.filter(type='lowpass', freq=4, zerophase=False, corners=4)  # KEY!
 
 # READ IN "REAL" DATA
 with open(
@@ -141,8 +151,8 @@ ax.plot(
 )
 ax.set_xlabel('Distance from shot (km)')
 ax.set_ylabel(f'Ground transmission loss\n(dB rel. {d_ref * M_PER_KM:g} m)')
-ax.set_xlim(0, 25)
-ax.set_ylim(-85, 0)
+ax.set_xlim(0, 24)
+ax.set_ylim(-65, 0)
 ax.xaxis.set_minor_locator(plt.MultipleLocator(1))
 ax.yaxis.set_minor_locator(plt.MultipleLocator(5))
 for side in 'top', 'right':
@@ -157,7 +167,7 @@ fig.show()
 SKIP = 75  # Plot every SKIP stations
 SELF_NORMALIZE = True
 MIN_TIME, MAX_TIME = 0, 80  # [s]
-MIN_DIST, MAX_DIST = 0, 25  # [km]
+MIN_DIST, MAX_DIST = 0, 24  # [km]
 POST_ROLL = 10  # [s]
 TOPO_FILE = (
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
@@ -280,11 +290,7 @@ topo_ax1.set_ylabel(f'Distance from shot {SHOT} (km)', labelpad=20, rotation=-90
 
 norms = []
 for ax, st, scale, pre_roll, log in zip(
-    [ax1, ax2],
-    [st_syn_plot, st_plot],
-    [5, 300],  # TODO: Arbitrary / trial-and-error scaling factors
-    PRE_ROLL,
-    [False, False],
+    [ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCALE], PRE_ROLL, [False, False]
 ):
     norm, cmap = process_and_plot(st, ax, scale, pre_roll, log=log)
     norms.append(norm)
@@ -353,4 +359,4 @@ cax.set_xlabel(
 
 fig.show()
 
-# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'fdprop' / f'fdprop_imush_{RUN[:2]}_waveforms_reduced_topo.png', dpi=300, bbox_inches='tight')
+# fig.savefig(NODAL_WORKING_DIR / 'figures' / 'fdprop' / 'final' / f'fdprop_imush_{RUN[:2]}_waveforms.png', dpi=300, bbox_inches='tight')
