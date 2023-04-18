@@ -1,13 +1,16 @@
+import json
 import os
 import subprocess
+from itertools import compress
 from pathlib import Path
 
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
+from obspy import Stream, Trace
 from tqdm import tqdm
 
-from utils import NODAL_WORKING_DIR
+from utils import NODAL_WORKING_DIR, get_waveforms_shot
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -19,9 +22,13 @@ SHOT = 'Y5'
 if SHOT == 'Y5':
     RUN = '20_shot_y5_new_stf_hf'
     Z_SRC = 734  # [m]
+    SYN_SCALE = 5
+    OBS_SCALE = 300
 elif SHOT == 'X5':
     RUN = '22_shot_x5_new_stf_hf'
     Z_SRC = 464  # [m]
+    SYN_SCALE = 10
+    OBS_SCALE = 1200
 else:
     raise ValueError
 PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_snapshots'
@@ -30,6 +37,7 @@ XLIM = (0, 24)  # [km] Relative to shot x-position
 YLIM = (-0.5, 5)  # [km] Relative to shot z-position
 DT = 0.004  # [s]
 X_SRC = 1500  # [m]
+WAVEFORM_SNAPSHOT_INTERVAL = 5
 
 # Constants
 M_PER_KM = 1000  # [m/km]
@@ -67,6 +75,55 @@ for timestamp in tqdm(TIMESTAMPS[1:], initial=1, total=TIMESTAMPS.size):
 terrain_contour = np.loadtxt(
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
 )
+
+#%% Load in synthetic and observed data
+
+# Synthetic data
+st_syn = Stream()
+files = list(
+    (NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_runs' / RUN / 'OUTPUT_FILES').glob(
+        'process*_waveforms_pressure.txt'
+    )
+)
+for file in tqdm(files):
+    # Read in params from file
+    dt, t0 = np.loadtxt(file, max_rows=2, usecols=2)  # [s]
+    x_locs = np.loadtxt(file, skiprows=2, max_rows=1) / M_PER_KM  # [km]
+    # Row 4 is elevation, which we skip
+    traces = np.loadtxt(file, skiprows=4).T  # [Pa] Each row is a waveform!
+    interval = dt * WAVEFORM_SNAPSHOT_INTERVAL  # [s] True sampling interval of data
+    # Add to Stream
+    for trace, x in zip(traces, x_locs):
+        tr = Trace(data=trace, header=dict(sampling_rate=1 / interval))
+        tr.stats.starttime += t0  # Shift for t0
+        tr.stats.t0 = t0  # [s]
+        tr.stats.x = x  # [km]
+        st_syn += tr
+st_syn.sort(keys=['x'])  # Sort by increasing x distance
+st_syn = st_syn[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
+st_syn.filter(type='lowpass', freq=4, zerophase=False, corners=4)  # KEY!
+
+# Observed data
+with open(
+    NODAL_WORKING_DIR / 'metadata' / f'imush_{SHOT.lower()}_transect_stations.json'
+) as f:
+    sta_info = json.load(f)
+st = get_waveforms_shot(SHOT, processed=True)
+# Detrend, taper, filter
+st.detrend('demean')
+st.taper(0.05)
+FREQMIN = 5  # [Hz]
+FREQMAX = 50  # [Hz]
+st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
+include = np.array([tr.stats.station in sta_info.keys() for tr in st])
+st = Stream(compress(st, include))
+for tr in st:
+    x, out_of_plane_dist = sta_info[tr.stats.station]  # [m]
+    tr.stats.x = x / M_PER_KM  # [km]
+    tr.stats.out_of_plane_dist = out_of_plane_dist  # [m]
+st.sort(keys=['x'])  # Sort by increasing x distance
+for tr in st:
+    tr.data *= 1e6  # Convert to μm/s
 
 #%% Plot
 
