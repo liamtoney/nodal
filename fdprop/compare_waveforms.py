@@ -35,29 +35,40 @@ for run, waveform_snapshot_interval, x_src in zip(
 
 #%% Plot a series of waveforms at different distances
 
+# FILTER_KWARGS = None
+FILTER_KWARGS = dict(type='lowpass', freq=4, zerophase=False, corners=4)
+
 for run in '20_shot_y5_new_stf_hf', '22_shot_x5_new_stf_hf':
-    fig, ax = plt.subplots()
-    for tr in st_dict[run][2155:2290:10]:
+    fig, ax = plt.subplots(figsize=(8, 3))
+    st_plot = st_dict[run].copy()
+    if FILTER_KWARGS is not None:
+        st_plot.filter(**FILTER_KWARGS)
+    for tr in st_plot[2155:2290:20]:
         ax.plot(tr.times(), tr.data, label=f'{tr.stats.x:g} m')
     ax.set_xlim(22, 28)
     ax.set_ylim(-0.25, 0.25)
     ax.legend(loc='upper left')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Pressure (Pa)')
-    ax.set_title(run)
+    ax.set_title(run + ', ' + str(FILTER_KWARGS))
     ax.grid(linestyle=':')
     ax.set_axisbelow(True)
     fig.show()
 
 #%% Plot time and frequency domain comparison between runs
 
-TARGET_DISTANCE = 4000  # [m]
+TARGET_DISTANCE = 20000  # [m]
 
 CELERITY = 338  # [m/s] For estimating first arrival time
 
 fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(11, 7))
 
-for run, st in st_dict.items():
+for run, st_orig in st_dict.items():
+
+    st = st_orig.copy()
+
+    if FILTER_KWARGS is not None:
+        st.filter(**FILTER_KWARGS)
 
     # Select the waveform at this distance
     ind = np.argwhere(np.array([tr.stats.x for tr in st]) == TARGET_DISTANCE)[0][0]
@@ -99,7 +110,7 @@ for run, st in st_dict.items():
 ax1.set_xlabel('Time (s)')
 ax1.set_ylabel('Amplitude\n(waveform normalized\nto first peak)')
 ax1.set_xlim([t - tr.stats.starttime for t in (spec_win[0] - 2, spec_win[1] + 2)])
-ax1.set_title(f'{TARGET_DISTANCE} m')
+ax1.set_title(f'{TARGET_DISTANCE} m, {FILTER_KWARGS}')
 ax2.set_xlim(0, 20)
 ax2.set_ylim(bottom=0)
 ax2.set_xlabel('Frequency (Hz)')
