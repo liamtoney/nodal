@@ -54,18 +54,16 @@ def _p_matrix_from_timestamp(run, timestamp):
     return p, hoz_min, hoz_max, vert_min, vert_max, dx
 
 
-# Load in aggregate pressure matrix
+#%% Load in waveform snapshot stuff
+
+# Aggregate pressure matrix
 p_agg, hoz_min, hoz_max, vert_min, vert_max, dx = _p_matrix_from_timestamp(
     RUN, TIMESTAMPS[0]
 )
 for timestamp in tqdm(TIMESTAMPS[1:], initial=1, total=TIMESTAMPS.size):
     p_agg += _p_matrix_from_timestamp(RUN, timestamp)[0]
 
-# Form axes
-hoz_axis = np.arange(hoz_min, hoz_max + dx, dx) / M_PER_KM
-vert_axis = np.arange(vert_min, vert_max + dx, dx) / M_PER_KM
-
-# Terrain .dat file for this run
+# Terrain from .dat file for this run
 terrain_contour = np.loadtxt(
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
 )
@@ -76,10 +74,10 @@ fig, ax = plt.subplots(figsize=(7.17, 1.9))
 
 # Plot pressure
 extent = [
-    hoz_axis[0] - X_SRC / M_PER_KM,
-    hoz_axis[-1] - X_SRC / M_PER_KM,
-    vert_axis[0] - Z_SRC / M_PER_KM,
-    vert_axis[-1] - Z_SRC / M_PER_KM,
+    (hoz_min - X_SRC) / M_PER_KM,
+    (hoz_max - X_SRC) / M_PER_KM,
+    (vert_min - Z_SRC) / M_PER_KM,
+    (vert_max - Z_SRC) / M_PER_KM,
 ]
 im = ax.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
 
