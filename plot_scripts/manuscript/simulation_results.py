@@ -131,6 +131,7 @@ for tr in st:
 
 # Waveform plotting config params
 SKIP = 50  # Plot every SKIP stations
+START = 5  # Start at this station index (for shifting which set of traces is plotted)
 DUR = 80  # [s] Duration of waveforms to cut, intially
 POST_ROLL = 8  # [s]
 PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below topo_ax
@@ -204,7 +205,8 @@ fig.colorbar(
 
 # Form [subsetted] plotting Stream for FAKE data
 starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
-st_syn_plot = st_syn.copy().trim(starttime, starttime + DUR)[::SKIP]
+st_syn_plot = st_syn.copy().trim(starttime, starttime + DUR)[START::SKIP]
+assert X_SRC / M_PER_KM in [tr.stats.x for tr in st_syn_plot]  # Check we have wf at src
 
 # Form plotting Stream for REAL data
 starttime = get_shots().loc[SHOT].time
@@ -214,11 +216,11 @@ st_plot = st.copy().trim(starttime, starttime + DUR)
 # Helper function to get the onset time for a [synthetic] waveform
 def _get_onset_time(tr):
     dist_km = tr.stats.x - X_SRC / M_PER_KM
-    if dist_km >= 0:
+    if dist_km > 0:
         return tr.stats.starttime + dist_km / REMOVAL_CELERITY
     else:
         print(f'Removed station with x = {tr.stats.x - X_SRC / M_PER_KM:.2} km')
-        return None  # We're on the wrong side of the source
+        return None  # We're on the wrong side of the source, or AT the source
 
 
 # BIG helper function for plotting wfs
