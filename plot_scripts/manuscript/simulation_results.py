@@ -38,7 +38,6 @@ PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_sn
 TIMESTAMPS = np.arange(1000, 15000 + 1000, 1000)  # Same for both transects
 XLIM = (0, 24)  # [km] Relative to shot x-position
 YLIM = (-0.5, 5)  # [km] Relative to shot z-position
-DT = 0.004  # [s]
 X_SRC = 1500  # [m]
 WAVEFORM_SNAPSHOT_INTERVAL = 5
 
@@ -164,7 +163,7 @@ ax0.fill_between(
 text = ax0.text(
     0.99,
     0.95,
-    ', '.join([f'{timestamp * DT:g}' for timestamp in TIMESTAMPS]) + ' s',
+    ', '.join([f'{timestamp * dt:g}' for timestamp in TIMESTAMPS]) + ' s',
     ha='right',
     va='top',
     transform=ax0.transAxes,
