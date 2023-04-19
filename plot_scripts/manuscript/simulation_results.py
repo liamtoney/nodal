@@ -7,6 +7,7 @@ from pathlib import Path
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LogNorm
 from matplotlib.transforms import Bbox
 from obspy import Stream, Trace
 from tqdm import tqdm
@@ -196,7 +197,7 @@ fig.tight_layout(
 # Colorbar
 cax = fig.add_subplot(111)
 ax0_pos = ax0.get_position()
-cax.set_position([ax0_pos.xmax + 0.1, ax0_pos.ymin, 0.01, ax0_pos.height])
+cax.set_position([ax0_pos.xmax + 0.09, ax0_pos.ymin, 0.01, ax0_pos.height])
 fig.colorbar(
     im, cax=cax, ticks=(im.norm.vmin, 0, im.norm.vmax), label='Normalized pressure'
 )
@@ -243,7 +244,7 @@ def process_and_plot(st, ax, scale, pre_roll):
     # Configure colormap limits from p2p measurements of windowed traces
     cmap = plt.cm.viridis
     maxes_all = maxes_all[include]
-    norm = plt.Normalize(vmin=np.min(maxes_all), vmax=np.percentile(maxes_all, 80))
+    norm = LogNorm(vmin=np.percentile(maxes_all, 20), vmax=np.percentile(maxes_all, 95))
 
     st = Stream(compress(st, include))
     for tr, mx in zip(st[::-1], maxes_all[::-1]):  # Plot the closest waveforms on top!
@@ -349,15 +350,28 @@ position = [
     ax1_pos.ymax - topo_ax2_pos.ymin,
 ]
 for norm in norms:
+    extend_frac = 0.02
     _cax = fig.add_subplot(111)
     _cax.set_position(position)
-    fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=_cax)
+    fig.colorbar(
+        plt.cm.ScalarMappable(norm=norm, cmap=cmap),
+        cax=_cax,
+        extend='both',
+        extendfrac=extend_frac,
+    )
     if norm == norms[0]:
         _cax.yaxis.set_ticks_position('left')
         _cax.yaxis.set_label_position('left')
         _cax.set_ylabel('Peak pressure (Pa)')
     else:
         _cax.set_ylabel('Peak velocity (μm/s)')
+    pos = _cax.get_position()
+    triangle_height = extend_frac * pos.height
+    ymin = pos.ymin
+    height = pos.height
+    ymin -= triangle_height
+    height += 2 * triangle_height
+    _cax.set_position([pos.xmin, ymin, pos.width, height])
 
 # Shared y-axis label
 label_ax = fig.add_subplot(111)
