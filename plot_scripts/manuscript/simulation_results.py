@@ -160,7 +160,8 @@ ax0.fill_between(
     color=TOPO_COLOR,
 )
 
-# Timestamp labels
+# Timestamp labels (note: we don't bother correcting for t0 here since it's so small —
+# in reality the true times are `timestamp * dt + t0`)
 text = ax0.text(
     0.99,
     0.95,
