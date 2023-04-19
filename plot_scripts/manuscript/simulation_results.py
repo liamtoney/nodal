@@ -23,14 +23,14 @@ SHOT = 'Y5'
 if SHOT == 'Y5':
     RUN = '20_shot_y5_new_stf_hf'
     Z_SRC = 734  # [m]
-    SYN_SCALE = 5
+    SYN_SCALE = 12
     OBS_SCALE = 300
     REMOVAL_CELERITY = 0.342  # [km/s]
 elif SHOT == 'X5':
     RUN = '22_shot_x5_new_stf_hf'
     Z_SRC = 464  # [m]
-    SYN_SCALE = 10
-    OBS_SCALE = 1200
+    SYN_SCALE = 14
+    OBS_SCALE = 1800
     REMOVAL_CELERITY = 0.336  # [km/s]
 else:
     raise ValueError
@@ -131,9 +131,11 @@ for tr in st:
 #%% Plot
 
 # Waveform plotting config params
-SKIP = 75  # Plot every SKIP stations
+SKIP = 50  # Plot every SKIP stations
 POST_ROLL = 8  # [s]
 PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below topo_ax
+
+TOPO_COLOR = 'silver'
 
 FIGSIZE = (7.17, 10)  # [in.] Figure height is more than we need; we only save a portion
 fig, (ax0, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
@@ -155,7 +157,7 @@ ax0.fill_between(
     -1,
     (terrain_contour[:, 1] - Z_SRC) / M_PER_KM,
     lw=0.5,  # Makes pressure–terrain interface a little smoother-looking
-    color='tab:gray',
+    color=TOPO_COLOR,
 )
 
 # Timestamp labels
@@ -257,7 +259,7 @@ def process_and_plot(st, ax, scale, pre_roll):
             color=cmap(norm(p2p)),
             clip_on=False,
             solid_capstyle='round',
-            lw=0.5,
+            lw=0.4,
         )
     return norm, cmap
 
@@ -272,7 +274,7 @@ topo_z = topo_z[mask]
 
 for topo_ax in topo_ax1, topo_ax2:
     topo_ax.fill_between(
-        topo_x, YLIM[0], topo_z, lw=0.5, color='tab:gray', clip_on=False
+        topo_x, YLIM[0], topo_z, lw=0.5, color=TOPO_COLOR, clip_on=False
     )
     topo_ax.set_ylim(YLIM[0], 0)  # Axis technically ends at elevation of shot
     topo_ax.set_aspect('equal')
