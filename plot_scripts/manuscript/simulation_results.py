@@ -187,8 +187,12 @@ ax0.set_aspect('equal')
 ax0.tick_params(top=True, right=True, which='both')
 
 # Layout adjustment (note we're making room for the colorbar here!)
-y_offset = 0.02
-fig.tight_layout(pad=0.2, rect=(0, y_offset, 0.84, 1 + y_offset))
+y_offset = 0.03
+left_pad = 0.04
+right_pad = 0.12
+fig.tight_layout(
+    pad=0.2, rect=(left_pad, y_offset, 1 - left_pad - right_pad, 1 + y_offset)
+)
 
 # Colorbar
 cax = fig.add_subplot(111)
@@ -383,12 +387,25 @@ for topo_ax in topo_ax1, topo_ax2:
     _spine.set_xticks([])
     _spine.set_yticks([])
 
+# Plot (a), (b), and (c) tags
+for ax, label in zip([ax0, ax1, ax2], ['(a)', '(b)', '(c)']):
+    ax.text(
+        -0.115,
+        1,
+        s=label,
+        transform=ax.transAxes,
+        ha='right',
+        va='top',
+        weight='bold',
+        fontsize=12,
+    )
+
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
-    portion_to_save = 0.476  # Vertical fraction of figure to actually save
+    portion_to_save = 0.45  # Vertical fraction of figure to actually save
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
