@@ -265,17 +265,16 @@ def process_and_plot(st, ax, scale, pre_roll):
 # Load topography
 topo_x, topo_z = terrain_contour.T / M_PER_KM  # [km]
 topo_x -= X_SRC / M_PER_KM
+topo_z -= Z_SRC / M_PER_KM
 mask = (topo_x >= XLIM[0]) & (topo_x <= XLIM[1])  # Since we use clip_on = False later
 topo_x = topo_x[mask]
 topo_z = topo_z[mask]
 
 for topo_ax in topo_ax1, topo_ax2:
     topo_ax.fill_between(
-        topo_x, topo_z.min(), topo_z, lw=0.5, color='tab:gray', clip_on=False
+        topo_x, YLIM[0], topo_z, lw=0.5, color='tab:gray', clip_on=False
     )
-    topo_ax.set_ylim(
-        topo_z.min(), topo_z[0]
-    )  # Axis technically ends at elevation of shot
+    topo_ax.set_ylim(YLIM[0], 0)  # Axis technically ends at elevation of shot
     topo_ax.set_aspect('equal')
     topo_ax.set_zorder(-5)
     topo_ax.tick_params(left=False, labelleft=False)
