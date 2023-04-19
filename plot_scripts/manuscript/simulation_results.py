@@ -231,7 +231,7 @@ def process_and_plot(st, ax, scale, pre_roll):
         onset_time = _get_onset_time(tr_measure)
         if onset_time:
             tr_measure.trim(onset_time, onset_time + POST_ROLL)
-            p2p_all.append(tr_measure.data.max() - tr_measure.data.min())  # [Pa]
+            p2p_all.append(tr_measure.data.max() - tr_measure.data.min())
         else:  # No break!
             st.remove(tr)
     p2p_all = np.array(p2p_all)
@@ -246,13 +246,12 @@ def process_and_plot(st, ax, scale, pre_roll):
     norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.percentile(p2p_all, 80))
 
     st = Stream(compress(st, include))
-    for tr in st[::-1]:  # Plot the closest waveforms on top!
+    for tr, p2p in zip(st[::-1], p2p_all[::-1]):  # Plot the closest waveforms on top!
         tr_plot = tr.copy()
         onset_time = _get_onset_time(tr_plot)
         tr_plot.trim(
             onset_time - pre_roll, onset_time + POST_ROLL, pad=True, fill_value=0
         )
-        p2p = tr_plot.data.max() - tr_plot.data.min()  # [Pa]
         data_scaled = tr_plot.copy().normalize().data / scale
         ax.plot(
             -1 * data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
