@@ -168,7 +168,7 @@ text = ax0.text(
     transform=ax0.transAxes,
 )
 text.set_path_effects(
-    [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()]
+    [path_effects.Stroke(linewidth=1.5, foreground='white'), path_effects.Normal()]
 )
 
 # Axis params
