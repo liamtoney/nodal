@@ -7,10 +7,11 @@ from pathlib import Path
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.transforms import Bbox
 from obspy import Stream, Trace
 from tqdm import tqdm
 
-from utils import NODAL_WORKING_DIR, get_waveforms_shot
+from utils import NODAL_WORKING_DIR, get_shots, get_waveforms_shot
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -24,11 +25,13 @@ if SHOT == 'Y5':
     Z_SRC = 734  # [m]
     SYN_SCALE = 5
     OBS_SCALE = 300
+    REMOVAL_CELERITY = 0.342  # [km/s]
 elif SHOT == 'X5':
     RUN = '22_shot_x5_new_stf_hf'
     Z_SRC = 464  # [m]
     SYN_SCALE = 10
     OBS_SCALE = 1200
+    REMOVAL_CELERITY = 0.336  # [km/s]
 else:
     raise ValueError
 PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_snapshots'
@@ -127,7 +130,15 @@ for tr in st:
 
 #%% Plot
 
-fig, ax = plt.subplots(figsize=(7.17, 1.9))
+# Waveform plotting config params
+SKIP = 75  # Plot every SKIP stations
+POST_ROLL = 8  # [s]
+PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below topo_ax
+
+FIGSIZE = (7.17, 10)  # [in.] Figure height is more than we need; we only save a portion
+fig, (ax0, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
+    nrows=5, figsize=FIGSIZE, sharex=True
+)
 
 # Plot pressure
 extent = [
@@ -136,10 +147,10 @@ extent = [
     (vert_min - Z_SRC) / M_PER_KM,
     (vert_max - Z_SRC) / M_PER_KM,
 ]
-im = ax.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
+im = ax0.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
 
 # Plot terrain
-ax.fill_between(
+ax0.fill_between(
     (terrain_contour[:, 0] - X_SRC) / M_PER_KM,
     -1,
     (terrain_contour[:, 1] - Z_SRC) / M_PER_KM,
@@ -148,45 +159,243 @@ ax.fill_between(
 )
 
 # Timestamp labels
-text = ax.text(
+text = ax0.text(
     0.99,
     0.95,
     ', '.join([f'{timestamp * DT:g}' for timestamp in TIMESTAMPS]) + ' s',
     ha='right',
     va='top',
-    transform=ax.transAxes,
+    transform=ax0.transAxes,
 )
 text.set_path_effects(
     [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()]
 )
 
 # Axis params
-ax.set_xlabel(f'Distance from shot {SHOT} (km)')
-ax.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
-ax.set_xlim(XLIM)
-ax.set_ylim(YLIM)
+ax0.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
+ax0.set_xlim(XLIM)
+ax0.set_ylim(YLIM)
 major_tick_interval = 2  # [km]
 minor_tick_interval = 1  # [km[
-ax.xaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
-ax.xaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
-ax.yaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
-ax.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
-ax.set_aspect('equal')
-ax.tick_params(top=True, right=True, which='both')
+ax0.xaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax0.xaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax0.yaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax0.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax0.set_aspect('equal')
+ax0.tick_params(top=True, right=True, which='both')
 
 # Layout adjustment (note we're making room for the colorbar here!)
-fig.tight_layout(pad=0.2, rect=(0, 0, 0.91, 1))
+y_offset = 0.02
+fig.tight_layout(pad=0.2, rect=(0, y_offset, 0.84, 1 + y_offset))
 
 # Colorbar
 cax = fig.add_subplot(111)
-ax_pos = ax.get_position()
-cax.set_position([ax_pos.xmax + 0.03, ax_pos.ymin, 0.01, ax_pos.height])
+ax0_pos = ax0.get_position()
+cax.set_position([ax0_pos.xmax + 0.1, ax0_pos.ymin, 0.01, ax0_pos.height])
 fig.colorbar(
     im, cax=cax, ticks=(im.norm.vmin, 0, im.norm.vmax), label='Normalized pressure'
 )
+
+# Form [subsetted] plotting Stream for FAKE data
+starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
+st_syn_plot = st_syn.copy().trim(starttime, starttime + 80)[::SKIP]
+
+# Form plotting Stream for REAL data
+starttime = get_shots().loc[SHOT].time
+st_plot = st.copy().trim(starttime, starttime + 80)
+
+
+# Helper function to get the onset time for a [synthetic] waveform
+def _get_onset_time(tr):
+    dist_km = tr.stats.x - X_SRC / M_PER_KM
+    if dist_km >= 0:
+        return tr.stats.starttime + dist_km / REMOVAL_CELERITY
+    else:
+        print(f'Removed station with x = {tr.stats.x - X_SRC / M_PER_KM:.2} km')
+        return None  # We're on the wrong side of the source
+
+
+# BIG helper function for plotting wfs
+def process_and_plot(st, ax, scale, pre_roll):
+
+    # Make measurements on the windowed traces
+    maxes = []
+    p2p_all = []
+    for tr in st:
+        tr_measure = tr.copy()
+        onset_time = _get_onset_time(tr_measure)
+        if onset_time:
+            tr_measure.trim(onset_time - pre_roll, onset_time + POST_ROLL)
+            maxes.append(tr_measure.data.max())
+            p2p_all.append(tr_measure.data.max() - tr_measure.data.min())  # [Pa]
+        else:  # No break!
+            st.remove(tr)
+    maxes = np.array(maxes)
+    p2p_all = np.array(p2p_all)
+
+    # Further subset Stream
+    xs = np.array([tr.stats.x for tr in st]) - X_SRC / M_PER_KM  # Set source at x = 0
+    include = (xs >= XLIM[0]) & (xs <= XLIM[1])
+
+    # Configure colormap limits from p2p measurements of windowed traces
+    cmap = plt.cm.viridis
+    p2p_all = p2p_all[include]
+    norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.percentile(p2p_all, 80))
+
+    st = Stream(compress(st, include))
+    for tr in st[::-1]:  # Plot the closest waveforms on top!
+        tr_plot = tr.copy()
+        onset_time = _get_onset_time(tr_plot)
+        tr_plot.trim(
+            onset_time - pre_roll, onset_time + POST_ROLL, pad=True, fill_value=0
+        )
+        p2p = tr_plot.data.max() - tr_plot.data.min()  # [Pa]
+        data_scaled = tr_plot.copy().normalize().data / (scale / maxes.max())
+        ax.plot(
+            -1 * data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
+            tr_plot.times() - pre_roll,
+            color=cmap(norm(p2p)),
+            clip_on=False,
+            solid_capstyle='round',
+            lw=0.5,
+        )
+    return norm, cmap
+
+
+# Load topography
+topo_x, topo_z = terrain_contour.T / M_PER_KM  # [km]
+topo_x -= X_SRC / M_PER_KM
+mask = (topo_x >= XLIM[0]) & (topo_x <= XLIM[1])  # Since we use clip_on = False later
+topo_x = topo_x[mask]
+topo_z = topo_z[mask]
+
+for topo_ax in topo_ax1, topo_ax2:
+    topo_ax.fill_between(
+        topo_x, topo_z.min(), topo_z, lw=0.5, color='tab:gray', clip_on=False
+    )
+    topo_ax.set_ylim(
+        topo_z.min(), topo_z[0]
+    )  # Axis technically ends at elevation of shot
+    topo_ax.set_aspect('equal')
+    topo_ax.set_zorder(-5)
+    topo_ax.tick_params(left=False, labelleft=False)
+    for side in 'right', 'top':
+        topo_ax.spines[side].set_visible(False)
+topo_ax2.set_xlabel(f'Distance from shot {SHOT} (km)')
+
+norms = []
+for ax, st, scale in zip([ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCALE]):
+    norm, cmap = process_and_plot(st, ax, scale, PRE_ROLL)
+    norms.append(norm)
+    ax.set_ylim(0, POST_ROLL)
+    ax.set_xlim(XLIM)
+    for side in 'top', 'right', 'bottom':
+        ax.spines[side].set_visible(False)
+    ax.tick_params(bottom=False, labelbottom=False, which='both')
+    ax.patch.set_alpha(0)
+    ax.yaxis.set_major_locator(plt.MultipleLocator(2))
+    ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
+
+
+def _reposition():
+
+    ax0_pos = ax0.get_position()
+    y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax0_pos.height
+    spacing = 0.025
+
+    ax1_pos = ax1.get_position()
+    ax1.set_position(
+        [ax0_pos.xmin, ax0_pos.ymin - y_height - spacing, ax1_pos.width, y_height]
+    )
+    topo_ax1_pos = topo_ax1.get_position()
+    topo_ax1.set_position(
+        [
+            ax0_pos.xmin,
+            ax1_pos.ymin - topo_ax1_pos.height,
+            topo_ax1_pos.width,
+            topo_ax1_pos.height,
+        ]
+    )
+    topo_ax1_pos = topo_ax1.get_position()
+    ax2_pos = ax2.get_position()
+    ax2.set_position(
+        [ax0_pos.xmin, topo_ax1_pos.ymin - y_height - spacing, ax2_pos.width, y_height]
+    )
+    topo_ax2_pos = topo_ax2.get_position()
+    ax2_pos = ax2.get_position()
+    topo_ax2.set_position(
+        [
+            ax0_pos.xmin,
+            ax2_pos.ymin - topo_ax2_pos.height,
+            topo_ax2_pos.width,
+            topo_ax2_pos.height,
+        ]
+    )
+
+
+# Needs to be called twice, I guess?
+_reposition()
+_reposition()
+
+# Colorbar
+ax1_pos = ax1.get_position()
+topo_ax2_pos = topo_ax2.get_position()
+cax_pos = cax.get_position()
+position = [
+    cax_pos.xmin,
+    topo_ax2_pos.ymin,
+    cax_pos.width,
+    ax1_pos.ymax - topo_ax2_pos.ymin,
+]
+for norm in norms:
+    _cax = fig.add_subplot(111)
+    _cax.set_position(position)
+    fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=_cax)
+    if norm == norms[0]:
+        _cax.yaxis.set_ticks_position('left')
+        _cax.yaxis.set_label_position('left')
+        _cax.set_ylabel('Peak-to-peak pressure (Pa)')
+    else:
+        _cax.set_ylabel('Peak-to-peak velocity (μm/s)')
+
+# Shared y-axis label
+label_ax = fig.add_subplot(111)
+label_ax.set_position(
+    [topo_ax2_pos.xmin, topo_ax2_pos.ymin, topo_ax2_pos.width, position[-1]]
+)
+label_ax.patch.set_alpha(0)
+for spine in label_ax.spines.values():
+    spine.set_visible(False)
+label_ax.set_xticks([])
+label_ax.set_yticks([])
+label_ax.set_ylabel(
+    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=15
+)
+
+# Add spine to cover wf ends
+for topo_ax in topo_ax1, topo_ax2:
+    _spine = fig.add_subplot(111)
+    _spine.set_position(topo_ax.get_position())
+    for side in 'top', 'left', 'right':
+        _spine.spines[side].set_visible(False)
+    _spine.patch.set_alpha(0)
+    _spine.set_xticks([])
+    _spine.set_yticks([])
 
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / f'simulation_results_{SHOT.lower()}.png', dpi=400)
+if False:
+    portion_to_save = 0.476  # Vertical fraction of figure to actually save
+    fig.savefig(
+        Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
+        / f'simulation_results_{SHOT.lower()}.png',
+        dpi=400,
+        bbox_inches=Bbox.from_bounds(
+            0,
+            (1 - portion_to_save) * FIGSIZE[1],
+            FIGSIZE[0],
+            FIGSIZE[1] * portion_to_save,
+        ),
+    )
