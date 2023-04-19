@@ -233,7 +233,7 @@ def process_and_plot(st, ax, scale, pre_roll):
         tr_measure = tr.copy()
         onset_time = _get_onset_time(tr_measure)
         if onset_time:
-            tr_measure.trim(onset_time - pre_roll, onset_time + POST_ROLL)
+            tr_measure.trim(onset_time, onset_time + POST_ROLL)
             maxes.append(tr_measure.data.max())
             p2p_all.append(tr_measure.data.max() - tr_measure.data.min())  # [Pa]
         else:  # No break!
