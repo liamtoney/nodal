@@ -35,7 +35,7 @@ elif SHOT == 'X5':
 else:
     raise ValueError
 PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_snapshots'
-TIMESTAMPS = np.arange(0, 20000 + 1000, 1000)  # Same for both transects
+TIMESTAMPS = np.arange(1000, 15000 + 1000, 1000)  # Same for both transects
 XLIM = (0, 24)  # [km] Relative to shot x-position
 YLIM = (-0.5, 5)  # [km] Relative to shot z-position
 DT = 0.004  # [s]
