@@ -213,9 +213,9 @@ starttime = get_shots().loc[SHOT].time
 st_plot = st.copy().trim(starttime, starttime + DUR)
 
 
-# Helper function to get the onset time for a [synthetic] waveform
+# Helper function to get the onset time for a waveform
 def _get_onset_time(tr):
-    dist_km = tr.stats.x - X_SRC / M_PER_KM
+    dist_km = tr.stats.x - X_SRC / M_PER_KM  # Get distance from SOURCE
     if dist_km > 0:
         return tr.stats.starttime + dist_km / REMOVAL_CELERITY
     else:
