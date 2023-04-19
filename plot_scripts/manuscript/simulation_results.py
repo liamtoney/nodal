@@ -225,16 +225,16 @@ def _get_onset_time(tr):
 def process_and_plot(st, ax, scale, pre_roll):
 
     # Make measurements on the windowed traces
-    p2p_all = []
+    maxes_all = []
     for tr in st:
         tr_measure = tr.copy()
         onset_time = _get_onset_time(tr_measure)
         if onset_time:
             tr_measure.trim(onset_time, onset_time + POST_ROLL)
-            p2p_all.append(tr_measure.data.max() - tr_measure.data.min())
+            maxes_all.append(tr_measure.data.max())
         else:  # No break!
             st.remove(tr)
-    p2p_all = np.array(p2p_all)
+    maxes_all = np.array(maxes_all)
 
     # Further subset Stream
     xs = np.array([tr.stats.x for tr in st]) - X_SRC / M_PER_KM  # Set source at x = 0
@@ -242,11 +242,11 @@ def process_and_plot(st, ax, scale, pre_roll):
 
     # Configure colormap limits from p2p measurements of windowed traces
     cmap = plt.cm.viridis
-    p2p_all = p2p_all[include]
-    norm = plt.Normalize(vmin=np.min(p2p_all), vmax=np.percentile(p2p_all, 80))
+    maxes_all = maxes_all[include]
+    norm = plt.Normalize(vmin=np.min(maxes_all), vmax=np.percentile(maxes_all, 80))
 
     st = Stream(compress(st, include))
-    for tr, p2p in zip(st[::-1], p2p_all[::-1]):  # Plot the closest waveforms on top!
+    for tr, mx in zip(st[::-1], maxes_all[::-1]):  # Plot the closest waveforms on top!
         tr_plot = tr.copy()
         onset_time = _get_onset_time(tr_plot)
         tr_plot.trim(
@@ -256,7 +256,7 @@ def process_and_plot(st, ax, scale, pre_roll):
         ax.plot(
             -1 * data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
             tr_plot.times() - pre_roll,
-            color=cmap(norm(p2p)),
+            color=cmap(norm(mx)),
             clip_on=False,
             solid_capstyle='round',
             lw=0.4,
@@ -355,9 +355,9 @@ for norm in norms:
     if norm == norms[0]:
         _cax.yaxis.set_ticks_position('left')
         _cax.yaxis.set_label_position('left')
-        _cax.set_ylabel('Peak-to-peak pressure (Pa)')
+        _cax.set_ylabel('Peak pressure (Pa)')
     else:
-        _cax.set_ylabel('Peak-to-peak velocity (μm/s)')
+        _cax.set_ylabel('Peak velocity (μm/s)')
 
 # Shared y-axis label
 label_ax = fig.add_subplot(111)
