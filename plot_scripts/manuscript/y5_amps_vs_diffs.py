@@ -14,7 +14,7 @@ shot = get_shots().loc['Y5']
 # Set PyGMT defaults
 pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP='D', FONT='10p')
 
-# Shared region for maps (buffer around nodes + shot Y5, to nearest 0.02°
+# Shared region for maps (buffer around nodes + shot Y5, to nearest 0.02°)
 REGION = (-122.36, -122.02, 46.08, 46.32)
 
 # CONSTANT
