@@ -33,6 +33,7 @@ def plot_winds(
     fig,  # Figure to plot into
     shot_name,
     frame='WESN',  # Which sides of frame to tick vs. annotate
+    cbar_xpos=None,
 ):
     # Get shot
     shot = df.loc[shot_name]
@@ -79,7 +80,11 @@ def plot_winds(
         pen='1p+c',
         cmap=True,
     )
-    fig.colorbar(frame='a45f15')
+    if cbar_xpos:
+        fig.colorbar(
+            frame='a45f15+l"Wind direction (\\232)"',
+            position=f'JBC+o{cbar_xpos}i/0.35i+w4i/0.1i',
+        )
 
     # Plot and label shot
     size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
@@ -103,7 +108,7 @@ fig = pygmt.Figure()
 plot_winds(fig, 'X5', frame='WeSN')
 xshift = 3.32  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
-plot_winds(fig, 'Y5', frame='wESN')
+plot_winds(fig, 'Y5', frame='wESN', cbar_xpos=-xshift / 2)
 
 # Plot (a) and (b) tags
 tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='12p,Helvetica-Bold')
