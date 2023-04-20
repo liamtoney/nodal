@@ -74,7 +74,7 @@ def plot_winds(
                 wind * in_per_ms,  # length
             ]
         ).T,
-        style=f'V4.5p+e+a45',
+        style=f'V4.5p+e+a45+n',  # +n means that vector heads are always drawn
         pen='1p+c',
         cmap=True,
     )
