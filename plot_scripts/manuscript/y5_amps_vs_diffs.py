@@ -104,16 +104,14 @@ def plot_node_values(
     clip_low = series[0] > sta_values.min()
     clip_high = series[1] < sta_values.max()
     if clip_low and clip_high:
-        tri = '+ebf'
+        position = '+ebf'
     elif clip_low and not clip_high:
-        tri = '+eb'
+        position = '+eb'
     elif not clip_low and clip_high:
-        tri = '+ef'
+        position = '+ef'
     else:
-        tri = ''
-    fig.colorbar(
-        frame=f'{cbar_tick_ints}+l"{cbar_label}"', position='JBC+jMC+o0/-0.5i+h' + tri
-    )
+        position = None
+    fig.colorbar(frame=f'{cbar_tick_ints}+l"{cbar_label}"', position=position)
 
 
 fig = pygmt.Figure()
