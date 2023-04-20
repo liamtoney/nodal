@@ -62,18 +62,16 @@ def plot_winds(
     assert np.all(u.latitude.values == v.latitude.values)
     wind = np.sqrt(u.values.flatten() ** 2 + v.values.flatten() ** 2)
     wdir = (270 - np.rad2deg(np.arctan2(v.values.flatten(), u.values.flatten()))) % 360
-    wdir_adj = (wdir - 180) % 360
     CMAP = '/Users/ldtoney/Documents/CETperceptual_GMT/CET-C6.cpt'
-
     pygmt.makecpt(cmap=CMAP, series=[0, 360])
     fig.plot(
         data=np.vstack(
             [
-                u.longitude.values.flatten(),
-                u.latitude.values.flatten(),
-                wdir,
-                wdir_adj,  # only need adjusted for plotting
-                wind * in_per_ms,
+                u.longitude.values.flatten(),  # x
+                u.latitude.values.flatten(),  # y
+                wdir,  # color
+                (wdir - 180) % 360,  # azimuth (flip vector direction here for plotting)
+                wind * in_per_ms,  # length
             ]
         ).T,
         style=f'V4.5p+e+a45',
