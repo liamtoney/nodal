@@ -106,14 +106,14 @@ def spec_existing(tr, spec_ax, wf_ax):
 
 
 # Axis setup
-spec_ratios = (6, 2, 0.6)  # `spec_ax` height, `wf_ax` height, spacer height
+spec_ratios = (6, 2, 0.5)  # `spec_ax` height, `wf_ax` height, spacer height
 spec_rows = 3
 spec_cols = 4
 assert spec_rows * spec_cols == st.count()  # Basic check that we have enough subplots
 fig, axs = plt.subplots(
     ncols=spec_cols + 1,  # Extra column for `map_ax`
     nrows=(2 * spec_rows) + (spec_rows - 1),  # Two axes for each spec, plus spacer axes
-    figsize=(10, 4.8),
+    figsize=(7.17, 4),
     gridspec_kw=dict(
         height_ratios=(spec_ratios * spec_rows)[:-1], width_ratios=[1] * spec_cols + [2]
     ),
@@ -154,7 +154,7 @@ label_ax.set_xticks([])
 label_ax.set_yticks([])
 for spine in label_ax.spines.values():
     spine.set_visible(False)
-label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=20)
+label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=17)
 
 # Remove some ticks
 for ax in axs[:, 1:].flatten():
@@ -163,8 +163,8 @@ for ax in axs[:-1, :].flatten():
     ax.tick_params(bottom=False, which='both')
 
 # Final figure tweaks to achieve proper borders
-fig.tight_layout(pad=0.2, rect=(0, -0.05, 1, 1))
-fig.subplots_adjust(hspace=0)
+fig.tight_layout(pad=0.2, rect=(0, -0.06, 1, 1))
+fig.subplots_adjust(hspace=0, wspace=0.05)
 
 fig.show()
 
