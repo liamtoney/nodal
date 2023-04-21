@@ -153,8 +153,17 @@ wf_axs = axs[1::3, :-1].flatten()
 for tr, spec_ax, wf_ax in zip(st, spec_axs, wf_axs):
     spec_existing(tr, spec_ax, wf_ax)
 
-# Plot map
-map_ax.imshow(mpimg.imread('/Users/ldtoney/Documents/image.png'), aspect='auto')
+# Plot map, instructions for making `x4_spectrogram_stations.png` are:
+# (1) Open `x4_spectrogram_stations.kml` in Google Earth (keep default view)
+# (2) Go to historical imagery from 7/2014
+# (3) File -> Save -> Save Image...
+# (4) Include only a "Scale" and "Compass" and set "Scaling" to 350%
+# (5) Drag north arrow and scalebar to a reasonable location
+# (6) Save image as a PNG to the filepath and name given by `image` below
+# (7) Crop image to a reasonable extent with a 5:3 aspect ratio (e.g., 1,560 x 2,600)
+image = NODAL_WORKING_DIR / 'data' / 'imagery' / 'x4_spectrogram_stations.png'
+map_ax.set_aspect('equal', adjustable='datalim')  # For aspect ratio calculation later
+map_ax.imshow(mpimg.imread(image), aspect='auto')
 map_ax.set_xticks([])
 map_ax.set_yticks([])
 
@@ -181,6 +190,10 @@ for ax in axs[:-1, :].flatten():
 # Final figure tweaks to achieve proper borders
 fig.tight_layout(pad=0.2, rect=(0, -0.06, 1, 1))
 fig.subplots_adjust(hspace=0, wspace=0.05)
+
+# Print image axis aspect ratio (informs how to crop the image)
+ratio = np.abs(np.diff(map_ax.get_ylim())[0] / np.diff(map_ax.get_xlim())[0])
+print(f'Map height / width = {ratio:.2f}')
 
 fig.show()
 
