@@ -1,3 +1,4 @@
+import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import spectrogram
@@ -43,7 +44,7 @@ WF_LIM = (-3, 3)  # [μm/s]
 SPEC_LIM = (10, 50)  # [Hz]
 DB_LIM = (-160, -130)  # [dB]
 WIN_DUR = 0.5  # [s]
-TIME_LIM = (40, 60)  # [s]
+TIME_LIM = (40, 55)  # [s]
 
 
 # Define function to plot waveform and spectrogram into existing axes
@@ -78,10 +79,12 @@ def spec_existing(tr, spec_ax, wf_ax):
 
     # Axis adjustments
     for ax in wf_ax, spec_ax:
-        ax.grid(linestyle=':')
+        ax.grid(linestyle=':', which='both')
     wf_ax.set_ylim(WF_LIM)
     spec_ax.set_ylim(SPEC_LIM)
     wf_ax.set_xlim(TIME_LIM)
+    wf_ax.xaxis.set_major_locator(plt.MultipleLocator(10))
+    wf_ax.xaxis.set_minor_locator(plt.MultipleLocator(5))
     wf_ax.yaxis.set_major_locator(plt.MultipleLocator(WF_LIM[1]))
     spec_ax.yaxis.set_minor_locator(plt.MultipleLocator(10))
 
@@ -99,7 +102,7 @@ def spec_existing(tr, spec_ax, wf_ax):
 
 
 # Axis setup
-spec_ratios = (6, 2, 1)  # `spec_ax` height, `wf_ax` height, spacer height
+spec_ratios = (6, 2, 0.6)  # `spec_ax` height, `wf_ax` height, spacer height
 spec_rows = 3
 spec_cols = 4
 assert spec_rows * spec_cols == st.count()  # Basic check that we have enough subplots
@@ -131,6 +134,7 @@ for tr, spec_ax, wf_ax in zip(st, spec_axs, wf_axs):
     spec_existing(tr, spec_ax, wf_ax)
 
 # Plot map
+map_ax.imshow(mpimg.imread('/Users/ldtoney/Documents/image.png'), aspect='auto')
 map_ax.set_xticks([])
 map_ax.set_yticks([])
 
@@ -147,5 +151,9 @@ label_ax.set_yticks([])
 for spine in label_ax.spines.values():
     spine.set_visible(False)
 label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=20)
+
+# Final figure tweaks to achieve proper borders
+fig.tight_layout(pad=0.2, rect=(0, -0.05, 1, 1))
+fig.subplots_adjust(hspace=0)
 
 fig.show()
