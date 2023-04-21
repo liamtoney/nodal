@@ -5,133 +5,181 @@
             <IconStyle id="5">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
                 <Icon id="6">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="7">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="9">
-            <IconStyle id="10">
+        <Style id="10">
+            <IconStyle id="11">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="11">
+                <Icon id="12">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="13">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="14">
-            <IconStyle id="15">
+        <Style id="16">
+            <IconStyle id="17">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="16">
+                <Icon id="18">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="19">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="19">
-            <IconStyle id="20">
+        <Style id="22">
+            <IconStyle id="23">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="21">
+                <Icon id="24">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="25">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="24">
-            <IconStyle id="25">
+        <Style id="28">
+            <IconStyle id="29">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="26">
+                <Icon id="30">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
-        </Style>
-        <Style id="29">
-            <IconStyle id="30">
-                <color>ff2b8ef2</color>
+            <LabelStyle id="31">
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
-                <heading>0</heading>
-                <Icon id="31">
-                    <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
-                </Icon>
-            </IconStyle>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
         <Style id="34">
             <IconStyle id="35">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
                 <Icon id="36">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="37">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="39">
-            <IconStyle id="40">
+        <Style id="40">
+            <IconStyle id="41">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="41">
+                <Icon id="42">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="43">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="44">
-            <IconStyle id="45">
+        <Style id="46">
+            <IconStyle id="47">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="46">
+                <Icon id="48">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="49">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="49">
-            <IconStyle id="50">
+        <Style id="52">
+            <IconStyle id="53">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="51">
+                <Icon id="54">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="55">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="54">
-            <IconStyle id="55">
+        <Style id="58">
+            <IconStyle id="59">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="56">
+                <Icon id="60">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="61">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
-        <Style id="59">
-            <IconStyle id="60">
+        <Style id="64">
+            <IconStyle id="65">
                 <color>ff2b8ef2</color>
                 <colorMode>normal</colorMode>
-                <scale>1.5</scale>
+                <scale>2</scale>
                 <heading>0</heading>
-                <Icon id="61">
+                <Icon id="66">
                     <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
                 </Icon>
             </IconStyle>
+            <LabelStyle id="67">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
+        </Style>
+        <Style id="70">
+            <IconStyle id="71">
+                <color>ff2b8ef2</color>
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+                <heading>0</heading>
+                <Icon id="72">
+                    <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                </Icon>
+            </IconStyle>
+            <LabelStyle id="73">
+                <colorMode>normal</colorMode>
+                <scale>2</scale>
+            </LabelStyle>
         </Style>
         <Placemark id="3">
             <name>4302</name>
@@ -140,80 +188,80 @@
                 <coordinates>-122.1343,46.1492,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="8">
+        <Placemark id="9">
             <name>4303</name>
-            <styleUrl>#9</styleUrl>
-            <Point id="7">
+            <styleUrl>#10</styleUrl>
+            <Point id="8">
                 <coordinates>-122.133301,46.149101,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="13">
+        <Placemark id="15">
             <name>4304</name>
-            <styleUrl>#14</styleUrl>
-            <Point id="12">
+            <styleUrl>#16</styleUrl>
+            <Point id="14">
                 <coordinates>-122.1325,46.1488,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="18">
+        <Placemark id="21">
             <name>4305</name>
-            <styleUrl>#19</styleUrl>
-            <Point id="17">
+            <styleUrl>#22</styleUrl>
+            <Point id="20">
                 <coordinates>-122.131897,46.148102,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="23">
+        <Placemark id="27">
             <name>4306</name>
-            <styleUrl>#24</styleUrl>
-            <Point id="22">
+            <styleUrl>#28</styleUrl>
+            <Point id="26">
                 <coordinates>-122.131401,46.1474,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="28">
+        <Placemark id="33">
             <name>4307</name>
-            <styleUrl>#29</styleUrl>
-            <Point id="27">
+            <styleUrl>#34</styleUrl>
+            <Point id="32">
                 <coordinates>-122.130898,46.146801,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="33">
+        <Placemark id="39">
             <name>4308</name>
-            <styleUrl>#34</styleUrl>
-            <Point id="32">
+            <styleUrl>#40</styleUrl>
+            <Point id="38">
                 <coordinates>-122.133102,46.149502,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="38">
+        <Placemark id="45">
             <name>4309</name>
-            <styleUrl>#39</styleUrl>
-            <Point id="37">
+            <styleUrl>#46</styleUrl>
+            <Point id="44">
                 <coordinates>-122.133598,46.150299,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="43">
+        <Placemark id="51">
             <name>4310</name>
-            <styleUrl>#44</styleUrl>
-            <Point id="42">
+            <styleUrl>#52</styleUrl>
+            <Point id="50">
                 <coordinates>-122.134598,46.1511,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="48">
+        <Placemark id="57">
             <name>4311</name>
-            <styleUrl>#49</styleUrl>
-            <Point id="47">
+            <styleUrl>#58</styleUrl>
+            <Point id="56">
                 <coordinates>-122.135101,46.151798,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="53">
+        <Placemark id="63">
             <name>4312</name>
-            <styleUrl>#54</styleUrl>
-            <Point id="52">
+            <styleUrl>#64</styleUrl>
+            <Point id="62">
                 <coordinates>-122.1353,46.1525,0.0</coordinates>
             </Point>
         </Placemark>
-        <Placemark id="58">
+        <Placemark id="69">
             <name>4319</name>
-            <styleUrl>#59</styleUrl>
-            <Point id="57">
+            <styleUrl>#70</styleUrl>
+            <Point id="68">
                 <coordinates>-122.136101,46.1535,0.0</coordinates>
             </Point>
         </Placemark>

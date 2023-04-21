@@ -52,11 +52,12 @@ color = 'tab:orange'
 for tr in st:
     pnt = kml.newpoint(name=tr.stats.station)
     pnt.coords = [(tr.stats.longitude, tr.stats.latitude)]
-    pnt.style.iconstyle.scale = 1.5
+    pnt.style.iconstyle.scale = 2
     pnt.style.iconstyle.icon.href = (
         'http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png'
     )
     pnt.style.iconstyle.color = simplekml.Color.hex(to_hex(color).lstrip('#'))
+    pnt.style.labelstyle.scale = 2
 kml.save(NODAL_WORKING_DIR / 'metadata' / 'x4_spectrogram_stations.kml')
 
 WF_LIM = (-3, 3)  # [μm/s]
