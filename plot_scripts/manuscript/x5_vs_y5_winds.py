@@ -34,6 +34,7 @@ def plot_winds(
     shot_name,
     frame='WESN',  # Which sides of frame to tick vs. annotate
     cbar_xpos=None,
+    ref_arrow=False,
 ):
     # Get shot
     shot = df.loc[shot_name]
@@ -58,6 +59,8 @@ def plot_winds(
 
     # Plot winds
     in_per_ms = 0.04  # [in/(m/s)]
+    vector_style = 'V4.5p+e+a45+n'  # +n means that vector heads are always drawn
+    vector_pen = '1p'
     assert np.all(u.longitude.values == v.longitude.values)
     assert np.all(u.latitude.values == v.latitude.values)
     wind = np.sqrt(u.values.flatten() ** 2 + v.values.flatten() ** 2)
@@ -74,14 +77,40 @@ def plot_winds(
                 wind * in_per_ms,  # length
             ]
         ).T,
-        style=f'V4.5p+e+a45+n',  # +n means that vector heads are always drawn
-        pen='1p+c',
+        style=vector_style,
+        pen=f'{vector_pen}+c',
         cmap=True,
     )
     if cbar_xpos:
         fig.colorbar(
-            frame='a45f15+l"Wind direction (\\232)"',
+            frame='a45f15+l"Wind direction (\\260)"',
             position=f'JBC+o{cbar_xpos}i/0.35i+w4i/0.1i',
+        )
+    if ref_arrow:
+        reference_speed = 10  # [m/s]
+        arrow_yoff = -0.4  # [in]
+        fig.plot(
+            data=np.vstack(
+                [
+                    REGION[0],  # x
+                    REGION[2],  # y
+                    90,  # azimuth
+                    reference_speed * in_per_ms,  # length
+                ]
+            ).T,
+            style=vector_style,
+            pen=vector_pen,
+            color='black',
+            no_clip=True,
+            offset=f'0/{arrow_yoff}i',
+        )
+        fig.text(
+            x=REGION[0],
+            y=REGION[2],
+            text=f'{reference_speed} m/s',
+            no_clip=True,
+            offset=f'0/{arrow_yoff - 0.135}i',
+            justify='TL',
         )
 
     # Plot and label shot
@@ -103,7 +132,7 @@ def plot_winds(
 
 
 fig = pygmt.Figure()
-plot_winds(fig, 'X5', frame='WeSN')
+plot_winds(fig, 'X5', frame='WeSN', ref_arrow=True)
 xshift = 3.32  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
 plot_winds(fig, 'Y5', frame='wESN', cbar_xpos=-xshift / 2)
