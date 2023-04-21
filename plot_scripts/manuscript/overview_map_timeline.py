@@ -133,7 +133,7 @@ fig_gmt.text(
 # Add frame on top
 fig_gmt.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
 # Colorbar, shifted to the left
-fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jML+o0/-0.5i+h')
+fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jTL+o0/0.35i+w0/0.1i+h')
 # Inset map showing all shots
 with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
     # Plot patch corresponding to main map extent
@@ -275,7 +275,7 @@ with NamedTemporaryFile(dir=Path.home() / '.gmt', suffix='.eps') as sym_f:
         f.write(f'S - k{symbolname} {met_size}i - - - Weather station\n')
         f.flush()
         fig_gmt.legend(
-            f.name, position='JBR+jML+o-0.6i/-0.65i+l1.5'
+            f.name, position='JBR+jTL+o-0.6i/0.26i+l1.5'
         )  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
@@ -452,7 +452,7 @@ fig.subplots_adjust(wspace=0.15, top=0.71)
 # --------------------------------------------------------------------------------------
 
 # Note: EPS does not support transparency!
-Y_OFF = 1.2  # [in] For (b), from bottom edge of (a) axes (positive down)
+Y_OFF = 1.1  # [in] For (b), from bottom edge of (a) axes (positive down)
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name)
     fig_gmt.image(
