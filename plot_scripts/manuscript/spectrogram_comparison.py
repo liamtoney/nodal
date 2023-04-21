@@ -56,8 +56,7 @@ for tr in st:
     pnt.style.iconstyle.icon.href = (
         'http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png'
     )
-    hex = to_hex(color).lstrip('#')
-    pnt.style.iconstyle.color = 'ff' + hex[4:] + hex[2:4] + hex[:2]
+    pnt.style.iconstyle.color = simplekml.Color.hex(to_hex(color).lstrip('#'))
 kml.save(NODAL_WORKING_DIR / 'metadata' / 'x4_spectrogram_stations.kml')
 
 WF_LIM = (-3, 3)  # [μm/s]
