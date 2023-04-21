@@ -1,3 +1,7 @@
+import os
+import subprocess
+from pathlib import Path
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -157,3 +161,7 @@ fig.tight_layout(pad=0.2, rect=(0, -0.05, 1, 1))
 fig.subplots_adjust(hspace=0)
 
 fig.show()
+
+_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
+
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'spectrogram_comparison.png', dpi=400)
