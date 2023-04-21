@@ -156,6 +156,12 @@ for spine in label_ax.spines.values():
     spine.set_visible(False)
 label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=20)
 
+# Remove some ticks
+for ax in axs[:, 1:].flatten():
+    ax.tick_params(left=False, which='both')
+for ax in axs[:-1, :].flatten():
+    ax.tick_params(bottom=False, which='both')
+
 # Final figure tweaks to achieve proper borders
 fig.tight_layout(pad=0.2, rect=(0, -0.05, 1, 1))
 fig.subplots_adjust(hspace=0)
