@@ -5,9 +5,11 @@ from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
+import simplekml
+from matplotlib.colors import to_hex
 from scipy.signal import spectrogram
 
-from utils import get_shots, get_stations, get_waveforms_shot
+from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -43,6 +45,20 @@ for tr in st:
     tr.stats.latitude = coords['latitude']
     tr.stats.longitude = coords['longitude']
 st.trim(starttime=get_shots().loc[SHOT].time)  # Stream starts at shot time
+
+# Export KML file of station locations
+kml = simplekml.Kml()
+color = 'tab:orange'
+for tr in st:
+    pnt = kml.newpoint(name=tr.stats.station)
+    pnt.coords = [(tr.stats.longitude, tr.stats.latitude)]
+    pnt.style.iconstyle.scale = 1.5
+    pnt.style.iconstyle.icon.href = (
+        'http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png'
+    )
+    hex = to_hex(color).lstrip('#')
+    pnt.style.iconstyle.color = 'ff' + hex[4:] + hex[2:4] + hex[:2]
+kml.save(NODAL_WORKING_DIR / 'metadata' / 'x4_spectrogram_stations.kml')
 
 WF_LIM = (-3, 3)  # [μm/s]
 SPEC_LIM = (10, 50)  # [Hz]
