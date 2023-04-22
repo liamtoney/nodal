@@ -253,19 +253,10 @@ for celerity in celerities_to_plot:
 ax.set_xlim(xlim)
 ax.set_ylim(ylim)
 
-# Colorbar 1: STA/LTA value (transparency)
+# Colorbar 1: STA/LTA value
 ylim = norm.vmin, norm.vmax
-check_shape = (110, 4)  # Currently just hard-coded to produce square "checks"
-cax1.pcolormesh(
-    np.linspace(0, 1, check_shape[1] + 1),
-    np.linspace(*ylim, check_shape[0] + 1),
-    np.indices(check_shape).sum(axis=0) % 2,  # The checker pattern
-    cmap=cc.m_gray_r,
-    vmax=8,  # Effectively controls how gray the checkerboard is (`vmax=1` is black)
-    shading='flat',
-)
 npts = 1000
-cax1.pcolormesh(
+pcm = cax1.pcolormesh(
     [0, 1],  # Just to stretch the image
     np.linspace(*ylim, npts),  # Linear y-axis
     np.ones((npts - 1, 1)),  # Solid black
@@ -283,6 +274,30 @@ for side in 'top', 'right':
     ax.spines[side].set_visible(False)
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
+
+# Colorbar 1: Checkerboard pattern (after everything else has been adjusted!)
+def callback(event=None):
+    if len(cax1.collections) > 1:
+        cax1.collections[1].remove()
+    width = 4  # [squares] Width of checkerboard pattern
+    cax1.set_aspect('equal', adjustable='datalim')
+    fig.canvas.draw()  # KEY: So Matplotlib can register that we've changed the aspect!
+    height = round(width * np.diff(cax1.get_ylim())[0] / np.diff(cax1.get_xlim())[0])
+    cax1.set_aspect('auto', adjustable='datalim')
+    check_shape = (height, width)
+    cax1.pcolormesh(
+        np.linspace(0, 1, check_shape[1] + 1),
+        np.linspace(*ylim, check_shape[0] + 1),
+        np.indices(check_shape).sum(axis=0) % 2,  # The checker pattern
+        cmap=cc.m_gray_r,
+        vmax=8,  # Effectively controls how gray the checkerboard is (`vmax=1` is black)
+        shading='flat',
+        zorder=pcm.zorder - 1,  # Ensure we're behind the transparency layer
+    )
+
+
+callback()
+fig.canvas.mpl_connect('resize_event', callback)  # Extra fun: If we resize, we re-draw
 fig.show()
 
 #%% (C3) Map view plots of quantities w/ STA/LTA shading
