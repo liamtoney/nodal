@@ -146,6 +146,32 @@ ax1.set_title(
 fig.tight_layout()
 fig.show()
 
+# Investigate how "pick error" affects calculated celerities
+delta_c = lambda c_ref, d, delta_t: -(c_ref * delta_t) / ((d / c_ref) + delta_t)
+npts = 500
+d_vec = np.linspace(7.5, 25, npts) * M_PER_KM  # [m]
+delta_t_vec = np.linspace(0, 0.3, npts)  # [s]
+C_REF = 341.5  # [m/s]
+
+args = d_vec, delta_t_vec, delta_c(C_REF, *np.meshgrid(d_vec, delta_t_vec))
+
+fig, ax = plt.subplots()
+pcm = ax.pcolormesh(*args, cmap=cc.m_fire)
+cs = ax.contour(
+    *args, levels=np.arange(-2, 0, 0.5), colors='black', linewidths=0.5, linestyles='-'
+)
+fig.colorbar(pcm, label='$\Delta c$ (m/s)')
+ax.set_xlabel('$d$ (m)')
+ax.set_ylabel('$\Delta t$ (s)')
+left_title = ax.set_title('$c_\mathrm{ref}$ = ' + f'{C_REF} m/s', loc='left', y=1.02)
+ax.set_title(
+    r'$\Delta c~=~-\frac{\Delta t c_\mathrm{ref}}{d~/~c_\mathrm{ref}~+~\Delta t}$',
+    loc='right',
+    y=left_title._y,
+)
+ax.clabel(cs, cs.levels, fmt=lambda x: f'${x:g}$ m/s', inline=True)
+fig.show()
+
 #%% (C1) Observed arrival time plotting and analysis
 
 removal_celerity = np.max(CELERITY_LIMITS)  # [m/s]
