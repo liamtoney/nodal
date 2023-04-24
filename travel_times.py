@@ -158,7 +158,7 @@ args = d_vec, delta_t_vec, delta_c(C_REF, *np.meshgrid(d_vec, delta_t_vec))
 fig, ax = plt.subplots()
 pcm = ax.pcolormesh(*args, cmap=cc.m_fire)
 cs = ax.contour(
-    *args, levels=np.arange(-2, 0, 0.5), colors='black', linewidths=0.5, linestyles='-'
+    *args, levels=np.arange(-3, 0, 0.5), colors='black', linewidths=0.5, linestyles='-'
 )
 fig.colorbar(pcm, label='$\Delta c$ (m/s)')
 ax.set_xlabel('$d$ (m)')
