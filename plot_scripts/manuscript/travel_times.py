@@ -98,6 +98,7 @@ def plot_node_values(
     frame='WESN',  # Which sides of frame to tick vs. annotate
     ref_arrow_xshift=None,
     cbar_pos='left',  # Choose 'left' or 'right' alignment
+    sta_lta_transparent=False,
 ):
 
     # Determine which nodes to mask
@@ -133,13 +134,17 @@ def plot_node_values(
             pen='gray31',
         )
     # Plot nodes OUTSIDE mask
+    if sta_lta_transparent:
+        transparency = (1 - norm(df.sta_lta_amp[~is_masked])) * 100  # [% transparency]
+    else:
+        transparency = None
     fig.plot(
         x=df.lon[~is_masked],
         y=df.lat[~is_masked],
         color=sta_values[~is_masked],
         style=node_style,
         cmap=True,
-        transparency=(1 - norm(df.sta_lta_amp[~is_masked])) * 100,  # [% transparency]
+        transparency=transparency,
         pen='gray31',
     )
     clip_low = series[0] > sta_values.min()
@@ -242,6 +247,7 @@ plot_node_values(
     cbar_pos='left',
     sta_dists=df.dist_m,
     mask_distance=MASK_DISTANCE_KM,
+    sta_lta_transparent=True,
 )
 xshift = 3.32  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
@@ -255,6 +261,7 @@ plot_node_values(
     frame='wESN',
     cbar_pos='right',
     ref_arrow_xshift=-(xshift - MAP_WIDTH) / 2,
+    sta_lta_transparent=False,
 )
 
 # Plot (a) and (b) tags
