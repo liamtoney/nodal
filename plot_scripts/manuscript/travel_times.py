@@ -97,6 +97,7 @@ def plot_node_values(
     mask_distance=0,  # [km] Plot markers within this range differently
     frame='WESN',  # Which sides of frame to tick vs. annotate
     ref_arrow_xshift=None,
+    cbar_pos='left',  # Choose 'left' or 'right' alignment
 ):
 
     # Determine which nodes to mask
@@ -151,8 +152,17 @@ def plot_node_values(
         tri = '+ef'
     else:
         tri = ''
+    cbar_width = 2.6  # [in]
+    if cbar_pos == 'left':
+        dir = -1
+    elif cbar_pos == 'right':
+        dir = 1
+    else:
+        raise ValueError
     fig.colorbar(
-        frame=f'{cbar_tick_ints}+l"{cbar_label}"', position='JBC+o0/0.35i+w0/0.1i' + tri
+        frame=f'{cbar_tick_ints}+l"{cbar_label}"',
+        position=f'JBC+o{dir * (MAP_WIDTH - cbar_width) / 2}i/0.35i+w{cbar_width}i/0.1i'
+        + tri,
     )
 
     # Plot winds
@@ -224,13 +234,14 @@ fig = pygmt.Figure()
 plot_node_values(
     fig,
     df.diffracted_path_length / df.arr_time,
-    sta_dists=df.dist_m,
     cbar_label='Modified celerity (m/s)',
     cbar_tick_ints='a0.5',
-    mask_distance=MASK_DISTANCE_KM,
     vmin=339,
     vmax=341.5,
     frame='WeSN',
+    cbar_pos='left',
+    sta_dists=df.dist_m,
+    mask_distance=MASK_DISTANCE_KM,
 )
 xshift = 3.32  # [in]
 fig.shift_origin(xshift=f'{xshift}i')
@@ -238,10 +249,11 @@ plot_node_values(
     fig,
     dot_product_medians,
     cbar_label='@%Helvetica-Oblique%w@-p@-@%% (m/s)',  # LOL
+    cbar_tick_ints='a0.3-0.2',
     vmin=-3.5,
     vmax=-2,
-    cbar_tick_ints='a0.3-0.2',
     frame='wESN',
+    cbar_pos='right',
     ref_arrow_xshift=-(xshift - MAP_WIDTH) / 2,
 )
 
