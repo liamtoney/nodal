@@ -178,7 +178,7 @@ def plot_node_values(
         + tri,
     )
     if sta_lta_transparent:
-        height = 4  # [squares] Height of checkerboard pattern
+        height = 5  # [squares] Height of checkerboard pattern
         width = round(height * (cbar_width / cbar_height))
         check_shape = (height, width)
         fig_cbar, ax = plt.subplots()
@@ -292,7 +292,7 @@ fig.shift_origin(xshift=f'{xshift}i')
 plot_node_values(
     fig,
     dot_product_medians,
-    cbar_label='@%Helvetica-Oblique%w@-p@-@%% (m/s)',  # LOL
+    cbar_label='Median @%Helvetica-Oblique%w@-p@-@%% (m/s)',  # LOL
     cbar_tick_ints='a0.3-0.2',  # Making a "phase" adjustment here
     vmin=-3.5,
     vmax=-2,
