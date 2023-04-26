@@ -1,7 +1,10 @@
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
+import colorcet as cc
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pygmt
@@ -48,7 +51,7 @@ v = v.where(mask_lon & mask_lat, drop=True)
 df = pd.read_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{shot.name}.csv')
 
 # Define normalization for STA/LTA (transparency mapping)
-GAMMA = 2  # Exponent for accentuating higher STA/LTA values
+GAMMA = 3  # Exponent for accentuating higher STA/LTA values
 norm = PowerNorm(gamma=GAMMA, vmin=df.sta_lta_amp.min(), vmax=df.sta_lta_amp.max())
 
 # Calculate w_p
@@ -157,7 +160,12 @@ def plot_node_values(
         tri = '+ef'
     else:
         tri = ''
+    cbar_height = 0.1  # [in]
     cbar_width = 2.6  # [in]
+    if sta_lta_transparent:
+        cbar_yoff = 0.7  # [in]
+    else:
+        cbar_yoff = 0.35 - cbar_height  # [in]
     if cbar_pos == 'left':
         dir = -1
     elif cbar_pos == 'right':
@@ -166,9 +174,39 @@ def plot_node_values(
         raise ValueError
     fig.colorbar(
         frame=f'{cbar_tick_ints}+l"{cbar_label}"',
-        position=f'JBC+o{dir * (MAP_WIDTH - cbar_width) / 2}i/0.35i+w{cbar_width}i/0.1i'
+        position=f'JBC+o{dir * (MAP_WIDTH - cbar_width) / 2}i/{cbar_height + cbar_yoff}i+w{cbar_width}i/{cbar_height}i'
         + tri,
     )
+    if sta_lta_transparent:
+        height = 4  # [squares] Height of checkerboard pattern
+        width = round(height * (cbar_width / cbar_height))
+        check_shape = (height, width)
+        fig_cbar, ax = plt.subplots()
+        ax.pcolormesh(
+            np.linspace(0, cbar_width, check_shape[1] + 1),
+            np.linspace(0, cbar_height, check_shape[0] + 1),
+            np.indices(check_shape).sum(axis=0) % 2,  # The checker pattern
+            cmap=cc.m_gray_r,
+            vmax=8,  # Effectively controls how gray checkerboard is (`vmax=1` is black)
+        )
+        npts = 1000
+        ax.pcolormesh(
+            np.linspace(0, cbar_width, npts + 1),
+            [0, cbar_height],
+            np.ones((1, npts)),  # Solid black
+            alpha=norm(np.expand_dims(np.linspace(norm.vmin, norm.vmax, npts), 1).T),
+            cmap=cc.m_gray,
+            rasterized=True,  # Avoids unsightly horizontal stripes
+        )
+        ax.set_aspect('equal')
+        ax.axis('off')
+        transp_cbar_pos = f'JBC+o{dir * (MAP_WIDTH - cbar_width) / 2}i/{cbar_yoff}i+w{cbar_width}i/{cbar_height}i'
+        with tempfile.NamedTemporaryFile(suffix='.png') as f:
+            fig_cbar.savefig(f.name, dpi=1000, bbox_inches='tight', pad_inches=0)
+            fig.image(f.name, position=transp_cbar_pos)
+        plt.close(fig_cbar)
+        pygmt.makecpt(series=[norm.vmin, norm.vmax], transparency=100)  # For frame
+        fig.colorbar(frame='+l"STA/LTA amplitude"', position=transp_cbar_pos + '+m')
 
     # Plot winds
     in_per_ms = 0.06  # [in/(m/s)]
