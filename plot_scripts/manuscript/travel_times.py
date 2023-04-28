@@ -60,7 +60,9 @@ dot_product_medians = []
 for lon, lat in zip(df.lon, df.lat):
 
     # Define path to interpolate along
-    npts = 100  # TODO should this vary with the shot–node distance?
+    distance = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[0]  # [m]
+    spacing = 500  # [m] Nominal interpolation profile spacing; needs to avoid aliasing!
+    npts = round(distance / spacing)
     x = np.linspace(shot.lon, lon, npts)
     y = np.linspace(shot.lat, lat, npts)
 
