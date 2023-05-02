@@ -99,7 +99,7 @@ def spec_existing(tr, spec_ax, wf_ax):
 
     # Axis adjustments
     for ax in wf_ax, spec_ax:
-        ax.grid(linestyle=':', which='both')
+        ax.grid(linestyle=':', which='both', color='lightgray')
     wf_ax.set_ylim(WF_LIM)
     spec_ax.set_ylim(SPEC_LIM)
     wf_ax.set_xlim(TIME_LIM)
