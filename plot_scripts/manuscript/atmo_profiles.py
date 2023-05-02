@@ -80,10 +80,12 @@ for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
     ax1.set_ylim(-0.5, 5)
     ax1.yaxis.set_major_locator(plt.MultipleLocator(2))
     ax1.yaxis.set_minor_locator(plt.MultipleLocator(1))
+    ax1.xaxis.set_minor_locator(plt.MultipleLocator(5))
+    ax2.xaxis.set_minor_locator(plt.MultipleLocator(10))
     for ax in ax1, ax2:
-        ax.grid(linestyle=':', which='both', color='gray', zorder=-1, alpha=0.5)
+        ax.grid(linestyle=':', which='both', color='lightgray', zorder=-1)
         xlim = ax.get_xlim()
-        ax.fill_between(xlim, -M_PER_KM, 0, color='silver', zorder=2)  # TOPO_COLOR
+        ax.fill_between(xlim, -M_PER_KM, 0, color='silver', zorder=2, lw=0.5)
         ax.set_xlim(xlim)
 axs[1, 0].set_xlabel('Wind speed (m/s)')
 axs[1, 1].set_xlabel('Sound speed (m/s)')
@@ -94,8 +96,16 @@ axs[0, 0].legend(
     title=r'${\bf Wind\ component}$',
 )
 axs[0, 1].legend(frameon=False, loc='lower left', bbox_to_anchor=(0, 1))
+axs[0, 1].tick_params(left=False, which='both')
+axs[1, 1].tick_params(left=False, which='both')
+for side in 'top', 'right':
+    for ax in axs.flatten():
+        ax.spines[side].set_visible(False)
+axs[0, 1].spines['left'].set_visible(False)
+axs[1, 1].spines['left'].set_visible(False)
 
 fig.tight_layout(pad=0.2)
+fig.subplots_adjust(hspace=0.07)
 
 fig.show()
 
