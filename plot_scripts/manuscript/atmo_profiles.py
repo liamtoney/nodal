@@ -70,7 +70,7 @@ for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
     c_eff_surface = np.interp(0, z_plot, c_eff_plot)  # Linear interpolation
 
     ax1, ax2 = ax_row
-    plot_kw = dict(lw=1.5, clip_on=False, solid_capstyle='round', dash_capstyle='round')
+    plot_kw = dict(lw=1.5, clip_on=False, solid_capstyle='round')
     ax1.plot(u_plot, z_plot, color='tab:red', label='Eastward', **plot_kw)
     ax1.plot(v_plot, z_plot, color='tab:blue', label='Northward', **plot_kw)
     ax2.plot(c_plot, z_plot, color='black', alpha=0.4, label='$c$', **plot_kw)
@@ -80,7 +80,8 @@ for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
         color='black',
         linestyle=':',
         label='$c_\mathrm{eff}$ (surface)',
-        **plot_kw,
+        lw=plot_kw['lw'],
+        dash_capstyle='round',
     )
     ax1.set_ylabel(f'Elevation relative to shot {shot_name} (km)')
     ax1.set_xlim(-15, 15)
