@@ -83,7 +83,6 @@ for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
     ax1.xaxis.set_minor_locator(plt.MultipleLocator(5))
     ax2.xaxis.set_minor_locator(plt.MultipleLocator(10))
     for ax in ax1, ax2:
-        ax.grid(linestyle=':', which='both', color='lightgray', zorder=-1)
         xlim = ax.get_xlim()
         ax.fill_between(xlim, -M_PER_KM, 0, color='silver', zorder=2, lw=0.5)
         ax.set_xlim(xlim)
@@ -103,9 +102,36 @@ for side in 'top', 'right':
         ax.spines[side].set_visible(False)
 axs[0, 1].spines['left'].set_visible(False)
 axs[1, 1].spines['left'].set_visible(False)
+for ax in axs.flatten():
+    ax.patch.set_alpha(0)
 
 fig.tight_layout(pad=0.2)
 fig.subplots_adjust(hspace=0.07)
+
+# Add grids
+grid_kw = dict(
+    linestyle=':',
+    zorder=-1,
+    color='lightgray',
+    linewidth=plt.rcParams['grid.linewidth'],
+)
+for ax in axs.flatten():
+    xticks_all = sorted(
+        ax.get_xticks().tolist() + ax.xaxis.get_minorticklocs().tolist()
+    )
+    for loc in xticks_all[2:-2]:
+        ax.axvline(loc, **grid_kw)
+gs = axs[0, 0].get_gridspec()
+for row in 0, 1:
+    ax_grid = fig.add_subplot(gs[row, :], sharey=axs[row, 0], zorder=-5)
+    for spine in ax_grid.spines.values():
+        spine.set_visible(False)
+    ax_grid.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)
+    yticks_all = sorted(
+        ax_grid.get_yticks().tolist() + ax_grid.yaxis.get_minorticklocs().tolist()
+    )
+    for loc in yticks_all[3:-2]:
+        ax_grid.axhline(loc, **grid_kw)
 
 fig.show()
 
