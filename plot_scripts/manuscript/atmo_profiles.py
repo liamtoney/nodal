@@ -114,8 +114,8 @@ axs[1, 1].spines['left'].set_visible(False)
 for ax in axs.flatten():
     ax.patch.set_alpha(0)
 
-fig.tight_layout(pad=0.2)
-fig.subplots_adjust(hspace=0.07)
+fig.tight_layout(pad=0.2, rect=(0, 0, 1.03, 1.01))
+fig.subplots_adjust(hspace=0.1)
 
 # Add grids
 grid_kw = dict(
