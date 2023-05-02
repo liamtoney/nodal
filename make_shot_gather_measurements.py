@@ -36,7 +36,7 @@ FREQMIN = 5  # [Hz]
 FREQMAX = 50  # [Hz]
 STA = 0.2  # [s]
 LTA = 2  # [s]
-CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
+CELERITY_LIMITS = (320, 350)  # [m/s] For defining acoustic arrival window
 FREQ_WIN_DUR = 10  # [s] Duration of window (centered on arrival) for peak freq. calc.
 RMS_WIN_DUR = 20  # [s] Seconds before shot time to include in RMS velocity calculation
 # -------------------------------

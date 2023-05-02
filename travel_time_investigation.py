@@ -17,7 +17,7 @@ from utils import INNER_RING_REGION, NODAL_WORKING_DIR, get_shots, get_waveforms
 
 SHOT = 'Y5'  # Shot to analyze
 
-CELERITY_LIMITS = (330, 350)  # [m/s] For defining acoustic arrival window
+CELERITY_LIMITS = (320, 350)  # [m/s] For defining acoustic arrival window
 
 M_PER_KM = 1000  # [m/km] CONSTANT
 

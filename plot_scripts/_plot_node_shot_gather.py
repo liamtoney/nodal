@@ -112,7 +112,7 @@ fig.show()
 
 #%% (Plot min/max celerities on top of shot gather created above)
 
-celerity_limits = (330, 350)
+celerity_limits = (320, 350)
 
 xlim = ax.get_xlim()
 ylim = ax.get_ylim()
