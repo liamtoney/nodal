@@ -2,6 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
 from pyproj import Geod
@@ -142,6 +143,22 @@ for row in 0, 1:
     )
     for loc in yticks_all[3:-2]:
         ax_grid.axhline(loc, **grid_kw)
+
+# Add subplot labels
+for ax, label in zip(axs.flatten(), ['(a)', '(b)', '(c)', '(d)']):
+    text = ax.text(
+        0.03,
+        0.995,
+        s=label,
+        transform=ax.transAxes,
+        ha='left',
+        va='top',
+        weight='bold',
+        fontsize=12,
+    )
+    text.set_path_effects(
+        [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()]
+    )
 
 fig.show()
 
