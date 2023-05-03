@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import tempfile
@@ -153,6 +154,20 @@ with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
     )
     # Plot nodes as tiny black dots
     fig_gmt.plot(x=sta_lons, y=sta_lats, color='black', style='c0.01i')
+    # Plot TA stations
+    with open(NODAL_WORKING_DIR / 'metadata' / 'ta_station_coords.json') as f:
+        station_coords = json.load(f)
+    ta_color = to_hex('tab:brown')
+    for station, coords in station_coords.items():
+        fig_gmt.plot(x=coords[1], y=coords[0], color=ta_color, style='c0.07i')
+        fig_gmt.text(
+            x=coords[1],
+            y=coords[0],
+            text=station,
+            justify='CB',
+            offset='0/0.05i',
+            font=f'5p,Helvetica-Bold,{ta_color}',
+        )
     # Plot shots
     scale = 0.00007  # [in/lb] Scale shot weights to marker sizes
     fig_gmt.plot(
