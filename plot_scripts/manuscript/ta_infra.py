@@ -1,3 +1,7 @@
+import os
+import subprocess
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 from multitaper import MTSpec
@@ -10,6 +14,8 @@ from utils import get_shots
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
+
+M_PER_KM = 1000  # [m/km]
 
 # Ordered by increasing distance from shot
 SHOT_STATION_PAIRS = (['Y1', 'F05D'], ['Y7', 'E04D'], ['Y6', 'E04D'], ['Y8', 'E04D'])
@@ -52,19 +58,19 @@ for shot_name, station in SHOT_STATION_PAIRS:
     st_tmp_noise = client.get_waveforms(**noise_win, **kwargs)
     for tr in st_tmp_signal + st_tmp_noise:
         tr.stats.shot = shot_name
+        tr.stats.distance = dist_m
     st_signal += st_tmp_signal
     st_noise += st_tmp_noise
 for st in st_signal, st_noise:
     assert st.count() == len(SHOT_STATION_PAIRS)  # Easy check
+    st.detrend('linear')
+    st.taper(0.05)
+    st.remove_response()
 
 #%% Quick plot
 
 fig, axs = plt.subplots(ncols=2, nrows=st.count(), sharex=True, sharey=True)
-for st_raw, ax_col in zip([st_signal, st_noise], axs.T):
-    st = st_raw.copy()
-    st.detrend('linear')
-    st.taper(0.05)
-    st.remove_response()
+for st, ax_col in zip([st_signal, st_noise], axs.T):
     for tr, ax in zip(st, ax_col):
         ax.plot(tr.times(), tr.data)
         ax.set_title(f'{tr.stats.shot}–{tr.stats.station}')
@@ -78,15 +84,20 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color'][: len(SHOT_STATION_PA
 signal_plot_kw = dict(linestyle=None, alpha=1)
 noise_plot_kw = dict(linestyle=':', alpha=0.5)
 
-fig, ax = plt.subplots()
+# Axis setup
+fig, axs = plt.subplots(
+    ncols=2,
+    nrows=len(SHOT_STATION_PAIRS),
+    sharex=True,
+    sharey=True,
+    figsize=(7.17, 3.2),
+)
+gs = axs[0, -1].get_gridspec()  # Top-right corner
+spec_ax = fig.add_subplot(gs[:, -1])  # Right-most column
+for ax in axs[:, -1]:
+    ax.remove()  # Remove the subplots in the right-most column
 
-for st_raw, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plot_kw]):
-
-    # Process
-    st = st_raw.copy()
-    st.detrend('linear')
-    st.taper(0.05)
-    st.remove_response()
+for st, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plot_kw]):
 
     # Calculate multitapers and plot lines
     for tr, color in zip(st, colors):
@@ -109,18 +120,53 @@ for st_raw, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plo
         pxx_db = 10 * np.log10(pxx / (P_REF**2))
 
         # Plot
-        ax.semilogx(f, pxx_db, color=color, **plot_kwargs)
+        spec_ax.semilogx(f, pxx_db, color=color, **plot_kwargs)
 
-ax.set_xlim(0.5, 10)
-ax.set_ylim(20, 70)
+for tr, ax, color in zip(st_signal, axs[:, 0], colors):
+    reduced_time = (
+        tr.times(reftime=df.loc[tr.stats.shot].time) - tr.stats.distance / CELERITY
+    )
+    ax.plot(reduced_time, tr.data, color=color)
+    ax.text(
+        0.01,
+        0.94,
+        rf'$\bf{{{tr.stats.shot}}}$–{tr.stats.station}',
+        transform=ax.transAxes,
+        ha='left',
+        va='top',
+    )
+    ax.text(
+        0.01,
+        0.02,
+        f'{tr.stats.distance / M_PER_KM:.1f} km',
+        transform=ax.transAxes,
+        ha='left',
+        va='bottom',
+    )
+    ax.set_ylim(-1, 1)
 
-ax.set_xlabel('Frequency (Hz)')
-ax.set_ylabel(f'Power (dB rel. [{P_REF * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)')
+spec_ax.set_xlim(0.5, 10)
+spec_ax.set_ylim(20, 70)
+
+spec_ax.set_xlabel('Frequency (Hz)')
+spec_ax.set_ylabel(f'Power (dB rel. [{P_REF * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)')
+spec_ax.yaxis.set_label_position(position='right')
+spec_ax.yaxis.tick_right()
+
+axs[-1, 0].set_xlabel(f'Time from shot (s), reduced by {CELERITY} m/s')
+axs[-1, 0].set_xlim(-5, 5)
+axs[-1, 0].xaxis.set_minor_locator(plt.MultipleLocator(1))
 
 # Make dummy legend
-ax.plot(np.nan, np.nan, color='black', label='Signal window', **signal_plot_kw)
-ax.plot(np.nan, np.nan, color='black', label='Noise window', **noise_plot_kw)
-ax.legend(frameon=False)
+spec_ax.plot(np.nan, np.nan, color='black', label='Signal window', **signal_plot_kw)
+spec_ax.plot(np.nan, np.nan, color='black', label='Noise window', **noise_plot_kw)
+spec_ax.legend(frameon=False)
 
-fig.tight_layout()
+fig.tight_layout(pad=0.2)
+fig.subplots_adjust(wspace=0.05)
+
 fig.show()
+
+_ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
+
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'ta_infra.png', dpi=600)
