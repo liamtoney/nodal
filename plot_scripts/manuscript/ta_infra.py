@@ -22,6 +22,8 @@ SHOT_STATION_PAIRS = (['Y1', 'F05D'], ['Y7', 'E04D'], ['Y6', 'E04D'], ['Y8', 'E0
 
 CELERITY = 340  # [m/s] For windowing acoustic arrival
 DATA_WIN = 60  # [s] How much data to compute the PSD for
+SPEC_XLIM = (0.5, 10)  # [Hz]
+WF_XLIM = (-5, 5)  # [s]
 
 # Where data and metadata come from
 client = Client('IRIS')
@@ -71,8 +73,8 @@ for st in st_signal, st_noise:
 
 P_REF = 20e-6  # [Pa]
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color'][: len(SHOT_STATION_PAIRS)]
-signal_plot_kw = dict(linestyle=None, alpha=1)
-noise_plot_kw = dict(linestyle=':', alpha=0.5)
+signal_plot_kw = dict(linestyle=None, alpha=1, solid_capstyle='round')
+noise_plot_kw = dict(linestyle=':', alpha=0.5, dash_capstyle='round')
 
 # Axis setup
 fig, axs = plt.subplots(
@@ -110,13 +112,23 @@ for st, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plot_kw
         pxx_db = 10 * np.log10(pxx / (P_REF**2))
 
         # Plot
-        spec_ax.semilogx(f, pxx_db, color=color, **plot_kwargs)
+        mask = (f >= SPEC_XLIM[0]) & (f <= SPEC_XLIM[1])
+        spec_ax.semilogx(
+            f[mask], pxx_db[mask], color=color, clip_on=False, **plot_kwargs
+        )
 
 for tr, ax, color in zip(st_signal, axs[:, 0], colors):
     reduced_time = (
         tr.times(reftime=df.loc[tr.stats.shot].time) - tr.stats.distance / CELERITY
     )
-    ax.plot(reduced_time, tr.data, color=color)
+    mask = (reduced_time >= WF_XLIM[0]) & (reduced_time <= WF_XLIM[1])
+    ax.plot(
+        reduced_time[mask],
+        tr.data[mask],
+        color=color,
+        solid_capstyle='round',
+        clip_on=False,
+    )
     ax.text(
         0.01,
         0.94,
@@ -127,7 +139,7 @@ for tr, ax, color in zip(st_signal, axs[:, 0], colors):
     )
     ax.text(
         0.01,
-        0.02,
+        0.01,
         f'{tr.stats.distance / M_PER_KM:.1f} km',
         transform=ax.transAxes,
         ha='left',
@@ -135,16 +147,18 @@ for tr, ax, color in zip(st_signal, axs[:, 0], colors):
     )
     ax.set_ylim(-1, 1)
 
-spec_ax.set_xlim(0.5, 10)
+spec_ax.set_xlim(SPEC_XLIM)
 spec_ax.set_ylim(20, 70)
 
 spec_ax.set_xlabel('Frequency (Hz)')
 spec_ax.set_ylabel(f'Power (dB rel. [{P_REF * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)')
 spec_ax.yaxis.set_label_position(position='right')
 spec_ax.yaxis.tick_right()
+for side in 'top', 'left':
+    spec_ax.spines[side].set_visible(False)
 
 axs[-1, 0].set_xlabel(f'Time from shot (s), reduced by {CELERITY} m/s')
-axs[-1, 0].set_xlim(-5, 5)
+axs[-1, 0].set_xlim(WF_XLIM)
 axs[-1, 0].xaxis.set_minor_locator(plt.MultipleLocator(1))
 label_ax = fig.add_subplot(gs[:, 0])
 label_ax.patch.set_alpha(0)
@@ -153,14 +167,26 @@ label_ax.set_yticks([])
 for spine in label_ax.spines.values():
     spine.set_visible(False)
 label_ax.set_ylabel('Pressure (Pa)', labelpad=20)
+for side in 'top', 'right':
+    for ax in axs[:, 0]:
+        ax.spines[side].set_visible(False)
+for ax in axs[:-1, 0]:
+    ax.spines['bottom'].set_visible(False)
+    ax.tick_params(bottom=False, which='both')
 
 # Make dummy legend
 spec_ax.plot(np.nan, np.nan, color='black', label='Signal window', **signal_plot_kw)
 spec_ax.plot(np.nan, np.nan, color='black', label='Noise window', **noise_plot_kw)
-spec_ax.legend(frameon=False)
+spec_ax.legend(
+    frameon=False,
+    borderpad=0.2,
+    numpoints=2,
+    loc='lower left',
+    bbox_to_anchor=(-0.03, 0),
+)
 
 fig.tight_layout(pad=0.2, rect=(-0.035, 0, 1, 1))
-fig.subplots_adjust(wspace=0.05)
+fig.subplots_adjust(wspace=0.1)
 
 fig.show()
 
