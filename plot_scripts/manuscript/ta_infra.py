@@ -146,13 +146,20 @@ spec_ax.yaxis.tick_right()
 axs[-1, 0].set_xlabel(f'Time from shot (s), reduced by {CELERITY} m/s')
 axs[-1, 0].set_xlim(-5, 5)
 axs[-1, 0].xaxis.set_minor_locator(plt.MultipleLocator(1))
+label_ax = fig.add_subplot(gs[:, 0])
+label_ax.patch.set_alpha(0)
+label_ax.set_xticks([])
+label_ax.set_yticks([])
+for spine in label_ax.spines.values():
+    spine.set_visible(False)
+label_ax.set_ylabel('Pressure (Pa)', labelpad=20)
 
 # Make dummy legend
 spec_ax.plot(np.nan, np.nan, color='black', label='Signal window', **signal_plot_kw)
 spec_ax.plot(np.nan, np.nan, color='black', label='Noise window', **noise_plot_kw)
 spec_ax.legend(frameon=False)
 
-fig.tight_layout(pad=0.2)
+fig.tight_layout(pad=0.2, rect=(-0.035, 0, 1, 1))
 fig.subplots_adjust(wspace=0.05)
 
 fig.show()
