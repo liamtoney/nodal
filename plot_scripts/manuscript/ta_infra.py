@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -10,7 +11,7 @@ from obspy.clients.fdsn import Client
 from obspy.geodetics.base import gps2dist_azimuth
 from scipy.fftpack import next_fast_len
 
-from utils import get_shots
+from utils import NODAL_WORKING_DIR, get_shots
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -39,6 +40,8 @@ for net in inv:
     for sta in net:
         station_coords[sta.code] = (sta.latitude, sta.longitude)
 assert sorted(station_coords.keys()) == sorted(unique_stations)  # Easy check
+with open(NODAL_WORKING_DIR / 'metadata' / 'ta_station_coords.json', 'w') as f:
+    json.dump(station_coords, f, indent='\t')
 
 # Get data
 st_signal = Stream()
