@@ -184,6 +184,18 @@ spec_ax.legend(
 fig.tight_layout(pad=0.2, rect=(-0.035, 0, 1, 1))
 fig.subplots_adjust(wspace=0.1)
 
+# Add subplot labels
+kwargs = dict(
+    y=0.99,
+    ha='left',
+    va='top',
+    weight='bold',
+    fontsize=12,
+)
+for ax, label in zip(axs[:, 0], ['(a)', '(b)', '(c)', '(d)']):
+    ax.text(x=0.015, s=label, transform=ax.transAxes, **kwargs)
+spec_ax.text(x=1.1, s='(e)', transform=axs[0, 0].transAxes, **kwargs)  # Use 1st subplot
+
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
