@@ -74,7 +74,7 @@ for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
     plot_kw = dict(lw=1.5, clip_on=False, solid_capstyle='round')
     ax1.plot(u_plot, z_plot, color='tab:red', label='Eastward', **plot_kw)
     ax1.plot(v_plot, z_plot, color='tab:blue', label='Northward', **plot_kw)
-    ax2.plot(c_plot, z_plot, color='black', alpha=0.4, label='$c$', **plot_kw)
+    ax2.plot(c_plot, z_plot, color='silver', label='$c$', **plot_kw)
     ax2.plot(c_eff_plot, z_plot, color='black', label='$c_\mathrm{eff}$', **plot_kw)
     ax2.axvline(
         c_eff_surface,
