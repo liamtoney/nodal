@@ -10,8 +10,7 @@ from matplotlib.colors import to_hex
 from matplotlib.transforms import Bbox
 from scipy.signal import spectrogram
 
-from utils import (NODAL_WORKING_DIR, get_shots, get_stations,
-                   get_waveforms_shot)
+from utils import NODAL_WORKING_DIR, get_shots, get_stations, get_waveforms_shot
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -68,6 +67,7 @@ DB_LIM = (-160, -130)  # [dB]
 WIN_DUR = 0.5  # [s]
 TIME_LIM = (40, 55)  # [s]
 V_REF = 1  # [m/s]
+
 
 # Define function to plot waveform and spectrogram into existing axes
 def spec_existing(tr, spec_ax, wf_ax):
