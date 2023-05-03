@@ -121,29 +121,25 @@ for tr, ax, color in zip(st_signal, axs[:, 0], colors):
     reduced_time = (
         tr.times(reftime=df.loc[tr.stats.shot].time) - tr.stats.distance / CELERITY
     )
-    mask = (reduced_time >= WF_XLIM[0]) & (reduced_time <= WF_XLIM[1])
+    sliver = 0.02  # [s] Avoids bit of waveform poking out beyond spine
+    mask = (reduced_time > WF_XLIM[0] + sliver) & (reduced_time <= WF_XLIM[1])
     ax.plot(
         reduced_time[mask],
-        tr.data[mask],
+        tr.data[mask] - np.median(tr.data[mask]),  # Extra little detrend here!
         color=color,
         solid_capstyle='round',
         clip_on=False,
     )
+    pad = 0.25  # [Pa] Either side of 0
     ax.text(
-        0.01,
-        0.94,
+        WF_XLIM[1],
+        pad,
         rf'$\bf{{{tr.stats.shot}}}$–{tr.stats.station}',
-        transform=ax.transAxes,
-        ha='left',
-        va='top',
+        ha='right',
+        va='bottom',
     )
     ax.text(
-        0.01,
-        0.01,
-        f'{tr.stats.distance / M_PER_KM:.1f} km',
-        transform=ax.transAxes,
-        ha='left',
-        va='bottom',
+        WF_XLIM[1], -pad, f'{tr.stats.distance / M_PER_KM:.1f} km', ha='right', va='top'
     )
     ax.set_ylim(-1, 1)
 
