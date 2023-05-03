@@ -74,7 +74,7 @@ for st in st_signal, st_noise:
 P_REF = 20e-6  # [Pa]
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color'][: len(SHOT_STATION_PAIRS)]
 signal_plot_kw = dict(linestyle=None, alpha=1, solid_capstyle='round')
-noise_plot_kw = dict(linestyle=':', alpha=0.5, dash_capstyle='round')
+noise_plot_kw = dict(linestyle=':', alpha=0.4, dash_capstyle='round')
 
 # Axis setup
 fig, axs = plt.subplots(
