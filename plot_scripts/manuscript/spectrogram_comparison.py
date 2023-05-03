@@ -47,6 +47,11 @@ for tr in st:
     tr.stats.longitude = coords['longitude']
 st.trim(starttime=get_shots().loc[SHOT].time)  # Stream starts at shot time
 
+# Print the centroid of the stations
+print(
+    f'({np.mean([tr.stats.latitude for tr in st]):.4f}, {np.mean([tr.stats.longitude for tr in st]):.4f})'
+)
+
 # Export KML file of station locations
 kml = simplekml.Kml()
 color = 'tab:orange'
