@@ -67,16 +67,6 @@ for st in st_signal, st_noise:
     st.taper(0.05)
     st.remove_response()
 
-#%% Quick plot
-
-fig, axs = plt.subplots(ncols=2, nrows=st.count(), sharex=True, sharey=True)
-for st, ax_col in zip([st_signal, st_noise], axs.T):
-    for tr, ax in zip(st, ax_col):
-        ax.plot(tr.times(), tr.data)
-        ax.set_title(f'{tr.stats.shot}–{tr.stats.station}')
-fig.tight_layout()
-fig.show()
-
 #%% Calculate multitapers and plot
 
 P_REF = 20e-6  # [Pa]
