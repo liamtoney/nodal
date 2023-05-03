@@ -68,11 +68,11 @@ fig_gmt.grdimage(
     transparency=30,
 )
 # Plot the two FDTD transects (TODO: Cropped according to the xlim in the snapshot code)
+g = Geod(ellps='WGS84')
 for transect, profile_end in zip(
     ['Y5', 'X5'], [(46.224, -122.031), (46.138, -122.297)]
 ):
     profile_start = (df.loc[transect].lat, df.loc[transect].lon)
-    g = Geod(ellps='WGS84')
     az_start_to_end = g.inv(*profile_start[::-1], *profile_end[::-1])[0]
     profile_end_crop = g.fwd(*profile_start[::-1], az_start_to_end, 24 * 1000)[:2][::-1]
     crs = _estimate_utm_crs(*profile_start)
@@ -96,6 +96,32 @@ pygmt.makecpt(
 fig_gmt.plot(
     x=sta_lons, y=sta_lats, color=elevations, style='c0.05i', cmap=True, pen='black'
 )
+
+# Plot arrow pointing to centroid of stations used in the spectrogram figure
+SPEC_STA_CENTROID = (46.1498, -122.1335)  # TODO: Output by `spectrogram_comparison.py`
+vec_start = (46.163, -122.123)  # Arbitrary, just a nice spot for vector tail
+az_start_to_end = g.inv(*vec_start[::-1], *SPEC_STA_CENTROID[::-1])[0]
+fig_gmt.plot(
+    x=[vec_start[1]],
+    y=[vec_start[0]],
+    style='V4.5p+e+a45',
+    direction=[[az_start_to_end], [0.55]],
+    pen='0.8p,black',
+    color='black',
+)
+label = 'Fig. 9\nnodes'  # TODO: Make sure this figure # is correct!
+y_off = 0
+for line in label.split('\n')[::-1]:
+    fig_gmt.text(
+        x=[vec_start[1]],
+        y=[vec_start[0]],
+        text=line,
+        font='7p',
+        justify='LB',
+        offset=f'-0.1i/{0.03 + y_off}i',
+    )
+    y_off += 0.1  # [in] Controls line spacing
+
 # Plot shots
 size_1000_lb = 0.2  # [in] Marker size for the smaller, 1000-lb shots
 shot_kw = dict(style='si', pen='0.25p')
