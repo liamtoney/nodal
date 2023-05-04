@@ -324,11 +324,6 @@ for ax, st, scale in zip([ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCA
     ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
 
 
-ax_im_pos = ax_im.get_position()
-y_height = ax_im_pos.height
-spacing = 0.025  # Spacing between subplots
-
-
 def _position_ax_below(ax_above, ax_below, height=None, spacing=None):
     ax_above_pos = ax_above.get_position()
     ax_below_pos = ax_below.get_position()
@@ -338,7 +333,7 @@ def _position_ax_below(ax_above, ax_below, height=None, spacing=None):
         spacing = -height  # Place `ax_below` at same ymin as `ax_above`
     ax_below.set_position(
         [
-            ax_im_pos.xmin,  # All of the x-positions are referenced to `ax_im`
+            ax_above_pos.xmin,  # Horizontally align with `ax_above`
             ax_above_pos.ymin - height - spacing,
             ax_below_pos.width,
             height,
@@ -346,14 +341,18 @@ def _position_ax_below(ax_above, ax_below, height=None, spacing=None):
     )
 
 
+# Set height and vertical spacing for subplots
+height = ax_im.get_position().height  # Panel (a) height
+spacing = 0.025
+
 # Panel (b) — TL
-_position_ax_below(ax_im, ax0, height=y_height / 2, spacing=spacing)
+_position_ax_below(ax_im, ax0, height=height / 2, spacing=spacing)
 _position_ax_below(ax0, topo_ax0)
 # Panel (c) — Synthetic waveforms
-_position_ax_below(topo_ax0, ax1, height=y_height, spacing=spacing)
+_position_ax_below(topo_ax0, ax1, height=height, spacing=spacing)
 _position_ax_below(ax1, topo_ax1)
 # Panel (d) — Observed waveforms
-_position_ax_below(topo_ax1, ax2, height=y_height, spacing=spacing)
+_position_ax_below(topo_ax1, ax2, height=height, spacing=spacing)
 _position_ax_below(ax2, topo_ax2)
 
 # Colorbar
