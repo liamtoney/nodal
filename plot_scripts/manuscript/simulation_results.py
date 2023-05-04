@@ -138,7 +138,7 @@ PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below t
 TOPO_COLOR = 'silver'
 
 FIGSIZE = (7.17, 10)  # [in.] Figure height is more than we need; we only save a portion
-fig, (ax0, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
+fig, (ax_im, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
     nrows=5, figsize=FIGSIZE, sharex=True
 )
 
@@ -149,10 +149,10 @@ extent = [
     (vert_min - Z_SRC) / M_PER_KM,
     (vert_max - Z_SRC) / M_PER_KM,
 ]
-im = ax0.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
+im = ax_im.imshow(p_agg, origin='lower', cmap='RdBu_r', vmin=-1, vmax=1, extent=extent)
 
 # Plot terrain
-ax0.fill_between(
+ax_im.fill_between(
     (terrain_contour[:, 0] - X_SRC) / M_PER_KM,
     -1,
     (terrain_contour[:, 1] - Z_SRC) / M_PER_KM,
@@ -162,38 +162,38 @@ ax0.fill_between(
 
 # Timestamp labels (note: we don't bother correcting for t0 here since it's so small —
 # in reality the true times are `timestamp * dt + t0`)
-text = ax0.text(
+text = ax_im.text(
     0.99,
     0.95,
     ', '.join([f'{timestamp * dt:g}' for timestamp in TIMESTAMPS]) + ' s',
     ha='right',
     va='top',
-    transform=ax0.transAxes,
+    transform=ax_im.transAxes,
 )
 text.set_path_effects(
     [path_effects.Stroke(linewidth=1.5, foreground='white'), path_effects.Normal()]
 )
 
 # Axis params
-ax0.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
-ax0.set_xlim(XLIM)
-ax0.set_ylim(YLIM)
+ax_im.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
+ax_im.set_xlim(XLIM)
+ax_im.set_ylim(YLIM)
 major_tick_interval = 2  # [km]
 minor_tick_interval = 1  # [km[
-ax0.xaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
-ax0.xaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
-ax0.yaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
-ax0.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
-ax0.set_aspect('equal')
-ax0.tick_params(top=True, right=True, which='both')
+ax_im.xaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax_im.xaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax_im.yaxis.set_major_locator(plt.MultipleLocator(major_tick_interval))
+ax_im.yaxis.set_minor_locator(plt.MultipleLocator(minor_tick_interval))
+ax_im.set_aspect('equal')
+ax_im.tick_params(top=True, right=True, which='both')
 
 # Layout adjustment (note we're making room for the colorbar here!)
 fig.tight_layout(pad=0.2, rect=(0.04, 0, 0.84, 1.03))
 
 # Colorbar
 cax = fig.add_subplot(111)
-ax0_pos = ax0.get_position()
-cax.set_position([ax0_pos.xmax + 0.09, ax0_pos.ymin, 0.01, ax0_pos.height])
+ax_im_pos = ax_im.get_position()
+cax.set_position([ax_im_pos.xmax + 0.09, ax_im_pos.ymin, 0.01, ax_im_pos.height])
 fig.colorbar(
     im, cax=cax, ticks=(im.norm.vmin, 0, im.norm.vmax), label='Normalized pressure'
 )
@@ -297,18 +297,18 @@ for ax, st, scale in zip([ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCA
 
 def _reposition():
 
-    ax0_pos = ax0.get_position()
-    y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax0_pos.height
+    ax_im_pos = ax_im.get_position()
+    y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax_im_pos.height
     spacing = 0.025
 
     ax1_pos = ax1.get_position()
     ax1.set_position(
-        [ax0_pos.xmin, ax0_pos.ymin - y_height - spacing, ax1_pos.width, y_height]
+        [ax_im_pos.xmin, ax_im_pos.ymin - y_height - spacing, ax1_pos.width, y_height]
     )
     topo_ax1_pos = topo_ax1.get_position()
     topo_ax1.set_position(
         [
-            ax0_pos.xmin,
+            ax_im_pos.xmin,
             ax1_pos.ymin - topo_ax1_pos.height,
             topo_ax1_pos.width,
             topo_ax1_pos.height,
@@ -317,13 +317,18 @@ def _reposition():
     topo_ax1_pos = topo_ax1.get_position()
     ax2_pos = ax2.get_position()
     ax2.set_position(
-        [ax0_pos.xmin, topo_ax1_pos.ymin - y_height - spacing, ax2_pos.width, y_height]
+        [
+            ax_im_pos.xmin,
+            topo_ax1_pos.ymin - y_height - spacing,
+            ax2_pos.width,
+            y_height,
+        ]
     )
     topo_ax2_pos = topo_ax2.get_position()
     ax2_pos = ax2.get_position()
     topo_ax2.set_position(
         [
-            ax0_pos.xmin,
+            ax_im_pos.xmin,
             ax2_pos.ymin - topo_ax2_pos.height,
             topo_ax2_pos.width,
             topo_ax2_pos.height,
@@ -394,7 +399,7 @@ for topo_ax in topo_ax1, topo_ax2:
     _spine.set_yticks([])
 
 # Plot (a), (b), and (c) tags
-for ax, label in zip([ax0, ax1, ax2], ['(a)', '(b)', '(c)']):
+for ax, label in zip([ax_im, ax1, ax2], ['(a)', '(b)', '(c)']):
     ax.text(
         -0.115,
         1,
