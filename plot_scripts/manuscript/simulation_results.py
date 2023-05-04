@@ -132,8 +132,8 @@ for tr in st:
 SKIP = 50  # Plot every SKIP stations
 START = 5  # Start at this station index (for shifting which set of traces is plotted)
 DUR = 80  # [s] Duration of waveforms to cut, intially
-PRE_ROLL = -0.8  # [s] Chosen to place t = 0 at the shot elevation for topo!
-POST_ROLL = 8  # [s]
+PRE_ROLL = -0.9  # [s] Chosen to place t = 0 at the shot elevation for topo!
+POST_ROLL = 6  # [s]
 
 TOPO_COLOR = 'silver'
 
@@ -347,13 +347,13 @@ height = ax_im.get_position().height  # Panel (a) height
 spacing = 0.025
 
 # Panel (b) — TL
-_position_ax_below(ax_im, ax0, height=height / 2, spacing=spacing)
+_position_ax_below(ax_im, ax0, height=0.5 * height, spacing=spacing)
 _position_ax_below(ax0, topo_ax0)
 # Panel (c) — Synthetic waveforms
-_position_ax_below(topo_ax0, ax1, height=height, spacing=spacing)
+_position_ax_below(topo_ax0, ax1, height=0.7 * height, spacing=spacing)
 _position_ax_below(ax1, topo_ax1)
 # Panel (d) — Observed waveforms
-_position_ax_below(topo_ax1, ax2, height=height, spacing=spacing)
+_position_ax_below(topo_ax1, ax2, height=0.7 * height, spacing=spacing)
 _position_ax_below(ax2, topo_ax2)
 
 # Colorbar
@@ -425,7 +425,7 @@ fig.show()
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
-    portion_to_save = 0.54  # Vertical fraction of figure to actually save
+    portion_to_save = 0.47  # Vertical fraction of figure to actually save
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
