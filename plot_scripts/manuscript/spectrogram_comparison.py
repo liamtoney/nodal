@@ -210,9 +210,12 @@ cax.set_position(
         0.02,
     ]
 )
-fig.colorbar(pcm, cax=cax, orientation='horizontal')
+extend_frac = 0.02
+fig.colorbar(
+    pcm, cax=cax, orientation='horizontal', extend='both', extendfrac=extend_frac
+)
 cax.text(
-    1.02,
+    1.04,
     0.5,
     f'Power (dB rel. {V_REF:g} [m/s]$^2$ Hz$^{{-1}}$)',
     ha='left',
@@ -220,6 +223,13 @@ cax.text(
     transform=cax.transAxes,
 )
 cax.xaxis.tick_top()
+pos = cax.get_position()
+triangle_width = extend_frac * pos.width
+xmin = pos.xmin
+width = pos.width
+xmin -= triangle_width
+width += 2 * triangle_width
+cax.set_position([xmin, pos.ymin, width, pos.height])
 
 # Print image axis aspect ratio (informs how to crop the image)
 ratio = np.abs(np.diff(map_ax.get_ylim())[0] / np.diff(map_ax.get_xlim())[0])
