@@ -211,9 +211,10 @@ tl[tl > 0] = np.nan
 cyl_tl[cyl_tl > 0] = np.nan
 sph_tl[sph_tl > 0] = np.nan
 line_kw = dict(clip_on=False, lw=1, solid_capstyle='round', dash_capstyle='round')
+ref_kw = dict(color='black', alpha=0.5)
 ax0.plot(d, tl, color='black', **line_kw)
-ax0.plot(d, cyl_tl, color='gray', linestyle='--', zorder=-2, **line_kw)
-ax0.plot(d, sph_tl, color='gray', linestyle=':', zorder=-1, **line_kw)
+ax0.plot(d, cyl_tl, linestyle='--', zorder=-2, **line_kw, **ref_kw)
+ax0.plot(d, sph_tl, linestyle=':', zorder=-1, **line_kw, **ref_kw)
 for label, geo in zip(['Cylindrical', 'Spherical'], [cyl_tl, sph_tl]):
     ax0.text(
         XLIM[1] + 0.2,
@@ -221,9 +222,9 @@ for label, geo in zip(['Cylindrical', 'Spherical'], [cyl_tl, sph_tl]):
         label,
         ha='left',
         va='center',
-        color='gray',
         weight='bold',
         fontsize=8,
+        **ref_kw,
     )
 ax0.set_ylabel('TL (dB)', labelpad=3)
 ax0.set_ylim(-65, 0)
