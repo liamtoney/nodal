@@ -351,7 +351,7 @@ def _position_ax_below(ax_above, ax_below, height=None, spacing=0):
 
 # Panel (b) — TL
 _position_ax_below(ax_im, ax0, height=y_height / 2, spacing=spacing)
-_position_ax_below(ax0, topo_ax0)
+_position_ax_below(ax0, topo_ax0, spacing=-topo_ax0.get_position().height)
 # Panel (c) — Synthetic waveforms
 _position_ax_below(topo_ax0, ax1, height=y_height, spacing=spacing)
 _position_ax_below(ax1, topo_ax1)
@@ -435,7 +435,7 @@ fig.show()
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
-    portion_to_save = 0.545  # Vertical fraction of figure to actually save
+    portion_to_save = 0.535  # Vertical fraction of figure to actually save
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
