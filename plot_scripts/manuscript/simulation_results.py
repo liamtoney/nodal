@@ -188,12 +188,7 @@ ax0.set_aspect('equal')
 ax0.tick_params(top=True, right=True, which='both')
 
 # Layout adjustment (note we're making room for the colorbar here!)
-y_offset = 0.03
-left_pad = 0.04
-right_pad = 0.12
-fig.tight_layout(
-    pad=0.2, rect=(left_pad, y_offset, 1 - left_pad - right_pad, 1 + y_offset)
-)
+fig.tight_layout(pad=0.2, rect=(0.04, 0, 0.84, 1.03))
 
 # Colorbar
 cax = fig.add_subplot(111)
@@ -416,7 +411,7 @@ fig.show()
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
-    portion_to_save = 0.45  # Vertical fraction of figure to actually save
+    portion_to_save = 0.455  # Vertical fraction of figure to actually save
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
