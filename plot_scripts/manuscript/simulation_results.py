@@ -132,8 +132,8 @@ for tr in st:
 SKIP = 50  # Plot every SKIP stations
 START = 5  # Start at this station index (for shifting which set of traces is plotted)
 DUR = 80  # [s] Duration of waveforms to cut, intially
+PRE_ROLL = -0.8  # [s] Chosen to place t = 0 at the shot elevation for topo!
 POST_ROLL = 8  # [s]
-PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below topo_ax
 
 TOPO_COLOR = 'silver'
 
@@ -227,9 +227,8 @@ for label, geo in zip(['Cylindrical', 'Spherical'], [cyl_tl, sph_tl]):
 ax0.set_ylabel('TL (dB)', labelpad=3)
 ax0.set_ylim(-70, 0)
 ax0.yaxis.set_minor_locator(plt.MultipleLocator(10))
-for side in 'top', 'right', 'bottom':
+for side in 'top', 'right':
     ax0.spines[side].set_visible(False)
-ax0.tick_params(bottom=False, labelbottom=False, which='both')
 ax0.patch.set_alpha(0)
 
 # Form [subsetted] plotting Stream for FAKE data
@@ -253,7 +252,7 @@ def _get_onset_time(tr):
 
 
 # BIG helper function for plotting wfs
-def process_and_plot(st, ax, scale, pre_roll):
+def process_and_plot(st, ax, scale):
 
     # Make measurements on the windowed traces
     maxes_all = []
@@ -281,12 +280,12 @@ def process_and_plot(st, ax, scale, pre_roll):
         tr_plot = tr.copy()
         onset_time = _get_onset_time(tr_plot)
         tr_plot.trim(
-            onset_time - pre_roll, onset_time + POST_ROLL, pad=True, fill_value=0
+            onset_time + PRE_ROLL, onset_time + POST_ROLL, pad=True, fill_value=0
         )
         data_scaled = tr_plot.copy().normalize().data / scale
         ax.plot(
             -1 * data_scaled + tr_plot.stats.x - X_SRC / M_PER_KM,  # Source at x = 0
-            tr_plot.times() - pre_roll,
+            tr_plot.times() + PRE_ROLL,
             color=cmap(norm(mx)),
             clip_on=False,
             solid_capstyle='round',
@@ -310,27 +309,23 @@ for topo_ax in topo_ax0, topo_ax1, topo_ax2:
     topo_ax.set_ylim(YLIM[0], 0)  # Axis technically ends at elevation of shot
     topo_ax.set_aspect('equal')
     topo_ax.set_zorder(-5)
-    topo_ax.tick_params(left=False, labelleft=False)
-    for side in 'right', 'top':
-        topo_ax.spines[side].set_visible(False)
-topo_ax2.set_xlabel(f'Distance from shot {SHOT} (km)')
+    topo_ax.axis('off')
 
 norms = []
 for ax, st, scale in zip([ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCALE]):
-    norm, cmap = process_and_plot(st, ax, scale, PRE_ROLL)
+    norm, cmap = process_and_plot(st, ax, scale)
     norms.append(norm)
-    ax.set_ylim(0, POST_ROLL)
+    ax.set_ylim(PRE_ROLL, POST_ROLL)
     ax.set_xlim(XLIM)
-    for side in 'top', 'right', 'bottom':
+    for side in 'top', 'right':
         ax.spines[side].set_visible(False)
-    ax.tick_params(bottom=False, labelbottom=False, which='both')
     ax.patch.set_alpha(0)
     ax.yaxis.set_major_locator(plt.MultipleLocator(2))
     ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
 
 
 ax_im_pos = ax_im.get_position()
-y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax_im_pos.height  # Height "above ground"
+y_height = ax_im_pos.height
 spacing = 0.025  # Spacing between subplots
 
 
@@ -350,14 +345,19 @@ def _position_ax_below(ax_above, ax_below, height=None, spacing=0):
 
 
 # Panel (b) — TL
-_position_ax_below(ax_im, ax0, height=y_height / 2, spacing=spacing)
+_position_ax_below(
+    ax_im,
+    ax0,
+    height=((YLIM[1] / np.diff(YLIM)[0]) * ax_im_pos.height) / 2,
+    spacing=spacing,
+)
 _position_ax_below(ax0, topo_ax0, spacing=-topo_ax0.get_position().height)
 # Panel (c) — Synthetic waveforms
 _position_ax_below(topo_ax0, ax1, height=y_height, spacing=spacing)
-_position_ax_below(ax1, topo_ax1)
+_position_ax_below(ax1, topo_ax1, spacing=-topo_ax1.get_position().height)
 # Panel (d) — Observed waveforms
 _position_ax_below(topo_ax1, ax2, height=y_height, spacing=spacing)
-_position_ax_below(ax2, topo_ax2)
+_position_ax_below(ax2, topo_ax2, spacing=-topo_ax1.get_position().height)
 
 # Colorbar
 ax1_pos = ax1.get_position()
@@ -393,6 +393,9 @@ for norm in norms:
     height += 2 * triangle_height
     _cax.set_position([pos.xmin, ymin, pos.width, height])
 
+ax2.tick_params(labelbottom=True)  # Hmm...
+ax2.set_xlabel(f'Distance from shot {SHOT} (km)')
+
 # Shared y-axis label
 label_ax = fig.add_subplot(111)
 label_ax.set_position(
@@ -406,16 +409,6 @@ label_ax.set_yticks([])
 label_ax.set_ylabel(
     f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=15
 )
-
-# Add spine to cover wf ends
-for topo_ax in topo_ax1, topo_ax2:
-    _spine = fig.add_subplot(111)
-    _spine.set_position(topo_ax.get_position())
-    for side in 'top', 'left', 'right':
-        _spine.spines[side].set_visible(False)
-    _spine.patch.set_alpha(0)
-    _spine.set_xticks([])
-    _spine.set_yticks([])
 
 # Plot subpanel labels
 for ax, label in zip([ax_im, ax0, ax1, ax2], ['(a)', '(b)', '(c)', '(d)']):
