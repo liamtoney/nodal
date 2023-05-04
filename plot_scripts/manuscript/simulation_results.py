@@ -295,50 +295,31 @@ for ax, st, scale in zip([ax1, ax2], [st_syn_plot, st_plot], [SYN_SCALE, OBS_SCA
     ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
 
 
-def _reposition():
+ax_im_pos = ax_im.get_position()
+y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax_im_pos.height  # Height "above ground"
+spacing = 0.025  # Spacing between subplots
 
-    ax_im_pos = ax_im.get_position()
-    y_height = (YLIM[1] / np.diff(YLIM)[0]) * ax_im_pos.height
-    spacing = 0.025
 
-    ax1_pos = ax1.get_position()
-    ax1.set_position(
-        [ax_im_pos.xmin, ax_im_pos.ymin - y_height - spacing, ax1_pos.width, y_height]
-    )
-    topo_ax1_pos = topo_ax1.get_position()
-    topo_ax1.set_position(
+def _position_ax_below(ax_above, ax_below, height=None, spacing=0):
+    ax_above_pos = ax_above.get_position()
+    ax_below_pos = ax_below.get_position()
+    if height is None:
+        height = ax_below_pos.height  # Just use the original height of `ax_below`
+    ax_below.set_position(
         [
-            ax_im_pos.xmin,
-            ax1_pos.ymin - topo_ax1_pos.height,
-            topo_ax1_pos.width,
-            topo_ax1_pos.height,
-        ]
-    )
-    topo_ax1_pos = topo_ax1.get_position()
-    ax2_pos = ax2.get_position()
-    ax2.set_position(
-        [
-            ax_im_pos.xmin,
-            topo_ax1_pos.ymin - y_height - spacing,
-            ax2_pos.width,
-            y_height,
-        ]
-    )
-    topo_ax2_pos = topo_ax2.get_position()
-    ax2_pos = ax2.get_position()
-    topo_ax2.set_position(
-        [
-            ax_im_pos.xmin,
-            ax2_pos.ymin - topo_ax2_pos.height,
-            topo_ax2_pos.width,
-            topo_ax2_pos.height,
+            ax_im_pos.xmin,  # All of the x-positions are referenced to `ax_im`
+            ax_above_pos.ymin - height - spacing,
+            ax_below_pos.width,
+            height,
         ]
     )
 
 
-# Needs to be called twice, I guess?
-_reposition()
-_reposition()
+_position_ax_below(ax_im, ax1, height=y_height, spacing=spacing)
+_position_ax_below(ax1, topo_ax1)
+
+_position_ax_below(topo_ax1, ax2, height=y_height, spacing=spacing)
+_position_ax_below(ax2, topo_ax2)
 
 # Colorbar
 ax1_pos = ax1.get_position()
