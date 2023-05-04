@@ -226,7 +226,7 @@ for label, geo in zip(['Cylindrical', 'Spherical'], [cyl_tl, sph_tl]):
         fontsize=8,
     )
 ax0.set_ylabel('TL (dB)', labelpad=3)
-ax0.set_ylim(-70, 0)
+ax0.set_ylim(-65, 0)
 ax0.yaxis.set_minor_locator(plt.MultipleLocator(10))
 for side in 'top', 'right':
     ax0.spines[side].set_visible(False)
