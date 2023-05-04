@@ -138,8 +138,8 @@ PRE_ROLL = 0.78  # [s] TODO must manually set this so that it doesn't go below t
 TOPO_COLOR = 'silver'
 
 FIGSIZE = (7.17, 10)  # [in.] Figure height is more than we need; we only save a portion
-fig, (ax_im, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
-    nrows=5, figsize=FIGSIZE, sharex=True
+fig, (ax_im, ax0, topo_ax0, ax1, topo_ax1, ax2, topo_ax2) = plt.subplots(
+    nrows=7, figsize=FIGSIZE, sharex=True
 )
 
 # Plot pressure
@@ -188,7 +188,7 @@ ax_im.set_aspect('equal')
 ax_im.tick_params(top=True, right=True, which='both')
 
 # Layout adjustment (note we're making room for the colorbar here!)
-fig.tight_layout(pad=0.2, rect=(0.04, 0, 0.84, 1.03))
+fig.tight_layout(pad=0.2, rect=(0.07, 0, 0.84, 1))
 
 # Colorbar
 cax = fig.add_subplot(111)
@@ -269,7 +269,7 @@ mask = (topo_x >= XLIM[0]) & (topo_x <= XLIM[1])  # Since we use clip_on = False
 topo_x = topo_x[mask]
 topo_z = topo_z[mask]
 
-for topo_ax in topo_ax1, topo_ax2:
+for topo_ax in topo_ax0, topo_ax1, topo_ax2:
     topo_ax.fill_between(
         topo_x, YLIM[0], topo_z, lw=0.5, color=TOPO_COLOR, clip_on=False
     )
@@ -315,9 +315,13 @@ def _position_ax_below(ax_above, ax_below, height=None, spacing=0):
     )
 
 
-_position_ax_below(ax_im, ax1, height=y_height, spacing=spacing)
+# Panel (b) — TL
+_position_ax_below(ax_im, ax0, height=y_height / 2, spacing=spacing)
+_position_ax_below(ax0, topo_ax0)
+# Panel (c) — Synthetic waveforms
+_position_ax_below(topo_ax0, ax1, height=y_height, spacing=spacing)
 _position_ax_below(ax1, topo_ax1)
-
+# Panel (d) — Observed waveforms
 _position_ax_below(topo_ax1, ax2, height=y_height, spacing=spacing)
 _position_ax_below(ax2, topo_ax2)
 
@@ -379,8 +383,8 @@ for topo_ax in topo_ax1, topo_ax2:
     _spine.set_xticks([])
     _spine.set_yticks([])
 
-# Plot (a), (b), and (c) tags
-for ax, label in zip([ax_im, ax1, ax2], ['(a)', '(b)', '(c)']):
+# Plot subpanel labels
+for ax, label in zip([ax_im, ax0, ax1, ax2], ['(a)', '(b)', '(c)', '(d)']):
     ax.text(
         -0.115,
         1,
@@ -397,7 +401,7 @@ fig.show()
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
-    portion_to_save = 0.455  # Vertical fraction of figure to actually save
+    portion_to_save = 0.545  # Vertical fraction of figure to actually save
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
