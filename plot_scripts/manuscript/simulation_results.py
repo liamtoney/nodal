@@ -198,6 +198,40 @@ fig.colorbar(
     im, cax=cax, ticks=(im.norm.vmin, 0, im.norm.vmax), label='Normalized pressure'
 )
 
+# Plot transmission loss
+d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
+mask = (d > XLIM[0]) & (d <= XLIM[1])  # So we can use `clip_on=False`
+peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
+d_ref = 24 / M_PER_KM  # [km] TODO: Reference distance
+tl = 20 * np.log10(peak_amp / peak_amp[np.isclose(d, d_ref)])[mask]
+cyl_tl = 20 * np.log10(np.sqrt(d_ref / d))[mask]
+sph_tl = 20 * np.log10(d_ref / d)[mask]
+tl[tl > 0] = np.nan
+cyl_tl[cyl_tl > 0] = np.nan
+sph_tl[sph_tl > 0] = np.nan
+line_kw = dict(clip_on=False, lw=1, solid_capstyle='round', dash_capstyle='round')
+ax0.plot(d[mask], tl, color='black', **line_kw)
+ax0.plot(d[mask], cyl_tl, color='gray', linestyle='--', zorder=-2, **line_kw)
+ax0.plot(d[mask], sph_tl, color='gray', linestyle=':', zorder=-1, **line_kw)
+for label, geo in zip(['Cylindrical', 'Spherical'], [cyl_tl, sph_tl]):
+    ax0.text(
+        XLIM[1] + 0.2,
+        geo[-1],
+        label,
+        ha='left',
+        va='center',
+        color='gray',
+        weight='bold',
+        fontsize=8,
+    )
+ax0.set_ylabel('TL (dB)', labelpad=3)
+ax0.set_ylim(-70, 0)
+ax0.yaxis.set_minor_locator(plt.MultipleLocator(10))
+for side in 'top', 'right', 'bottom':
+    ax0.spines[side].set_visible(False)
+ax0.tick_params(bottom=False, labelbottom=False, which='both')
+ax0.patch.set_alpha(0)
+
 # Form [subsetted] plotting Stream for FAKE data
 starttime = st_syn[0].stats.starttime - st_syn[0].stats.t0  # Start at t = 0
 st_syn_plot = st_syn.copy().trim(starttime, starttime + DUR)[START::SKIP]
