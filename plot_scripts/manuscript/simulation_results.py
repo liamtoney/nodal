@@ -26,13 +26,13 @@ if SHOT == 'Y5':
     Z_SRC = 734  # [m]
     REMOVAL_CELERITY = 0.342  # [km/s]
 elif SHOT == 'X5':
-    RUN = '22_shot_x5_new_stf_hf'
+    RUN = '24_shot_x5_pml_240'
     Z_SRC = 464  # [m]
     REMOVAL_CELERITY = 0.336  # [km/s]
 else:
     raise ValueError
 PRESSURE_SNAPSHOT_DIR = NODAL_WORKING_DIR / 'fdprop' / 'nodal_fdprop_pressure_snapshots'
-TIMESTAMPS = np.arange(1000, 15000 + 1000, 1000)  # Same for both transects
+TIMESTAMPS = np.arange(1000, 18000 + 1000, 1000)  # Anything after 1800 is outside!
 SYN_SCALE = 6  # Divide normalized synthetic waveforms by this factor for plotting
 OBS_SCALE = 10  # Divide normalized observed waveforms by this factor for plotting
 XLIM = (0, 24)  # [km] Relative to shot x-position
@@ -130,7 +130,7 @@ for tr in st:
 
 # Waveform plotting config params
 SKIP = 50  # Plot every SKIP stations
-START = 5  # Start at this station index (for shifting which set of traces is plotted)
+START = 45  # Start at this station index (for shifting which set of traces is plotted)
 DUR = 80  # [s] Duration of waveforms to cut, intially
 PRE_ROLL = -0.9  # [s] Chosen to place t = 0 at the shot elevation for topo!
 POST_ROLL = 6  # [s]
