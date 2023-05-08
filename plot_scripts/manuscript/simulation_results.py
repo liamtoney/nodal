@@ -22,7 +22,7 @@ SHOT = 'Y5'
 
 # Some logic to load the remaining transect-specific params correctly
 if SHOT == 'Y5':
-    RUN = '20_shot_y5_new_stf_hf'
+    RUN = '25_shot_y5_pml_240'
     Z_SRC = 734  # [m]
     REMOVAL_CELERITY = 0.342  # [km/s]
 elif SHOT == 'X5':
