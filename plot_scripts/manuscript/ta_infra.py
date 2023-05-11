@@ -22,7 +22,7 @@ M_PER_KM = 1000  # [m/km]
 SHOT_STATION_PAIRS = (['Y1', 'F05D'], ['Y7', 'E04D'], ['Y6', 'E04D'], ['Y8', 'E04D'])
 
 CELERITY = 340  # [m/s] For windowing acoustic arrival
-DATA_WIN = 60  # [s] How much data to compute the PSD for
+DATA_WIN = 30  # [s] How much data to compute the PSD for
 SPEC_XLIM = (0.5, 10)  # [Hz]
 WF_XLIM = (-5, 5)  # [s]
 
