@@ -123,6 +123,7 @@ def spec_existing(tr, spec_ax, wf_ax):
         va='top',
         ha='left',
         fontsize=8,
+        weight='bold',
     )
 
     return pcm
