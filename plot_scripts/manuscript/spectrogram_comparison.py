@@ -215,7 +215,7 @@ fig.colorbar(
     pcm, cax=cax, orientation='horizontal', extend='both', extendfrac=extend_frac
 )
 cax.text(
-    1.04,
+    1.05,
     0.5,
     f'Power (dB rel. {V_REF:g} [m/s]$^2$ Hz$^{{-1}}$)',
     ha='left',
