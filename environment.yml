@@ -21,6 +21,7 @@ dependencies:
   - simplekml
   - tqdm
   - pip:
+    - imageio
     - mat73
     - multitaper
     - git+https://github.com/liamtoney/infresnel.git

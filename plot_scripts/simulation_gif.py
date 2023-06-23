@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import imageio  # pip install imageio
+import imageio
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
@@ -127,7 +127,7 @@ for i, timestamp in enumerate(tqdm(TIMESTAMPS)):
     )
     plt.close(fig)
 
-#%% Convert PNG files to GIF
+# %% Convert PNG files to GIF
 
 imageio.mimwrite(
     image_dir + f'{RUN}.gif',
