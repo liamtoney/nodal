@@ -31,7 +31,6 @@ for tr in st:
 
 # If we're not making a raw gather, then process
 if not RAW:
-
     # Detrend, taper, filter
     st.detrend('demean')
     st.taper(0.05)
@@ -58,7 +57,6 @@ if not RAW:
     subdir = 'processed_gathers'
 
 else:
-
     # Define title
     title = f'Shot {SHOT}'
 
@@ -110,7 +108,7 @@ fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / subdir / f'shot_{SHOT}.png', dpi=300, bbox_inches='tight')
 
-#%% (Plot min/max celerities on top of shot gather created above)
+# %% (Plot min/max celerities on top of shot gather created above)
 
 celerity_limits = (320, 350)
 
@@ -130,7 +128,7 @@ ax.set_ylim(ylim)
 
 fig.show()
 
-#%% (Plot mask distance params on top of shot gather created above)
+# %% (Plot mask distance params on top of shot gather created above)
 
 from utils import MASK_DISTANCE_KM
 from utils.utils import T_SEP, V_P, C
@@ -164,7 +162,7 @@ ax.set_ylim(ylim)
 
 fig.show()
 
-#%% Align acoustic arrivals using a best-choice celerity (trial and error for each shot)
+# %% Align acoustic arrivals using a best-choice celerity (trial and error for each shot)
 
 # [m/s] Celerity to use for aligning arrivals
 celerity = 343

@@ -28,6 +28,7 @@ net = get_stations()[0]
 sta_lons = [sta.longitude for sta in net]
 sta_lats = [sta.latitude for sta in net]
 
+
 # Define function to plot wind arrows on an EXISTING map
 def plot_winds(
     fig,  # Figure to plot into

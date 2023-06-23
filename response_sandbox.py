@@ -9,7 +9,7 @@ from utils import NODAL_WORKING_DIR, get_stations, get_waveforms_shot
 inv = get_stations()
 st = get_waveforms_shot('Y5')  # Using RAW data here, not processed
 
-#%% Plot unique responses
+# %% Plot unique responses
 
 # Get unique responses
 vc = pd.value_counts([sta[0].response for sta in inv[0]])
@@ -43,7 +43,7 @@ fig.show()
 
 # fig.savefig(NODAL_WORKING_DIR / 'figures' / 'node_response.png', dpi=300, bbox_inches='tight')
 
-#%% Response removal testing
+# %% Response removal testing
 
 # Pick a nice waveform to test on — this is a RAW seismogram!
 tr_orig = st.select(station='4106')[0]

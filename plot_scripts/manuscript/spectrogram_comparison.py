@@ -76,7 +76,6 @@ V_REF = 1  # [m/s]
 
 # Define function to plot waveform and spectrogram into existing axes
 def spec_existing(tr, spec_ax, wf_ax):
-
     # Compute spectrogram
     fs = tr.stats.sampling_rate
     nperseg = int(WIN_DUR * fs)  # Samples

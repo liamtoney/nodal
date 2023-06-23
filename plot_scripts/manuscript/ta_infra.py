@@ -72,7 +72,7 @@ for st in st_signal, st_noise:
     st.taper(0.05)
     st.remove_response()
 
-#%% Calculate multitapers and plot
+# %% Calculate multitapers and plot
 
 P_REF = 20e-6  # [Pa]
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color'][: len(SHOT_STATION_PAIRS)]
@@ -93,7 +93,6 @@ for ax in axs[:, -1]:
     ax.remove()  # Remove the subplots in the right-most column
 
 for st, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plot_kw]):
-
     # Calculate multitapers and plot lines
     for tr, color in zip(st, colors):
         mtspec = MTSpec(

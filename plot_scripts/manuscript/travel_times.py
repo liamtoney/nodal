@@ -58,7 +58,6 @@ norm = PowerNorm(gamma=GAMMA, vmin=df.sta_lta_amp.min(), vmax=df.sta_lta_amp.max
 interpolation_method = 'linear'
 dot_product_medians = []
 for lon, lat in zip(df.lon, df.lat):
-
     # Define path to interpolate along
     distance = gps2dist_azimuth(shot.lat, shot.lon, lat, lon)[0]  # [m]
     spacing = 500  # [m] Nominal interpolation profile spacing; needs to avoid aliasing!
@@ -88,7 +87,8 @@ for lon, lat in zip(df.lon, df.lat):
     dot_product_medians.append(np.median(dot_product))
 dot_product_medians = np.array(dot_product_medians)
 
-#%% Plot
+# %% Plot
+
 
 # Define function to plot node values on an EXISTING map
 def plot_node_values(
@@ -105,7 +105,6 @@ def plot_node_values(
     cbar_pos='left',  # Choose 'left' or 'right' alignment
     sta_lta_transparent=False,
 ):
-
     # Determine which nodes to mask
     if mask_distance > 0:
         if sta_dists is None:

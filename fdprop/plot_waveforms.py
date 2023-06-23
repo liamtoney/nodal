@@ -71,7 +71,7 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 for tr in st:
     tr.data *= 1e6  # Convert to μm/s
 
-#%% Plot simple record sections / images for synthetic waveforms
+# %% Plot simple record sections / images for synthetic waveforms
 
 MAX_RANGE = 10  # [km] How far out to go for record section / image
 
@@ -118,7 +118,7 @@ ax.set_ylabel('Distance (km)')
 fig.tight_layout()
 fig.show()
 
-#%% Plot transmission loss for synthetics
+# %% Plot transmission loss for synthetics
 
 d = np.array([tr.stats.x - X_SRC / M_PER_KM for tr in st_syn])  # [km] Dist. from source
 peak_amp = np.array([tr.data.max() for tr in st_syn])  # [Pa] Peak amplitude
@@ -161,7 +161,7 @@ ax.legend(title=r'${\bf Geometric\ spreading}$', alignment='left', frameon=False
 fig.tight_layout()
 fig.show()
 
-#%% Plot comparison between synthetics and observed GCAs
+# %% Plot comparison between synthetics and observed GCAs
 
 # Plotting config params
 SKIP = 75  # Plot every SKIP stations
@@ -206,7 +206,6 @@ def _get_onset_time(tr):
 
 # BIG helper function for plotting wfs
 def process_and_plot(st, ax, scale, pre_roll, log=True):
-
     # Make measurements on the windowed traces
     maxes = []
     p2p_all = []

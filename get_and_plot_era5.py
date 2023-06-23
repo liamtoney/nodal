@@ -33,7 +33,6 @@ if __name__ == '__main__':
 
 
 def get_era5_u_v_z(year, month, day, hour, level, region=None):
-
     c = cdsapi.Client()
 
     params = {
@@ -64,8 +63,7 @@ def get_era5_u_v_z(year, month, day, hour, level, region=None):
 
 
 if __name__ == '__main__':
-
-    #%% Get ERA5 profile for a given shot
+    # %% Get ERA5 profile for a given shot
 
     # Get shot info
     shot = df.loc[SHOT]
@@ -86,7 +84,7 @@ if __name__ == '__main__':
     ds_shot = ds.sel(latitude=shot.lat, longitude=shot.lon, method='nearest')
     ds_shot['alt_km'] = (ds_shot.z / 9.8) / 1000  # [km] Convert to geopotential height
 
-    #%% Plot the profile (vertical view)
+    # %% Plot the profile (vertical view)
 
     MAX_ALT = 12  # [km]
 
@@ -132,7 +130,7 @@ if __name__ == '__main__':
     ax.legend()
     fig.show()
 
-    #%% Plot the profile (map view) [ABOVE CELL MUST BE RUN FIRST]
+    # %% Plot the profile (map view) [ABOVE CELL MUST BE RUN FIRST]
 
     fig, (ax, cax) = plt.subplots(
         ncols=2, gridspec_kw=dict(width_ratios=[40, 1]), figsize=(8, 8)

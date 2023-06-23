@@ -30,7 +30,6 @@ LTA = 2  # [s]
 da_list = []  # Initalize list to hold 23 DataArrays (one for each shot)
 print('Processing shot gather data...')
 for shot in tqdm.tqdm(df.index):
-
     # Read in data
     st = get_waveforms_shot(shot, processed=True)
 
@@ -72,7 +71,7 @@ for shot in tqdm.tqdm(df.index):
     )
     da_list.append(da)
 
-#%% Make quadmeshes
+# %% Make quadmeshes
 
 # Create canvas
 x_range = (
@@ -93,7 +92,7 @@ for da in tqdm.tqdm(da_list):
     qm.name = da.name
     qm_list.append(qm)
 
-#%% Make plot
+# %% Make plot
 
 # Set up figure and axes
 fig, axs = plt.subplots(nrows=6, ncols=4, figsize=(7.17, 9), sharex=True, sharey=True)

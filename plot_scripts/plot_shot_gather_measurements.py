@@ -35,7 +35,7 @@ DPI = 600  # PNG DPI
 # Read in all the measurements
 df = pd.read_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{SHOT}.csv')
 
-#%% Plot STA/LTA amplitudes
+# %% Plot STA/LTA amplitudes
 
 print('Plotting STA/LTA map...')
 fig = station_map(
@@ -53,7 +53,7 @@ fig = station_map(
 if SAVE:
     fig.savefig(VALUE_MAP_DIR / 'sta_lta' / f'shot_{SHOT}.png', dpi=DPI)
 
-#%% Plot path differences
+# %% Plot path differences
 
 print('Plotting path difference map...')
 fig = station_map(
@@ -70,7 +70,7 @@ fig = station_map(
 if SAVE:
     fig.savefig(VALUE_MAP_DIR / 'path_diff' / f'shot_{SHOT}.png', dpi=DPI)
 
-#%% Plot peak frequencies
+# %% Plot peak frequencies
 
 print('Plotting peak frequencies...')
 fig = station_map(
@@ -90,7 +90,7 @@ fig = station_map(
 if SAVE:
     fig.savefig(VALUE_MAP_DIR / 'peak_freq' / f'shot_{SHOT}.png', dpi=DPI)
 
-#%% Plot pre-shot RMS velocities
+# %% Plot pre-shot RMS velocities
 
 rms = df.pre_shot_rms * 1e6  # Converting to μm/s here
 

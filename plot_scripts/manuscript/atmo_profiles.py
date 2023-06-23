@@ -26,7 +26,6 @@ fig, axs = plt.subplots(
     nrows=2, ncols=2, sharex='col', sharey=True, figsize=(3.47, 5.5)
 )
 for ax_row, shot_name in zip(axs, ['Y5', 'X5']):
-
     if shot_name == 'Y5':
         Z_SRC = 734  # [m]
         PROFILE_END = (46.224, -122.031)

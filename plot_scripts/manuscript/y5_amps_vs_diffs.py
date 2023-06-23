@@ -23,6 +23,7 @@ M_PER_KM = 1000
 # Read in all the measurements
 df = pd.read_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / f'{shot.name}.csv')
 
+
 # Define function to plot node values on an EXISTING map
 def plot_node_values(
     fig,  # Figure to plot into
@@ -37,7 +38,6 @@ def plot_node_values(
     mask_distance=0,  # [km] Plot markers within this range differently
     frame='WESN',  # Which sides of frame to tick vs. annotate
 ):
-
     # Determine which nodes to mask
     if mask_distance > 0:
         if sta_dists is None:

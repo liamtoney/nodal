@@ -16,7 +16,6 @@ RADIUS = 15  # [km] From center of stations
 
 
 def get_dem_and_stations(iris_url):
-
     station_df = pd.read_csv(iris_url, sep='|', comment='#')
 
     mean_lon = station_df.Longitude.mean()
@@ -50,7 +49,6 @@ def get_dem_and_stations(iris_url):
 
 
 def plot_dem_and_stations(dem_utm, rec_xs, rec_ys, rec_elevs):
-
     fig, ax = plt.subplots()
 
     dem_utm['x'] = dem_utm.x - rec_xs.mean()

@@ -15,7 +15,7 @@ path_length_differences, dem = calculate_paths_grid(
     src_lat=shot.lat, src_lon=shot.lon, radius=RADIUS, spacing=SPACING
 )
 
-#%% Plot
+# %% Plot
 
 import colorcet as cc
 import matplotlib

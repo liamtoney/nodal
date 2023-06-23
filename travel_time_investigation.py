@@ -37,7 +37,7 @@ def celerity_estimate(shot):
         return 342  # [m/s]
 
 
-#%% (A) infresnel stuff
+# %% (A) infresnel stuff
 
 # Compute time delays owing to propagation over (rather than thru) topography
 celerity = celerity_estimate(shot)
@@ -84,7 +84,7 @@ ax.set_title(title, weight='bold')
 fig.tight_layout()
 fig.show()
 
-#%% (B) Sandbox for comparing STA/LTA time picks with waveform arrivals
+# %% (B) Sandbox for comparing STA/LTA time picks with waveform arrivals
 
 # These are the params used in make_shot_gather_measurements.py, or...
 # TODO new parameters to experiment with!!!
@@ -172,7 +172,7 @@ ax.set_title(
 ax.clabel(cs, cs.levels, fmt=lambda x: f'${x:g}$ m/s', inline=True)
 fig.show()
 
-#%% (C1) Observed arrival time plotting and analysis
+# %% (C1) Observed arrival time plotting and analysis
 
 removal_celerity = np.max(CELERITY_LIMITS)  # [m/s]
 
@@ -205,7 +205,7 @@ fig.colorbar(sm, label='STA/LTA amplitude')
 fig.tight_layout()
 fig.show()
 
-#%% (C2) Encode STA/LTA to transparency so we can color markers by azimuth
+# %% (C2) Encode STA/LTA to transparency so we can color markers by azimuth
 
 USE_DIFF_PATH = True  # Toggle using diffracted path length or great circle distance
 GAMMA = 2  # Exponent for accentuating higher STA/LTA values
@@ -301,6 +301,7 @@ for side in 'top', 'right':
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
 
+
 # Colorbar 1: Checkerboard pattern (after everything else has been adjusted!)
 def callback(event=None):
     if len(cax1.collections) > 1:
@@ -326,7 +327,7 @@ callback()
 fig.canvas.mpl_connect('resize_event', callback)  # Extra fun: If we resize, we re-draw
 fig.show()
 
-#%% (C3) Map view plots of quantities w/ STA/LTA shading
+# %% (C3) Map view plots of quantities w/ STA/LTA shading
 
 shot_kw = dict(color='black', marker='s', s=50, zorder=10)
 
@@ -372,7 +373,7 @@ fig.colorbar(
 fig.tight_layout()
 fig.show()
 
-#%% (C4) Celerity map view w/ wind arrows overlain
+# %% (C4) Celerity map view w/ wind arrows overlain
 
 # Celerity [measured] accounting for topography via infresnel!
 measured_celerity = df_sorted.diffracted_path_length / df_sorted.arr_time
@@ -430,13 +431,12 @@ ax.set_ylim(ylim)
 fig.tight_layout()
 fig.show()
 
-#%% (C5) Interpolate winds along path from shot to each node and plot like in C4
+# %% (C5) Interpolate winds along path from shot to each node and plot like in C4
 
 interpolation_method = 'linear'
 
 dot_product_medians = []
 for lon, lat in zip(df_sorted.lon, df_sorted.lat):
-
     # Define path to interpolate along
     npts = 100  # TODO should this vary with the shot–node distance?
     x = np.linspace(shot.lon, lon, npts)
@@ -500,7 +500,7 @@ ax.set_ylim(ylim)
 fig.tight_layout()
 fig.show()
 
-#%% (C6) Plot measured vs. modeled celerities against each other
+# %% (C6) Plot measured vs. modeled celerities against each other
 
 static_sound_speed = 342  # [m/s]
 

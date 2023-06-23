@@ -138,7 +138,7 @@ for shot in df_shot[df_shot.gcas_on_nodes].index:
         ax_stack.set_ylabel('Sum stack (normalized by # of stations)')
         fig_stack.show()
 
-#%% Plot all stacks
+# %% Plot all stacks
 
 # Sort by descending order of stack max
 shot_stacks = dict(sorted(shot_stacks.items(), key=lambda x: x[1].max(), reverse=True))
@@ -170,7 +170,7 @@ yticks = ax.get_yticks()
 ax.spines['left'].set_bounds(yticks[1], yticks[-2])
 fig.show()
 
-#%% Export as JSON
+# %% Export as JSON
 
 celerity_estimates = {}
 for shot, stack_function in shot_stacks.items():

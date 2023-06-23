@@ -26,7 +26,7 @@ for i, shot in enumerate(df_shot.index):
     freq[i, :] = df_consistent.peak_freq
     rms[i, :] = df_consistent.pre_shot_rms * 1e6  # [µm/s]
 
-#%% Plot matrices
+# %% Plot matrices
 
 FIGSIZE = (23, 5)  # [in.] Size for both plots
 

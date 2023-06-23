@@ -195,7 +195,7 @@ with open(NODAL_WORKING_DIR / 'metadata' / json_filename, 'w') as f:
 print(f'\nx-extent: {profile.distance[-1] / M_PER_KM:.1f} km')
 print(f'Profile minimum: {profile.min() / M_PER_KM:.4f} km')
 
-#%% Write .dat file
+# %% Write .dat file
 
 Z_BUFFER = 100  # [m]
 
@@ -212,7 +212,7 @@ dat_file = NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / dat_filename
 np.savetxt(dat_file, np.transpose([x, z]), fmt='%.2f')
 print(f'Wrote {dat_file}')
 
-#%% Plot what the FDTD simulation is "seeing" in the domain coordinate system
+# %% Plot what the FDTD simulation is "seeing" in the domain coordinate system
 
 # TODO: These all must be copied from main.cpp
 x_bnds_g = (1000, 26000)  # [m]

@@ -32,7 +32,7 @@ grid_dem = define_grid(
 )
 dem = produce_dem(grid_dem, plot_output=True)
 
-#%% Get and process waveforms
+# %% Get and process waveforms
 
 # Read in data
 st = get_waveforms_shot(y5.name, processed=True)
@@ -61,11 +61,11 @@ STA = 0.2  # [s]
 LTA = 2  # [s]
 st.trigger('classicstalta', sta=STA, lta=LTA)
 
-#%% Test waveform plot
+# %% Test waveform plot
 
 st.select(station='4106').plot(fig=plt.figure())
 
-#%% Perform grid search
+# %% Perform grid search
 
 st_subset = st[:400]  # Subsetting stations here
 
@@ -80,7 +80,7 @@ S = grid_search(
     dem=dem,
 )
 
-#%% Plot results
+# %% Plot results
 
 fig = plot_time_slice(
     S,

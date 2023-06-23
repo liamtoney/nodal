@@ -38,13 +38,13 @@ SHOT = 'X4'
 # ------------------------------------------
 REGION = [-122.1399, -122.1297, 46.1462, 46.1547]  # Y-shaped dense area
 
-#%% Open IRIS gmap station map
+# %% Open IRIS gmap station map
 
 # All stations: https://ds.iris.edu/gmap/#net=1D&starttime=2014-07-01&endtime=2014-09-01
 url = f'https://ds.iris.edu/gmap/#net=1D&minlon={REGION[0]}&maxlon={REGION[1]}&minlat={REGION[2]}&maxlat={REGION[3]}&drawingmode=box'
 _ = webbrowser.open(url)
 
-#%% PyGMT map
+# %% PyGMT map
 
 # Get stations, data, shots
 inv = get_stations()
@@ -113,7 +113,7 @@ fig.plot(x=shot.lon, y=shot.lat, style='s0.2i', color='black')
 fig.text(x=shot.lon, y=shot.lat, text=shot.name, font='5p,white', justify='CM')
 fig.show()
 
-#%% Corresponding waveform plot
+# %% Corresponding waveform plot
 
 TIME_LIM = (-1, 4)
 EQUAL_SCALE = False

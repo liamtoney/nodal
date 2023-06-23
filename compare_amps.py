@@ -18,7 +18,6 @@ fig, axes = plt.subplots(
 )
 
 for SHOT, ax in zip(shot_list, axes):
-
     # Read in data
     st = get_waveforms_shot(SHOT, processed=True)
 

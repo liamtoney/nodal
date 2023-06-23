@@ -71,7 +71,7 @@ st.trigger('classicstalta', sta=STA, lta=LTA)  # TODO: Try other trigger algs?
 # Merge, as some stations have multiple Traces (doing this as late as possible)
 st.merge(fill_value=np.nan)
 
-#%% Calculate amplitudes (STA/LTA maxima) and arrival times (from the maxima)
+# %% Calculate amplitudes (STA/LTA maxima) and arrival times (from the maxima)
 
 amps = []
 arr_times = []
@@ -81,7 +81,7 @@ for tr in st.copy():  # Copying since we're destructively trimming here
     amps.append(tr.max())  # Simply taking the maximum of the STA/LTA function...
     arr_times.append(tr.times(reftime=df.loc[SHOT].time)[tr.data.argmax()])  # t of peak
 
-#%% Calculate peak frequencies
+# %% Calculate peak frequencies
 
 # Merge, if needed (otherwise we get an error for trying to compute spectra for slices)
 if SHOT == 'AO4':
@@ -103,7 +103,7 @@ for tr in st_freq.copy():  # Copying since we're destructively trimming here
 
     peak_freqs.append(f[pxx.argmax()])
 
-#%% Calculate RMS velocity in pre-shot windows
+# %% Calculate RMS velocity in pre-shot windows
 
 # Merge, if needed (IMPORTANT since AO4 gaps are in the pre-shot RMS window!)
 if SHOT == 'AO4':
@@ -120,7 +120,7 @@ rms_vals = []
 for tr in st_rms:
     rms_vals.append(np.sqrt(np.mean(tr.data**2)))
 
-#%% Calculate path differences
+# %% Calculate path differences
 
 # Grab coordinates as a list
 lats = [tr.stats.latitude for tr in st]
@@ -138,7 +138,7 @@ path_diffs = [ds.path_length_difference for ds in ds_list]
 direct_path_length = [ds.direct_path.length for ds in ds_list]
 diffracted_path_length = [ds.diffracted_path.length for ds in ds_list]
 
-#%% Export everything as CSV (we only have rows for stations with data!)
+# %% Export everything as CSV (we only have rows for stations with data!)
 
 data_dict = dict(
     station=[int(tr.stats.station) for tr in st],  # int() since station names are #s

@@ -74,7 +74,7 @@ fig.suptitle(f'Shot {shot.name}', weight='bold')
 fig.tight_layout()
 fig.show()
 
-#%% Write .met file
+# %% Write .met file
 
 R = 287.058  # [J/kg * K]
 density = (ds_shot.level * 100) / (R * ds_shot.t)  # [kg/m^3] Converting pressure to Pa

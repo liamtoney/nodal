@@ -33,7 +33,7 @@ for run, waveform_snapshot_interval, x_src in zip(
     st = st[::2]  # IMPORTANT: Keep only EVEN indices (0, 2, 4, ...)
     st_dict[run] = st
 
-#%% Plot a series of waveforms at different distances
+# %% Plot a series of waveforms at different distances
 
 # FILTER_KWARGS = None
 FILTER_KWARGS = dict(type='lowpass', freq=4, zerophase=False, corners=4)
@@ -55,7 +55,7 @@ for run in '20_shot_y5_new_stf_hf', '22_shot_x5_new_stf_hf':
     ax.set_axisbelow(True)
     fig.show()
 
-#%% Plot time and frequency domain comparison between runs
+# %% Plot time and frequency domain comparison between runs
 
 TARGET_DISTANCE = 20000  # [m]
 
@@ -64,7 +64,6 @@ CELERITY = 338  # [m/s] For estimating first arrival time
 fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(11, 7))
 
 for run, st_orig in st_dict.items():
-
     st = st_orig.copy()
 
     if FILTER_KWARGS is not None:

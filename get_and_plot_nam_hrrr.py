@@ -28,7 +28,6 @@ from utils import (
 from utils.utils import _outside_arrow
 
 if __name__ == '__main__':
-
     SAVE = False  # Toggle saving PNG files
 
     # Read in shot info
@@ -48,7 +47,6 @@ def build_url(year, month, day, hour, measurement):
 
 
 def ingest_grib_nam(url):
-
     file_path = pooch.retrieve(url=url, known_hash=None, progressbar=True)
     ds = xr.open_dataset(
         file_path,
@@ -65,7 +63,6 @@ def ingest_grib_nam(url):
 
 
 def ingest_grib_hrrr(url):
-
     file_path = pooch.retrieve(url=url, known_hash=None, progressbar=True)
     ds = xr.open_dataset(
         file_path,
@@ -82,7 +79,6 @@ def ingest_grib_hrrr(url):
 def plot_wind_speed_direction(
     u, v, grid_type, shot, region=FULL_REGION, combo_plot=False
 ):
-
     # Crop each DataArray
     minx, maxx, miny, maxy = region
     mask_lon = (u.longitude >= minx) & (u.longitude <= maxx)
@@ -257,11 +253,10 @@ def plot_wind_speed_direction(
     return fig
 
 
-#%% Script stuff below
+# %% Script stuff below
 
 if __name__ == '__main__':
-
-    #%% Get 10-m wind grid for a given shot
+    # %% Get 10-m wind grid for a given shot
 
     TYPE = 'nam'  # 'nam' or 'hrrr'
 
@@ -285,7 +280,7 @@ if __name__ == '__main__':
     else:
         raise ValueError("TYPE must be either 'hrrr' or 'nam'")
 
-    #%% Plot grid
+    # %% Plot grid
 
     fig = plot_wind_speed_direction(
         u, v, grid_name, shot, region=INNER_RING_REGION, combo_plot=True
@@ -298,7 +293,7 @@ if __name__ == '__main__':
             bbox_inches='tight',
         )
 
-    #%% Calculate convex hull and dot products
+    # %% Calculate convex hull and dot products
 
     from geopandas import GeoSeries, points_from_xy
     from obspy.geodetics.base import gps2dist_azimuth
@@ -320,7 +315,6 @@ if __name__ == '__main__':
 
     # Function to mask u and v winds to hull
     def mask_winds_with_hull(wind_comp):
-
         lons = wind_comp.longitude.values.flatten()
         lats = wind_comp.latitude.values.flatten()
         values = wind_comp.values.flatten()

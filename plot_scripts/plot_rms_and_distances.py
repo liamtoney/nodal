@@ -1,4 +1,4 @@
-#%% Load in data
+# %% Load in data
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,7 +26,7 @@ ylabel_list = [
     'Median shot–node distance (km)',
 ]
 
-#%% Make two bar plots
+# %% Make two bar plots
 
 for values, ylabel in zip(values_list, ylabel_list):
     fig, ax = plt.subplots(figsize=(12, 3.5))

@@ -63,7 +63,7 @@ def _p_matrix_from_timestamp(run, timestamp):
     return p, hoz_min, hoz_max, vert_min, vert_max, dx
 
 
-#%% Load in waveform snapshot stuff
+# %% Load in waveform snapshot stuff
 
 # Aggregate pressure matrix
 p_agg, hoz_min, hoz_max, vert_min, vert_max, dx = _p_matrix_from_timestamp(
@@ -77,7 +77,7 @@ terrain_contour = np.loadtxt(
     NODAL_WORKING_DIR / 'fdprop' / 'Acoustic_2D' / f'imush_{SHOT.lower()}_buffer.dat'
 )
 
-#%% Load in synthetic and observed data
+# %% Load in synthetic and observed data
 
 # Synthetic data
 st_syn = Stream()
@@ -126,7 +126,7 @@ st.sort(keys=['x'])  # Sort by increasing x distance
 for tr in st:
     tr.data *= 1e6  # Convert to μm/s
 
-#%% Plot
+# %% Plot
 
 # Waveform plotting config params
 SKIP = 50  # Plot every SKIP stations
@@ -255,7 +255,6 @@ def _get_onset_time(tr):
 
 # BIG helper function for plotting wfs
 def process_and_plot(st, ax, scale):
-
     # Make measurements on the windowed traces
     maxes_all = []
     for tr in st:

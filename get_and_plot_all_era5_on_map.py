@@ -42,7 +42,7 @@ for _, shot in df.iterrows():
 
     ds_list.append(ds_shot)
 
-#%% Plot the map
+# %% Plot the map
 
 MAX_ALT = 12  # [km]
 
@@ -68,7 +68,6 @@ ax.scatter(
 
 # Plot shots w/ wind arrows
 for (_, shot), ds_shot in zip(df.iterrows(), ds_list):
-
     shot_x, shot_y = proj.transform(shot.lat, shot.lon)
 
     ds_plot = ds_shot.where(ds_shot.alt_km < MAX_ALT, drop=True)
