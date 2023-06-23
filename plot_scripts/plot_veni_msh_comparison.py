@@ -134,8 +134,8 @@ def plot_dem_and_stations(dem_utm, rec_xs, rec_ys, rec_elevs):
 
 veni_dem_stations = get_dem_and_stations(URL_VENI)
 fig_veni = plot_dem_and_stations(*veni_dem_stations)
-# fig_veni.savefig('/Users/ldtoney/Downloads/1_veni.png', dpi=400, bbox_inches='tight')
+# fig_veni.savefig('1_veni.png', dpi=400, bbox_inches='tight')
 
 msh_dem_stations = get_dem_and_stations(URL_MSH)
 fig_msh = plot_dem_and_stations(*msh_dem_stations)
-# fig_msh.savefig('/Users/ldtoney/Downloads/2_msh.png', dpi=400, bbox_inches='tight')
+# fig_msh.savefig('2_msh.png', dpi=400, bbox_inches='tight')
