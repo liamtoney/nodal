@@ -198,9 +198,15 @@ fig.show()
 
 from multitaper import MTSpec  # pip install multitaper
 from obspy import Stream
-from python_util import plot
 from scipy.fftpack import next_fast_len
 from scipy.signal import welch, windows
+
+# Load in Liam's tools but continue silently if they aren't present
+HAS_PYTHON_UTIL = True
+try:
+    from python_util import plot
+except ImportError:
+    HAS_PYTHON_UTIL = False
 
 CELERITY = 343  # [m/s]
 
@@ -251,9 +257,10 @@ for shot, station in SHOT_STATION_PAIRS:
     good_st += st_sig[0]
     bad_st += st_noise[0]
 
-    # Plot
-    fig = plot.spec(good_st[0])
-    fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
+    # Plot, if tools are present
+    if HAS_PYTHON_UTIL:
+        fig = plot.spec(good_st[0])
+        fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
 
 # %% Multitapers
 
@@ -346,49 +353,6 @@ for i, (shot, station) in enumerate(SHOT_STATION_PAIRS):
 ax.legend()
 
 fig.show()
-
-# %% Examine coupling on TA stations
-
-import sys
-
-# Load xcorr_coh() function from my local repo
-sys.path.insert(0, '/Users/ldtoney/repos/seismoacoustic/')
-from xcorr_coh import xcorr_coh
-
-# xcorr_coh() parameters
-WINLEN = 10  # [s] Data window length
-OVERLAP = 0.9  # Data window overlap
-NPER = 64  # Number of points in FFT segment
-NPEROVER = 0.8  # FFT overlap(?)
-FILT = [2, 15]  # [Hz] Bandpass corners
-SHIFTSEC = 0.2  # [s] Amount xcorr can shift
-
-for shot, station in SHOT_STATION_PAIRS:
-    dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
-
-    # Download waveform
-    kwargs = dict(
-        network='*',
-        station=station,
-        location='*',
-        channel='BDF,BHZ',
-        attach_response=True,
-    )
-    arr_time = df.loc[shot].time + dist_km / (CELERITY / 1000)
-    sig_win = (arr_time - 60, arr_time + 60 + 5)
-    st = client.get_waveforms(starttime=sig_win[0], endtime=sig_win[1], **kwargs)
-    assert st.count() == 2  # Infra and seismic!
-    st.sort(keys=['channel'])  # For proper ordered input to xcorr_coh()
-
-    # Process waveforms
-    for tr in st:
-        tr.detrend('linear')
-        tr.remove_response()
-
-    # Run xcorr_coh()
-    fig = xcorr_coh(st, WINLEN, OVERLAP, NPER, NPEROVER, FILT, SHIFTSEC, 1)
-    fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
-    fig.savefig(f'/Users/ldtoney/Downloads/{shot}-{station}.png', bbox_inches='tight')
 
 # %% Plot close-up of best coupled arrival and obtain "scale factor"
 
