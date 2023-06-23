@@ -196,7 +196,7 @@ fig.show()
 
 # %% Investigate the nice arrivals
 
-from multitaper import MTSpec  # pip install multitaper
+from multitaper import MTSpec
 from obspy import Stream
 from scipy.fftpack import next_fast_len
 from scipy.signal import welch, windows
