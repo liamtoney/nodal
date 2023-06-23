@@ -94,6 +94,7 @@ ta_df = pd.DataFrame(
 
 # %% Unified record section
 
+import colorcet
 import matplotlib.patches as patches
 
 MAX_DIST = 40  # [km]
