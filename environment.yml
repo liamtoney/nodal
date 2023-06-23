@@ -23,6 +23,5 @@ dependencies:
   - pip:
     - mat73
     - multitaper
-    - --editable ${HOME}/repos/infresnel
-    - --editable ${HOME}/work/python_util
+    - git+https://github.com/liamtoney/infresnel.git
     - --editable .  # Installs packages specified in setup.py
