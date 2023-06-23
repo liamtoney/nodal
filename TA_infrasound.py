@@ -15,7 +15,7 @@ df = get_shots()
 CHANNEL = 'BDF'
 RADIUS_DEG = 2  # [deg.] Radius to search around MSH for stations
 
-#%% Make matrix of shot-station distances
+# %% Make matrix of shot-station distances
 
 # From https://volcano.si.edu/volcano.cfm?vn=321050
 MSH_LAT = 46.2
@@ -56,7 +56,7 @@ for net in inventory:
 dist_all = np.array(dist_all)
 station_names = np.array(station_names)
 
-#%% Plot matrix
+# %% Plot matrix
 
 sorted_idx = np.argsort(station_MSH_dists)  # Sort by distance from MSH
 
@@ -78,7 +78,7 @@ ax.set_title(
 fig.tight_layout()
 fig.show()
 
-#%% Flatten into DataFrame
+# %% Flatten into DataFrame
 
 import pandas as pd
 
@@ -92,7 +92,7 @@ ta_df = pd.DataFrame(
     )
 )
 
-#%% Unified record section
+# %% Unified record section
 
 import matplotlib.patches as patches
 
@@ -109,7 +109,6 @@ MAX_C = 345
 fig, ax = plt.subplots()
 
 for _, row in ta_df[ta_df.dist_km < MAX_DIST].sort_values(by='dist_km').iterrows():
-
     print(f'{row.shot}–{row.station} ({row.dist_km:.2f} km)')
 
     # Download waveform
@@ -194,7 +193,7 @@ for side in 'top', 'right':
 
 fig.show()
 
-#%% Investigate the nice arrivals
+# %% Investigate the nice arrivals
 
 from multitaper import MTSpec  # pip install multitaper
 from obspy import Stream
@@ -220,8 +219,7 @@ SHOT_STATION_PAIRS = [
 good_st = Stream()
 bad_st = Stream()
 
-for (shot, station) in SHOT_STATION_PAIRS:
-
+for shot, station in SHOT_STATION_PAIRS:
     dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
 
     # Download waveform
@@ -256,15 +254,13 @@ for (shot, station) in SHOT_STATION_PAIRS:
     fig = plot.spec(good_st[0])
     fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
 
-#%% Multitapers
+# %% Multitapers
 
 pxx_dict = dict(signal=[], noise=[])
 for st, k in zip([good_st, bad_st], pxx_dict.keys()):
-
     fig, ax = plt.subplots(figsize=(8.6, 4.8))
 
     for tr in st:
-
         if False:
             mtspec = MTSpec(
                 tr.data,
@@ -312,7 +308,7 @@ for st, k in zip([good_st, bad_st], pxx_dict.keys()):
 
     fig.show()
 
-#%% SNR
+# %% SNR
 
 fig, ax = plt.subplots(figsize=(8.6, 4.8))
 
@@ -321,7 +317,6 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 ymax = 30
 
 for i, (shot, station) in enumerate(SHOT_STATION_PAIRS):
-
     color = colors[i]
 
     snr = pxx_dict['signal'][i] - pxx_dict['noise'][i]
@@ -351,7 +346,7 @@ ax.legend()
 
 fig.show()
 
-#%% Examine coupling on TA stations
+# %% Examine coupling on TA stations
 
 import sys
 
@@ -367,8 +362,7 @@ NPEROVER = 0.8  # FFT overlap(?)
 FILT = [2, 15]  # [Hz] Bandpass corners
 SHIFTSEC = 0.2  # [s] Amount xcorr can shift
 
-for (shot, station) in SHOT_STATION_PAIRS:
-
+for shot, station in SHOT_STATION_PAIRS:
     dist_km = ta_df[(ta_df.station == station) & (ta_df.shot == shot)].dist_km.values[0]
 
     # Download waveform
@@ -395,7 +389,7 @@ for (shot, station) in SHOT_STATION_PAIRS:
     fig.axes[0].set_title(f'{shot}–{station} ({dist_km:.2f} km)')
     fig.savefig(f'/Users/ldtoney/Downloads/{shot}-{station}.png', bbox_inches='tight')
 
-#%% Plot close-up of best coupled arrival and obtain "scale factor"
+# %% Plot close-up of best coupled arrival and obtain "scale factor"
 
 # See Novoselov (2020), §4.3
 
