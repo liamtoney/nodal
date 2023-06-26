@@ -125,7 +125,7 @@ def plot_node_values(
         sta_values.min() if vmin is None else vmin,
         sta_values.max() if vmax is None else vmax,
     ]
-    CMAP = '/Users/ldtoney/Documents/CETperceptual_GMT/CET-D11.cpt'
+    CMAP = NODAL_WORKING_DIR / 'utils' / 'CETperceptual_GMT' / 'CET-D11.cpt'
     pygmt.makecpt(series=series, cmap=CMAP, background=True)
     node_style = 'c0.05i'
     # Plot nodes INSIDE mask (if any!)

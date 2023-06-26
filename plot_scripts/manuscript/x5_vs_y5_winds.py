@@ -7,7 +7,7 @@ import pandas as pd
 import pygmt
 
 from get_and_plot_nam_hrrr import build_url, ingest_grib_nam
-from utils import get_shots, get_stations
+from utils import NODAL_WORKING_DIR, get_shots, get_stations
 
 # Get shot info
 df = get_shots()
@@ -66,7 +66,7 @@ def plot_winds(
     assert np.all(u.latitude.values == v.latitude.values)
     wind = np.sqrt(u.values.flatten() ** 2 + v.values.flatten() ** 2)
     wdir = (270 - np.rad2deg(np.arctan2(v.values.flatten(), u.values.flatten()))) % 360
-    CMAP = '/Users/ldtoney/Documents/CETperceptual_GMT/CET-C6.cpt'
+    CMAP = NODAL_WORKING_DIR / 'utils' / 'CETperceptual_GMT' / 'CET-C6.cpt'
     pygmt.makecpt(cmap=CMAP, series=[0, 360])
     fig.plot(
         data=np.vstack(
