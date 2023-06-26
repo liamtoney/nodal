@@ -121,17 +121,18 @@ for i, timestamp in enumerate(tqdm(TIMESTAMPS)):
     )
 
     # Save
-    image_dir = '/Users/ldtoney/Downloads/'
+    image_dir = NODAL_WORKING_DIR / 'figures' / 'fdprop' / 'simulation_gifs'
+    image_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(
-        image_dir + f'{i:02}.png', dpi=400, bbox_inches='tight', pad_inches=0.05
+        image_dir / f'{i:02}.png', dpi=400, bbox_inches='tight', pad_inches=0.05
     )
     plt.close(fig)
 
 # %% Convert PNG files to GIF
 
 imageio.mimwrite(
-    image_dir + f'{RUN}.gif',
-    [imageio.imread(file) for file in sorted(Path(image_dir).glob('*.png'))],
+    image_dir / f'{RUN}.gif',
+    [imageio.imread(file) for file in sorted(image_dir.glob('*.png'))],
     duration=0.2,  # Duration [s] of each frame, larger values for "slower" GIF
     subrectangles=True,  # Works VERY well for saving space in this use case!
 )
