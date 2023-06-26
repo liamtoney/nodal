@@ -56,6 +56,8 @@ terrain_contour = np.loadtxt(
 )
 
 # Loop over each snapshot, making and saving figure
+image_dir = NODAL_WORKING_DIR / 'figures' / 'fdprop' / 'simulation_gifs'
+image_dir.mkdir(parents=True, exist_ok=True)
 for i, timestamp in enumerate(tqdm(TIMESTAMPS)):
     p, hoz_min, hoz_max, vert_min, vert_max, dx = _p_matrix_from_timestamp(
         RUN, timestamp
@@ -121,8 +123,6 @@ for i, timestamp in enumerate(tqdm(TIMESTAMPS)):
     )
 
     # Save
-    image_dir = NODAL_WORKING_DIR / 'figures' / 'fdprop' / 'simulation_gifs'
-    image_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(
         image_dir / f'{i:02}.png', dpi=400, bbox_inches='tight', pad_inches=0.05
     )
