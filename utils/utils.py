@@ -83,13 +83,10 @@ df['gcas_on_nodes'] = pd.read_json(
     NODAL_WORKING_DIR / 'metadata' / 'shot_gcas_on_nodes.json', typ='series'
 )
 
-# Read in station information
-inv = read_inventory(str(NODAL_WORKING_DIR / 'metadata' / '1D.xml'))
-
 
 def get_stations():
     """Return ObsPy Inventory containing 1D network information."""
-    return inv
+    return read_inventory(str(NODAL_WORKING_DIR / 'metadata' / '1D.xml'))
 
 
 def get_waveforms_shot(shot, processed=False):
