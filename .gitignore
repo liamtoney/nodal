@@ -12,7 +12,6 @@
 *.gif
 *.tif
 *.gdoc
-*.xlsx
 *.mseed
 *.mat
 *.pptx
