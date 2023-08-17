@@ -404,7 +404,7 @@ for spine in label_ax.spines.values():
 label_ax.set_xticks([])
 label_ax.set_yticks([])
 label_ax.set_ylabel(
-    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=15
+    f'Time (s), reduced by {REMOVAL_CELERITY * M_PER_KM:g} m/s', labelpad=20
 )
 
 # Plot subpanel labels
