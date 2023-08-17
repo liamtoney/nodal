@@ -93,7 +93,9 @@ for x, y, shot in zip(rms, distance, list(df.index)):
         fontsize=4.5,
         clip_on=False,
     )
-ax.set_xlabel('Median RMS velocity (μm/s),\n20 s window pre-shot')  # WIN_DUR
+ax.set_xlabel(
+    'Median RMS seismic ground velocity (μm/s),\n20 s window pre-shot'
+)  # WIN_DUR
 ax.set_ylabel('Median shot–node distance (km)')
 
 ax.set_xlim(right=0.8)
