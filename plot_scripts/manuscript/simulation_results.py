@@ -381,7 +381,7 @@ for norm in norms:
         _cax.yaxis.set_label_position('left')
         _cax.set_ylabel('Peak pressure (Pa)')
     else:
-        _cax.set_ylabel('Peak velocity (μm/s)')
+        _cax.set_ylabel('Peak ground velocity (μm/s)')
     pos = _cax.get_position()
     triangle_height = extend_frac * pos.height
     ymin = pos.ymin
