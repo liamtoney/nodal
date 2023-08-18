@@ -432,6 +432,7 @@ _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
 if False:
     portion_to_save = 0.47  # Vertical fraction of figure to actually save
+    fig.canvas.draw()
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
         / f'simulation_results_{SHOT.lower()}.png',
