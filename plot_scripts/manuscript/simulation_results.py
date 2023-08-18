@@ -162,17 +162,23 @@ ax_im.fill_between(
 
 # Timestamp labels (note: we don't bother correcting for t0 here since it's so small —
 # in reality the true times are `timestamp * dt + t0`)
-text = ax_im.text(
-    0.99,
-    0.95,
-    ', '.join([f'{timestamp * dt:g}' for timestamp in TIMESTAMPS]) + ' s',
-    ha='right',
-    va='top',
-    transform=ax_im.transAxes,
-)
-text.set_path_effects(
-    [path_effects.Stroke(linewidth=1.5, foreground='white'), path_effects.Normal()]
-)
+time_offset = -0.6  # [s] Aesthetic
+label_celerity = 0.335  # [km/s] Aesthetic
+for timestamp in TIMESTAMPS:
+    distance = label_celerity * (timestamp * dt + time_offset)
+    if timestamp * dt in [4, 8, 12, 16, 20]:
+        x_loc = y_loc = distance / np.sqrt(2)  # Just 45° raypath moveout
+    else:
+        # 20 s snapshot and onwards, we maintain the same fixed y-coordinate
+        distance_20_s = label_celerity * (TIMESTAMPS[4] * dt + time_offset)
+        y_loc = distance_20_s / np.sqrt(2)  # The fixed y-coordinate
+        x_loc = np.sqrt(distance**2 - y_loc**2)  # Compute x-coordinate
+    text = ax_im.text(
+        x_loc, y_loc, f'{timestamp * dt:g} s', ha='center', va='center', fontsize=6
+    )
+    text.set_path_effects(
+        [path_effects.Stroke(linewidth=1, foreground='white'), path_effects.Normal()]
+    )
 
 # Axis params
 ax_im.set_ylabel(f'Elevation relative\nto shot {SHOT} (km)')
