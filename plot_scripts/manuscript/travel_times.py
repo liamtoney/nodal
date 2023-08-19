@@ -133,7 +133,7 @@ def plot_node_values(
         fig.plot(
             x=df.lon[is_masked],
             y=df.lat[is_masked],
-            color=sta_values[is_masked],
+            fill=sta_values[is_masked],
             style=node_style,
             pen='gray31',
         )
@@ -145,7 +145,7 @@ def plot_node_values(
     fig.plot(
         x=df.lon[~is_masked],
         y=df.lat[~is_masked],
-        color=sta_values[~is_masked],
+        fill=sta_values[~is_masked],
         style=node_style,
         cmap=True,
         transparency=transparency,
@@ -226,7 +226,7 @@ def plot_node_values(
                 wind * in_per_ms,  # length
             ]
         ).T,
-        color='black',
+        fill='black',
         style=vector_style,
         pen=vector_pen,
     )
@@ -244,7 +244,7 @@ def plot_node_values(
             ).T,
             style=vector_style + '+jc',
             pen=vector_pen,
-            color='black',
+            fill='black',
             no_clip=True,
             offset=f'{ref_arrow_xshift}/{arrow_yoff}i',
         )
@@ -264,7 +264,7 @@ def plot_node_values(
         x=[shot.lon],
         y=[shot.lat],
         size=[shot.weight_lb * scale],
-        color='black',
+        fill='black',
         style='si',
         pen=True,
     )
