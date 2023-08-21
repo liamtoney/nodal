@@ -9,7 +9,7 @@ from utils import NODAL_WORKING_DIR, get_shots
 df = get_shots()
 
 # Convert shot weights from pounds to kilograms
-nearest_kg = 50  # [kg]
+nearest_kg = 1  # [kg]
 df['weight_kg'] = (nearest_kg * round((df.weight_lb / 2.2046) / nearest_kg)).astype(int)
 
 # Read in individual CSV files (one per shot) and add summarized values to DataFrame
