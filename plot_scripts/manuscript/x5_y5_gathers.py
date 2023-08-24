@@ -102,8 +102,8 @@ axs[-1].tick_params(which='both', left=False)
 axs[-1].tick_params(which='both', right=True)
 
 # These limits show ALL GCAs
-xlim = (0, 120)
-ylim = (1.7963702862403965, 30.231685277204217)
+xlim = (0, 80)
+ylim = (5, 26)
 
 # Iterate over each shot DataArray and plot
 for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
@@ -121,8 +121,8 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
         ha='right',
         va='bottom',
         transform=ax.transAxes,
-        color='black' if qm.name in df[df.gcas_on_nodes].index else 'gray',
-        weight='bold' if qm.name in df[df.gcas_on_nodes].index else None,
+        color='white',
+        weight='bold',
     )
 
 # Set limits
@@ -130,12 +130,12 @@ axs[0].set_xlim(xlim)
 axs[0].set_ylim(ylim)
 
 # Major ticks
-axs[0].xaxis.set_major_locator(plt.MultipleLocator(100))
-axs[0].yaxis.set_major_locator(plt.MultipleLocator(20))
+axs[0].xaxis.set_major_locator(plt.MultipleLocator(20))
+axs[0].yaxis.set_major_locator(plt.MultipleLocator(5))
 
 # Minor ticks
-axs[0].xaxis.set_minor_locator(plt.MultipleLocator(20))
-axs[0].yaxis.set_minor_locator(plt.MultipleLocator(5))
+axs[0].xaxis.set_minor_locator(plt.MultipleLocator(5))
+axs[0].yaxis.set_minor_locator(plt.MultipleLocator(1))
 
 # Add overall axis labels
 label_ax = fig.add_subplot(111)
