@@ -102,8 +102,8 @@ axs[-1].tick_params(which='both', left=False)
 axs[-1].tick_params(which='both', right=True)
 
 # These limits show ALL GCAs
-xlim = (0, 160)
-ylim = (5, 55)
+xlim = (0, 120)
+ylim = (1.7963702862403965, 30.231685277204217)
 
 # Iterate over each shot DataArray and plot
 for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
