@@ -11,6 +11,7 @@ import xarray as xr
 from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import get_shots, get_stations, get_waveforms_shot
+from utils.utils import V_P, C
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -147,9 +148,32 @@ label_ax.set_yticks([])
 label_ax.set_xlabel('Time from shot (s)', labelpad=25)
 axs[0].set_ylabel('Distance from shot (km)')
 
-# Finalize
+# Finalize layout
 fig.tight_layout(pad=0.2, rect=(0, -0.075, 1, 1))
 fig.subplots_adjust(wspace=0.1)
+
+# Plot and label moveout lines
+time_shift = 5  # [s] Aesthetic (so we can see the arrivals!)
+ygap = 1  # [km] Space between end of line and axis boundary
+for moveout_velocity, label in zip([C, V_P], ['$c$', '$v_\mathrm{P}$']):
+    for ax in axs:
+        # Plot line
+        yvec = np.array([ylim[0] + ygap, ylim[1] - ygap])
+        xvec = (yvec / (moveout_velocity / M_PER_KM)) + time_shift
+        ax.plot(xvec, yvec, color='white', lw=1, linestyle='--', dash_capstyle='round')
+        # Plot angled text (based on https://stackoverflow.com/a/38414616)
+        p1 = ax.transData.transform_point((xvec[0], yvec[0]))
+        p2 = ax.transData.transform_point((xvec[1], yvec[1]))
+        ax.text(
+            (yvec.mean() / (moveout_velocity / M_PER_KM)) + time_shift,
+            yvec.mean(),  # Vertically center in line!
+            f'{label} = {moveout_velocity} m/s',
+            rotation=np.rad2deg(np.arctan((p2[1] - p1[1]) / (p2[0] - p1[0]))),
+            va='center',
+            ha='center',
+            color='white',
+        )
+
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
