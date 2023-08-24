@@ -95,7 +95,7 @@ for da in tqdm.tqdm(da_list):
 # %% Make plot
 
 # Set up figure and axes
-fig, axs = plt.subplots(ncols=2, figsize=(3.585, 1.5), sharex=True, sharey=True)
+fig, axs = plt.subplots(ncols=2, figsize=(7.17, 3), sharex=True, sharey=True)
 for ax in axs:
     ax.tick_params(which='both', top=True)
 axs[-1].tick_params(which='both', left=False)
@@ -129,6 +129,10 @@ for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
 axs[0].set_xlim(xlim)
 axs[0].set_ylim(ylim)
 
+# Major ticks
+axs[0].xaxis.set_major_locator(plt.MultipleLocator(100))
+axs[0].yaxis.set_major_locator(plt.MultipleLocator(20))
+
 # Minor ticks
 axs[0].xaxis.set_minor_locator(plt.MultipleLocator(20))
 axs[0].yaxis.set_minor_locator(plt.MultipleLocator(5))
@@ -144,11 +148,8 @@ label_ax.set_xlabel('Time from shot (s)', labelpad=25)
 axs[0].set_ylabel('Distance from shot (km)')
 
 # Finalize
-# fig.tight_layout(pad=0.2, rect=(-0.03, -0.025, 1, 1))
-# fig.subplots_adjust(
-#     wspace=0.08,
-#     hspace=0.1,
-# )
+fig.tight_layout(pad=0.2, rect=(0, -0.075, 1, 1))
+fig.subplots_adjust(wspace=0.1)
 fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
