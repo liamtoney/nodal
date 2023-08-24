@@ -156,28 +156,35 @@ fig.subplots_adjust(wspace=0.1)
 
 # Plot and label moveout lines
 time_shift = 5  # [s] Aesthetic (so we can see the arrivals!)
-ygap = 1  # [km] Space between end of line and axis boundary
+y_gap = 1  # [km] Space between end of line and axis boundary
 npts = 500  # Just make this high
-for moveout_velocity, label, gap in zip(
+solid_fraction = 0.2  # Make this part of the line (after `ygap` adjustment) opaque
+for moveout_velocity, label, text_gap in zip(
     [C, V_P], ['$c$', '$v_\mathrm{P}$'], [0.13, 0.22]
 ):
     for ax in axs:
         # Plot line
-        yvec = np.linspace(ylim[0] + ygap, ylim[1] - ygap, npts)
+        yvec = np.linspace(ylim[0] + y_gap, ylim[1] - y_gap, npts)
         xvec = (yvec / (moveout_velocity / M_PER_KM)) + time_shift
-        a_size = int(npts * 0.4)
-        o_size = int(npts * 0.2)
+        solid_size = int(solid_fraction * npts)  # Size of solid portion
+        alpha_size = int(((1 - solid_fraction) / 2) * npts)  # Size of gradient
+        assert solid_size + 2 * alpha_size == npts
+        # Form the transparency gradient
         alpha = np.concatenate(
-            [np.linspace(0, 1, a_size), np.ones(o_size), np.linspace(1, 0, a_size)]
+            [
+                np.linspace(0, 1, alpha_size),
+                np.ones(solid_size),
+                np.linspace(1, 0, alpha_size),
+            ]
         )
-        xvec[npts // 2 - int(gap * npts) : npts // 2 + int(gap * npts)] = np.nan
-
+        # Make gap for the text
+        xvec[
+            npts // 2 - int(text_gap * npts) : npts // 2 + int(text_gap * npts)
+        ] = np.nan
         points = np.vstack((xvec, yvec)).T.reshape(-1, 1, 2)
         segments = np.hstack((points[:-1], points[1:]))
-
         colors = np.ones((npts, 4))
         colors[:, -1] = alpha
-
         lc = LineCollection(
             segments,
             colors=colors,
