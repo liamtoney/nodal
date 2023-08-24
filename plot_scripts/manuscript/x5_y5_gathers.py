@@ -160,7 +160,9 @@ y_gap = 1  # [km] Space between end of line and axis boundary
 npts = 500  # Just make this high
 solid_fraction = 0.2  # Make this part of the line (after `ygap` adjustment) opaque
 for moveout_velocity, label, text_gap in zip(
-    [C, V_P], ['$c$', '$v_\mathrm{P}$'], [0.13, 0.22]
+    [C, V_P],
+    [f'$c$ = {C} m/s', f'$v_\mathrm{{P}}$ = {V_P / M_PER_KM:g} km/s'],
+    [0.13, 0.18],
 ):
     for ax in axs:
         # Plot line
@@ -199,7 +201,7 @@ for moveout_velocity, label, text_gap in zip(
         ax.text(
             (yvec.mean() / (moveout_velocity / M_PER_KM)) + time_shift,
             yvec.mean(),  # Vertically center in line!
-            f'{label} = {moveout_velocity} m/s',
+            label,
             rotation=np.rad2deg(np.arctan((p2[1] - p1[1]) / (p2[0] - p1[0]))),
             va='center',
             ha='center',
