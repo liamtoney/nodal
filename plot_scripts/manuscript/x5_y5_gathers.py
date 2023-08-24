@@ -3,11 +3,13 @@ import subprocess
 from pathlib import Path
 
 import datashader as ds
+import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tqdm
 import xarray as xr
+from matplotlib.collections import LineCollection
 from obspy.geodetics.base import gps2dist_azimuth
 
 from utils import get_shots, get_stations, get_waveforms_shot
@@ -155,15 +157,38 @@ fig.subplots_adjust(wspace=0.1)
 # Plot and label moveout lines
 time_shift = 5  # [s] Aesthetic (so we can see the arrivals!)
 ygap = 1  # [km] Space between end of line and axis boundary
-for moveout_velocity, label in zip([C, V_P], ['$c$', '$v_\mathrm{P}$']):
+npts = 500  # Just make this high
+for moveout_velocity, label, gap in zip(
+    [C, V_P], ['$c$', '$v_\mathrm{P}$'], [0.13, 0.22]
+):
     for ax in axs:
         # Plot line
-        yvec = np.array([ylim[0] + ygap, ylim[1] - ygap])
+        yvec = np.linspace(ylim[0] + ygap, ylim[1] - ygap, npts)
         xvec = (yvec / (moveout_velocity / M_PER_KM)) + time_shift
-        ax.plot(xvec, yvec, color='white', lw=1, linestyle='--', dash_capstyle='round')
+        a_size = int(npts * 0.4)
+        o_size = int(npts * 0.2)
+        alpha = np.concatenate(
+            [np.linspace(0, 1, a_size), np.ones(o_size), np.linspace(1, 0, a_size)]
+        )
+        xvec[npts // 2 - int(gap * npts) : npts // 2 + int(gap * npts)] = np.nan
+
+        points = np.vstack((xvec, yvec)).T.reshape(-1, 1, 2)
+        segments = np.hstack((points[:-1], points[1:]))
+
+        colors = np.ones((npts, 4))
+        colors[:, -1] = alpha
+
+        lc = LineCollection(
+            segments,
+            colors=colors,
+            lw=1,
+            path_effects=[path_effects.Stroke(capstyle='projecting')],  # KEY
+        )
+        ax.add_collection(lc)
+
         # Plot angled text (based on https://stackoverflow.com/a/38414616)
         p1 = ax.transData.transform_point((xvec[0], yvec[0]))
-        p2 = ax.transData.transform_point((xvec[1], yvec[1]))
+        p2 = ax.transData.transform_point((xvec[-1], yvec[-1]))
         ax.text(
             (yvec.mean() / (moveout_velocity / M_PER_KM)) + time_shift,
             yvec.mean(),  # Vertically center in line!
