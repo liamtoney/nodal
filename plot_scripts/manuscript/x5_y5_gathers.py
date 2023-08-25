@@ -95,16 +95,15 @@ for da, ax in zip(da_list, axs.flatten()):
         vmin=np.nanmedian(da),
         vmax=np.nanpercentile(da, 98),
     )
+    text_kwargs = dict(ha='right', transform=ax.transAxes, color='white', weight='bold')
+    ax.text(x=0.97, y=0.03, va='bottom', s=da.name, fontsize=12, **text_kwargs)
     ax.text(
-        0.97,
-        0.03,
-        da.name,
-        ha='right',
-        va='bottom',
-        transform=ax.transAxes,
-        color='white',
-        weight='bold',
-        fontsize=12,
+        x=0.89,
+        y=0.07,
+        va='center',
+        s=df.loc[da.name].time.strftime('%-d %B\n%H:%M UTC'),
+        fontsize=6,
+        **text_kwargs,
     )
 
 # Set limits
