@@ -2,7 +2,6 @@ import os
 import subprocess
 from pathlib import Path
 
-import datashader as ds
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
@@ -74,27 +73,6 @@ for shot in tqdm.tqdm(['X5', 'Y5']):
     )
     da_list.append(da)
 
-# %% Make quadmeshes
-
-# Create canvas
-x_range = (
-    np.min([da.time.min() for da in da_list]),
-    np.max([da.time.max() for da in da_list]),
-)
-y_range = (
-    np.min([da.distance.min() for da in da_list]),
-    np.max([da.distance.max() for da in da_list]),
-)
-cvs = ds.Canvas(plot_height=500, plot_width=2000, x_range=x_range, y_range=y_range)
-
-# Iterate over each shot DataArray and plot
-qm_list = []  # Initalize list to hold quadmesh DataArrays
-print('Making quadmeshes...')
-for da in tqdm.tqdm(da_list):
-    qm = cvs.quadmesh(da, agg=ds.mean(da.name))
-    qm.name = da.name
-    qm_list.append(qm)
-
 # %% Make plot
 
 # Set up figure and axes
@@ -109,18 +87,18 @@ xlim = (0, 80)
 ylim = (5, 26)
 
 # Iterate over each shot DataArray and plot
-for da, qm, ax in zip(da_list, qm_list, axs.flatten()):
-    qm.plot.imshow(
+for da, ax in zip(da_list, axs.flatten()):
+    da.plot.pcolormesh(
         ax=ax,
         add_labels=False,
         add_colorbar=False,
-        vmin=np.nanmedian(qm),
-        vmax=np.nanpercentile(qm, 98),
+        vmin=np.nanmedian(da),
+        vmax=np.nanpercentile(da, 98),
     )
     ax.text(
         0.97,
         0.03,
-        qm.name,
+        da.name,
         ha='right',
         va='bottom',
         transform=ax.transAxes,
