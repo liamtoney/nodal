@@ -155,16 +155,19 @@ fig.tight_layout(pad=0.2, rect=(0, -0.075, 1, 1))
 fig.subplots_adjust(wspace=0.1)
 
 # Plot and label moveout lines
-time_shift = 5  # [s] Aesthetic (so we can see the arrivals!)
+time_shift = 6  # [s] Aesthetic (so we can see the arrivals!)
 npts = 500  # Just make this high
 solid_fraction = 0.2  # Make this part of the line (after `ygap` adjustment) opaque
-for moveout_velocity, label, text_gap, y_gap in zip(
-    [C, V_P],
-    [f'$c$ = {C} m/s', f'$v_\mathrm{{P}}$ = {V_P / M_PER_KM:g} km/s'],
-    [0.14, 0.17],  # How much of a gap to make in the line for the text label
-    [1.5, 0],  # [km] Space between end of line and axis boundary
-):
-    for ax in axs:
+for ax in axs:
+    for moveout_velocity, label, text_gap, y_gap in zip(
+        [V_P, C],
+        [f'$v_\mathrm{{P}}$ = {V_P / M_PER_KM:g} km/s', f'$c$ = {C} m/s'],
+        [0.17, 0.14],  # How much of a gap to make in the line for the text label
+        [0, 1.5],  # [km] Space between end of line and axis boundary
+    ):
+        if ax == axs[0] and moveout_velocity == C:
+            continue  # If we're plotting shot X5, don't show the acoustic line!
+
         # Plot line
         yvec = np.linspace(ylim[0] + y_gap, ylim[1] - y_gap, npts)
         xvec = (yvec / (moveout_velocity / M_PER_KM)) + time_shift
