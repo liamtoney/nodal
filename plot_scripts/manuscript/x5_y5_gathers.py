@@ -156,13 +156,13 @@ fig.subplots_adjust(wspace=0.1)
 
 # Plot and label moveout lines
 time_shift = 5  # [s] Aesthetic (so we can see the arrivals!)
-y_gap = 1  # [km] Space between end of line and axis boundary
 npts = 500  # Just make this high
 solid_fraction = 0.2  # Make this part of the line (after `ygap` adjustment) opaque
-for moveout_velocity, label, text_gap in zip(
+for moveout_velocity, label, text_gap, y_gap in zip(
     [C, V_P],
     [f'$c$ = {C} m/s', f'$v_\mathrm{{P}}$ = {V_P / M_PER_KM:g} km/s'],
-    [0.13, 0.18],
+    [0.14, 0.17],  # How much of a gap to make in the line for the text label
+    [1.5, 0],  # [km] Space between end of line and axis boundary
 ):
     for ax in axs:
         # Plot line
