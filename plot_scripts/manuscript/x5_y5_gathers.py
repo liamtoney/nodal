@@ -104,6 +104,7 @@ for da, ax in zip(da_list, axs.flatten()):
         transform=ax.transAxes,
         color='white',
         weight='bold',
+        fontsize=12,
     )
 
 # Set limits
