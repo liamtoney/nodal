@@ -115,8 +115,13 @@ for st, plot_kwargs in zip([st_signal, st_noise], [signal_plot_kw, noise_plot_kw
 
         # Plot
         mask = (f >= SPEC_XLIM[0]) & (f <= SPEC_XLIM[1])
+        right_clip = 2  # Remove a few more elements of the right-hand side
         spec_ax.semilogx(
-            f[mask], pxx_db[mask], color=color, clip_on=False, **plot_kwargs
+            f[mask][:-right_clip],
+            pxx_db[mask][:-right_clip],
+            color=color,
+            clip_on=False,
+            **plot_kwargs,
         )
 
 for tr, ax, color in zip(st_signal, axs[:, 0], colors):
