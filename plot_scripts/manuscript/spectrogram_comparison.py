@@ -37,6 +37,13 @@ STATIONS = (
 inv = get_stations()
 st = get_waveforms_shot(SHOT, processed=True)  # Response is already removed!
 
+# Detrend, taper, filter
+st.detrend('demean')
+st.taper(0.05)
+FREQMIN = 5  # [Hz]
+FREQMAX = 50  # [Hz]
+st.filter('bandpass', freqmin=FREQMIN, freqmax=FREQMAX, zerophase=True)
+
 # Reduce Stream to just the stations we want, and trim
 for tr in st:
     if tr.stats.station not in STATIONS:
