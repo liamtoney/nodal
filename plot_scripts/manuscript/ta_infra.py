@@ -164,7 +164,7 @@ label_ax.set_xticks([])
 label_ax.set_yticks([])
 for spine in label_ax.spines.values():
     spine.set_visible(False)
-label_ax.set_ylabel('Pressure (Pa)', labelpad=20)
+label_ax.set_ylabel('Pressure (Pa)', labelpad=23)
 for side in 'top', 'right':
     for ax in axs[:, 0]:
         ax.spines[side].set_visible(False)
