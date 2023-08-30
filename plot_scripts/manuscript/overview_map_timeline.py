@@ -83,7 +83,7 @@ for transect, profile_end in zip(
     )
     buffer = s.buffer(500, cap_style=2)  # [m] TODO: Must match `MASK_DIST`
     lats, lons = proj.transform(*buffer[0].exterior.coords.xy, direction='INVERSE')
-    fig_gmt.plot(x=lons, y=lats, close=True, color='black', transparency=70)
+    fig_gmt.plot(x=lons, y=lats, close=True, fill='black', transparency=70)
     fig_gmt.plot(
         x=[profile_start[1], profile_end_crop[1]],
         y=[profile_start[0], profile_end_crop[0]],
@@ -95,7 +95,7 @@ pygmt.makecpt(
     cmap=Path().home() / 'Documents' / 'CETperceptual_GMT' / 'CET-L10.cpt',
 )
 fig_gmt.plot(
-    x=sta_lons, y=sta_lats, color=elevations, style='c0.05i', cmap=True, pen='black'
+    x=sta_lons, y=sta_lats, fill=elevations, style='c0.05i', cmap=True, pen='black'
 )
 
 # Plot arrow pointing to centroid of stations used in the spectrogram figure
@@ -108,7 +108,7 @@ fig_gmt.plot(
     style='V4.5p+e+a45',
     direction=[[az_start_to_end], [0.55]],
     pen='0.8p,black',
-    color='black',
+    fill='black',
 )
 label = 'Fig. 9\nnodes'  # TODO: Make sure this figure # is correct!
 y_off = 0
@@ -131,14 +131,14 @@ fig_gmt.plot(
     x=df.lon[df.gcas_on_nodes],
     y=df.lat[df.gcas_on_nodes],
     size=df[df.gcas_on_nodes].weight_lb * scale,
-    color='black',
+    fill='black',
     **shot_kw,
 )
 fig_gmt.plot(
     x=df.lon[~df.gcas_on_nodes],
     y=df.lat[~df.gcas_on_nodes],
     size=df[~df.gcas_on_nodes].weight_lb * scale,
-    color='white',
+    fill='white',
     **shot_kw,
 )
 # Plot shot names
@@ -175,18 +175,18 @@ with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
             ]
         ],
         style='r+s',
-        color='lightgray',
+        fill='lightgray',
         region=FULL_REGION,
         projection='M?',
     )
     # Plot nodes as tiny black dots
-    fig_gmt.plot(x=sta_lons, y=sta_lats, color='black', style='c0.01i')
+    fig_gmt.plot(x=sta_lons, y=sta_lats, fill='black', style='c0.01i')
     # Plot TA stations
     with open(NODAL_WORKING_DIR / 'metadata' / 'ta_station_coords.json') as f:
         station_coords = json.load(f)
     ta_color = to_hex('tab:brown')
     for station, coords in station_coords.items():
-        fig_gmt.plot(x=coords[1], y=coords[0], color=ta_color, style='c0.07i')
+        fig_gmt.plot(x=coords[1], y=coords[0], fill=ta_color, style='c0.07i')
         fig_gmt.text(
             x=coords[1],
             y=coords[0],
@@ -201,14 +201,14 @@ with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
         x=df[df.gcas_on_nodes].lon,
         y=df[df.gcas_on_nodes].lat,
         size=df[df.gcas_on_nodes].weight_lb * scale,
-        color='black',
+        fill='black',
         **shot_kw,
     )
     fig_gmt.plot(
         x=df[~df.gcas_on_nodes].lon,
         y=df[~df.gcas_on_nodes].lat,
         size=df[~df.gcas_on_nodes].weight_lb * scale,
-        color='white',
+        fill='white',
         **shot_kw,
     )
     # Plot shot names (only those not appearing in main map!)
@@ -270,32 +270,32 @@ fig_symbol = pygmt.Figure()
 fig_symbol.plot(  # Transparent background circle to set the proper exported symbol size
     region=[-1, 1, -1, 1],
     style=f'c{met_size}i',
-    color='white',
+    fill='white',
     transparency=100,
     **kwargs,
 )
 fig_symbol.plot(  # RIGHT SUBTRIANGLE
     style=f'i{met_size / 2}i',
-    color=shades[0],
+    fill=shades[0],
     xshift=f'a{width / 2}i',
     yshift=f'a{(met_size / 2) / 4}i',
     **kwargs,
 )
 fig_symbol.plot(  # CENTER SUBTRIANGLE
     style=f't{met_size / 2}i',
-    color=shades[1],
+    fill=shades[1],
     **kwargs,
 )
 fig_symbol.plot(  # LEFT SUBTRIANGLE
     style=f'i{met_size / 2}i',
-    color=shades[2],
+    fill=shades[2],
     xshift=f'a{-width / 2}i',
     yshift=f'a{(met_size / 2) / 4}i',
     **kwargs,
 )
 fig_symbol.plot(  # BOTTOM SUBTRIANGLE
     style=f'i{met_size / 2}i',
-    color=shades[3],
+    fill=shades[3],
     yshift=f'a{-(met_size / 2) / 2}i',
     **kwargs,
 )
@@ -397,7 +397,7 @@ for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         fig_gmt.plot(
             x=met_station_coords[station][1],
             y=met_station_coords[station][0],
-            color=shade,
+            fill=shade,
             style=f'i{met_size}i',
             pen=met_pen,
         )
