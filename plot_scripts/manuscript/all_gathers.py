@@ -158,8 +158,8 @@ for spine in label_ax.spines.values():
     spine.set_visible(False)
 label_ax.set_xticks([])
 label_ax.set_yticks([])
-label_ax.set_xlabel('Time from shot (s)', labelpad=25)
-label_ax.set_ylabel('Distance from shot (km)', labelpad=25)
+label_ax.set_xlabel('Time from shot (s)', labelpad=28)
+label_ax.set_ylabel('Distance from shot (km)', labelpad=28)
 
 # Finalize
 fig.tight_layout(pad=0.2, rect=(-0.03, -0.025, 1, 1))
