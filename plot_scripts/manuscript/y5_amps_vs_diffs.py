@@ -62,6 +62,7 @@ def plot_node_values(
         region=REGION,
         frame=False,
         transparency=30,
+        dpi=200,
     )
 
     series = [
@@ -147,4 +148,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'y5_amps_vs_diffs.png', dpi=600, resize='+m2p')
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'y5_amps_vs_diffs.pdf', resize='+m2p')

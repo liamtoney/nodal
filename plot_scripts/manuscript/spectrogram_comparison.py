@@ -72,6 +72,7 @@ DB_LIM = (-160, -130)  # [dB]
 WIN_DUR = 0.5  # [s]
 TIME_LIM = (40, 55)  # [s]
 V_REF = 1  # [m/s]
+CMAP = plt.get_cmap('inferno')
 
 
 # Define function to plot waveform and spectrogram into existing axes
@@ -94,7 +95,7 @@ def spec_existing(tr, spec_ax, wf_ax):
         t,
         f,
         sxx_db,
-        cmap='inferno',
+        cmap=CMAP,
         rasterized=True,
         shading='nearest',
         vmin=DB_LIM[0],
@@ -214,6 +215,7 @@ extend_frac = 0.02
 fig.colorbar(
     pcm, cax=cax, orientation='horizontal', extend='both', extendfrac=extend_frac
 )
+cax.set_facecolor(CMAP.colors[0])  # HACK: Fill gap when exported as PDF!
 cax.text(
     1.05,
     0.5,
@@ -242,7 +244,7 @@ _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 if False:
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
-        / 'spectrogram_comparison.png',
-        dpi=400,
+        / 'spectrogram_comparison.pdf',
+        dpi=300,
         bbox_inches=Bbox.from_bounds(0, 0, FIGSIZE[0], FIGSIZE[1] + 0.38),
     )

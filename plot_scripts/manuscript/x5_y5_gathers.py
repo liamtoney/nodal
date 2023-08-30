@@ -94,6 +94,7 @@ for da, ax in zip(da_list, axs.flatten()):
         add_colorbar=False,
         vmin=np.nanmedian(da),
         vmax=np.nanpercentile(da, 98),
+        rasterized=True,
     )
     text_kwargs = dict(ha='right', transform=ax.transAxes, color='white', weight='bold')
     ax.text(x=0.97, y=0.03, va='bottom', s=da.name, fontsize=12, **text_kwargs)
@@ -193,4 +194,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'x5_y5_gathers.png', dpi=300)
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'x5_y5_gathers.pdf', dpi=400)

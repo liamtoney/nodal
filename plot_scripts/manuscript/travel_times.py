@@ -313,4 +313,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'travel_times.png', dpi=600, resize='+m2p')
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'travel_times.pdf', resize='+m2p')

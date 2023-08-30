@@ -171,4 +171,4 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.png', dpi=300)
+# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'all_gathers.pdf', dpi=400)

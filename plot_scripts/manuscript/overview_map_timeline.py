@@ -66,6 +66,7 @@ fig_gmt.grdimage(
     region=INNER_RING_REGION,
     frame=False,
     transparency=30,
+    dpi=200,
 )
 # Plot the two FDTD transects (TODO: Cropped according to the xlim in the snapshot code)
 g = Geod(ellps='WGS84')
@@ -512,4 +513,4 @@ fig_gmt.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig_gmt.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map_timeline.png', dpi=600, resize='+m2p')
+# fig_gmt.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'overview_map_timeline.pdf', resize='+m2p')

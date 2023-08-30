@@ -382,6 +382,7 @@ for norm in norms:
         extend='both',
         extendfrac=extend_frac,
     )
+    _cax.set_facecolor(cmap.colors[0])  # HACK: Fill gap when exported as PDF!
     if norm == norms[0]:
         _cax.yaxis.set_ticks_position('left')
         _cax.yaxis.set_label_position('left')
@@ -435,7 +436,7 @@ if False:
     fig.canvas.draw()
     fig.savefig(
         Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
-        / f'simulation_results_{SHOT.lower()}.png',
+        / f'simulation_results_{SHOT.lower()}.pdf',
         dpi=400,
         bbox_inches=Bbox.from_bounds(
             0,
