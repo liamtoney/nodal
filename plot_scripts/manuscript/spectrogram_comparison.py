@@ -187,7 +187,7 @@ label_ax.set_xticks([])
 label_ax.set_yticks([])
 for spine in label_ax.spines.values():
     spine.set_visible(False)
-label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=17)
+label_ax.set_xlabel(f'Time from shot {SHOT} (s)', labelpad=20)
 
 # Remove some ticks
 for ax in axs[:, 1:].flatten():
