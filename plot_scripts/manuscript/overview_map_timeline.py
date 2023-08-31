@@ -62,7 +62,7 @@ pygmt.makecpt(cmap='gray', series=[-2, shaded_relief.values.max()])  # -2 is nic
 fig_gmt.grdimage(
     shaded_relief,
     cmap=True,
-    projection='M5.2i',
+    projection='M3.85i',  # Chosen so that scaling matches Figure 5
     region=INNER_RING_REGION,
     frame=False,
     transparency=30,
@@ -100,13 +100,13 @@ fig_gmt.plot(
 
 # Plot arrow pointing to centroid of stations used in the spectrogram figure
 SPEC_STA_CENTROID = (46.1498, -122.1335)  # TODO: Output by `spectrogram_comparison.py`
-vec_start = (46.163, -122.123)  # Arbitrary, just a nice spot for vector tail
+vec_start = (46.162, -122.126)  # Arbitrary, just a nice spot for vector tail
 az_start_to_end = g.inv(*vec_start[::-1], *SPEC_STA_CENTROID[::-1])[0]
 fig_gmt.plot(
     x=[vec_start[1]],
     y=[vec_start[0]],
     style='V4.5p+e+a45',
-    direction=[[az_start_to_end], [0.55]],
+    direction=[[az_start_to_end], [0.32]],
     pen='0.8p,black',
     fill='black',
 )
@@ -163,7 +163,7 @@ fig_gmt.basemap(map_scale='g-122.04/46.09+w5+f+l', frame=['WESN', 'a0.1f0.02'])
 # Colorbar, shifted to the left
 fig_gmt.colorbar(frame='+l"Node elevation (m)"', position='JBL+jTL+o0/0.35i+w0/0.1i+h')
 # Inset map showing all shots
-with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
+with fig_gmt.inset(position='JTR+w1.5i+o-0.57i/-1.3i', box='+gwhite+p1p'):
     # Plot patch corresponding to main map extent
     fig_gmt.plot(
         data=[
@@ -180,7 +180,7 @@ with fig_gmt.inset(position='JTR+w1.95i+o-0.71i/-1.3i', box='+gwhite+p1p'):
         projection='M?',
     )
     # Plot nodes as tiny black dots
-    fig_gmt.plot(x=sta_lons, y=sta_lats, fill='black', style='c0.01i')
+    fig_gmt.plot(x=sta_lons, y=sta_lats, fill='black', style='c0.008i')
     # Plot TA stations
     with open(NODAL_WORKING_DIR / 'metadata' / 'ta_station_coords.json') as f:
         station_coords = json.load(f)
@@ -317,7 +317,7 @@ with NamedTemporaryFile(dir=Path.home() / '.gmt', suffix='.eps') as sym_f:
         f.write(f'S - k{symbolname} {met_size}i - - - Weather station\n')
         f.flush()
         fig_gmt.legend(
-            f.name, position='JBR+jTL+o-0.6i/0.26i+l1.5'
+            f.name, position='JBR+jTL+o-0.56i/0.24i+l1.5'
         )  # +l controls line spacing!
 
 # --------------------------------------------------------------------------------------
@@ -348,12 +348,12 @@ AX1_TIME_RANGE = UTCDateTime('2014-07-24'), UTCDateTime('2014-07-26')
 AX2_TIME_RANGE = UTCDateTime('2014-08-01'), UTCDateTime('2014-08-02')
 
 # Make plot
-MPL_PLOT_WIDTH = 6  # [in]
+MPL_PLOT_WIDTH = 4.65  # [in] Chosen to make the axis width equal the GMT figure width
 fig, (ax1, ax2) = plt.subplots(
     ncols=2,
     sharey=True,
     gridspec_kw=dict(width_ratios=(np.diff(AX1_TIME_RANGE), np.diff(AX2_TIME_RANGE))),
-    figsize=(MPL_PLOT_WIDTH, 1.9),
+    figsize=(MPL_PLOT_WIDTH, 1.8),
 )
 
 # Compute static [dry air] sound speed, see first equation for c_air in
@@ -407,7 +407,7 @@ ax1.set_ylabel('Static sound\nspeed (m/s)')
 # Plot shot times
 df = get_shots()
 df_sort = df.sort_values(by='time')
-df_sort['yloc'] = np.array([354, 351, 348, 345] * 6)[:-1]  # Manual stagger
+df_sort['yloc'] = np.array([356.5, 353, 349.5, 346] * 6)[:-1]  # Manual stagger
 for _, row in df_sort.iterrows():
     for ax, time_range in zip([ax1, ax2], [AX1_TIME_RANGE, AX2_TIME_RANGE]):
         if (row.time >= time_range[0]) & (row.time <= time_range[1]):
@@ -487,14 +487,14 @@ for ax in ax1, ax2:
     )
 
 fig.tight_layout(pad=0)
-fig.subplots_adjust(wspace=0.15, top=0.71)
+fig.subplots_adjust(wspace=0.2, top=0.66)
 
 # --------------------------------------------------------------------------------------
 # Now combine (b) into the GMT figure containing (a)
 # --------------------------------------------------------------------------------------
 
 # Note: EPS does not support transparency!
-Y_OFF = 1.1  # [in] For (b), from bottom edge of (a) axes (positive down)
+Y_OFF = 1  # [in] For (b), from bottom edge of (a) axes (positive down)
 with tempfile.NamedTemporaryFile(suffix='.eps') as f:
     fig.savefig(f.name)
     fig_gmt.image(
@@ -507,7 +507,7 @@ plt.close(fig)
 tag_kwargs = dict(position='TL', no_clip=True, justify='TR', font='12p,Helvetica-Bold')
 x_offset = -0.2  # [in]
 fig_gmt.text(text='(a)', offset=f'{x_offset}i/0', **tag_kwargs)
-fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-5.15 - Y_OFF}i', **tag_kwargs)
+fig_gmt.text(text='(b)', offset=f'{x_offset}i/{-3.8 - Y_OFF}i', **tag_kwargs)
 
 fig_gmt.show()
 
