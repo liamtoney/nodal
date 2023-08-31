@@ -66,7 +66,7 @@ fig_gmt.grdimage(
     region=INNER_RING_REGION,
     frame=False,
     transparency=30,
-    dpi=200,
+    dpi=300,
 )
 # Plot the two FDTD transects (TODO: Cropped according to the xlim in the snapshot code)
 g = Geod(ellps='WGS84')
