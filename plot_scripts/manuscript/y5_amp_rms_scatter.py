@@ -34,6 +34,7 @@ distance_mask = distance >= MASK_DISTANCE_KM
 sorted_idx = np.argsort(distance[distance_mask])[::-1]
 
 fig, ax = plt.subplots(figsize=(3.47, 3.3))
+
 # Plot those nodes within the masking distance first (underneath)
 ax.scatter(
     x=rms[~distance_mask],
@@ -44,6 +45,8 @@ ax.scatter(
     facecolor='none',
     edgecolor='tab:gray',
 )
+
+# Plot the remaining nodes as colored markers
 sm = ax.scatter(
     x=rms[distance_mask][sorted_idx],
     y=amplitude[distance_mask][sorted_idx],
@@ -54,7 +57,8 @@ sm = ax.scatter(
     lw=0,
     cmap=cc.m_rainbow_r,
 )
-ax.set_xlabel('RMS seismic ground velocity (μm/s),\n20 s window pre-shot')  # WIN_DUR
+
+ax.set_xlabel('RMS seismic ground velocity (μm/s),\n20 s window pre-shot Y5')  # WIN_DUR
 ax.set_ylabel('STA/LTA amplitude')
 
 ax.set_xlim(0, 1.2)
@@ -81,7 +85,7 @@ cax = inset_axes(
     width='100%',
     height='100%',
 )
-fig.colorbar(sm, cax=cax, label='Distance from\nshot (km)', orientation='horizontal')
+fig.colorbar(sm, cax=cax, label='Distance from\nshot Y5 (km)', orientation='horizontal')
 cax.xaxis.set_minor_locator(plt.MultipleLocator(5))
 
 fig.show()
