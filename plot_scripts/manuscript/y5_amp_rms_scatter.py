@@ -2,12 +2,13 @@ import os
 import subprocess
 from pathlib import Path
 
+import colorcet as cc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from utils import NODAL_WORKING_DIR, get_shots
+from utils import NODAL_WORKING_DIR
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -28,13 +29,20 @@ distance = distance[mask]
 
 fig, ax = plt.subplots(figsize=(3.47, 3.3))
 sm = ax.scatter(
-    x=rms, y=amplitude, c=distance, s=15, clip_on=False, alpha=0.7, lw=0, cmap='turbo_r'
+    x=rms,
+    y=amplitude,
+    c=distance,
+    s=15,
+    clip_on=False,
+    alpha=0.7,
+    lw=0,
+    cmap=cc.m_rainbow_r,
 )
 ax.set_xlabel('RMS seismic ground velocity (μm/s),\n20 s window pre-shot')  # WIN_DUR
 ax.set_ylabel('STA/LTA amplitude')
 
 ax.set_xlim(0, 1.2)
-ax.set_ylim(0.6, 10)
+ax.set_ylim(0.7, 10)
 
 ax.xaxis.set_minor_locator(plt.MultipleLocator(0.1))
 ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
