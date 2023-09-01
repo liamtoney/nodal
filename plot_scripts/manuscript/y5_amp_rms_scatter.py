@@ -28,12 +28,7 @@ distance = distance[mask]
 
 fig, ax = plt.subplots(figsize=(3.47, 3.3))
 sm = ax.scatter(
-    x=rms,
-    y=amplitude,
-    c=distance,
-    s=15,
-    clip_on=False,
-    cmap='turbo_r',
+    x=rms, y=amplitude, c=distance, s=15, clip_on=False, alpha=0.7, lw=0, cmap='turbo_r'
 )
 ax.set_xlabel('RMS seismic ground velocity (μm/s),\n20 s window pre-shot')  # WIN_DUR
 ax.set_ylabel('STA/LTA amplitude')
@@ -70,4 +65,7 @@ fig.show()
 
 _ = subprocess.run(['open', os.environ['NODAL_FIGURE_DIR']])
 
-# fig.savefig(Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve() / 'y5_amp_rms_scatter.pdf')
+fig.savefig(
+    Path(os.environ['NODAL_FIGURE_DIR']).expanduser().resolve()
+    / 'y5_amp_rms_scatter.pdf'
+)
