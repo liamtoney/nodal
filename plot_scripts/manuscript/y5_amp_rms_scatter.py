@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from utils import NODAL_WORKING_DIR
+from utils import MASK_DISTANCE_KM, NODAL_WORKING_DIR
 
 FONT_SIZE = 10  # [pt]
 plt.rcParams.update({'font.size': FONT_SIZE})
@@ -17,24 +17,37 @@ plt.rcParams.update({'font.size': FONT_SIZE})
 df = pd.read_csv(NODAL_WORKING_DIR / 'shot_gather_measurements' / 'Y5.csv')
 
 # Define values to plot
-amplitude = df.sta_lta_amp
-rms = df.pre_shot_rms * 1e6  # [μm/s]
-distance = df.dist_m / 1000  # [km]
+amplitude = df.sta_lta_amp.values
+rms = df.pre_shot_rms.values * 1e6  # [μm/s]
+distance = df.dist_m.values / 1000  # [km]
 
 # Mask extreme RMS values
-mask = rms <= np.percentile(rms, 95)
-amplitude = amplitude[mask].values
-rms = rms[mask].values
-distance = distance[mask].values
+rms_mask = rms <= np.percentile(rms, 95)
+amplitude = amplitude[rms_mask]
+rms = rms[rms_mask]
+distance = distance[rms_mask]
 
-# Plot closer markers on top
-sorted_idx = np.argsort(distance)[::-1]
+# Define mask for masking distance
+distance_mask = distance >= MASK_DISTANCE_KM
+
+# Plot closer markers on top (for those beyond masking distance)
+sorted_idx = np.argsort(distance[distance_mask])[::-1]
 
 fig, ax = plt.subplots(figsize=(3.47, 3.3))
+# Plot those nodes within the masking distance first (underneath)
+ax.scatter(
+    x=rms[~distance_mask],
+    y=amplitude[~distance_mask],
+    s=10,
+    clip_on=False,
+    lw=0.5,
+    facecolor='none',
+    edgecolor='tab:gray',
+)
 sm = ax.scatter(
-    x=rms[sorted_idx],
-    y=amplitude[sorted_idx],
-    c=distance[sorted_idx],
+    x=rms[distance_mask][sorted_idx],
+    y=amplitude[distance_mask][sorted_idx],
+    c=distance[distance_mask][sorted_idx],
     s=15,
     clip_on=False,
     alpha=0.7,
