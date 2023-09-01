@@ -72,18 +72,17 @@ ax.spines['left'].set_bounds(1, ax.get_ylim()[1])
 fig.tight_layout(pad=0.2)
 
 # Inset colorbar (after tight_layout) call!
-cbar_height = 0.25  # As fraction of total axis height
+cbar_width = 0.25  # As fraction of total axis width
 cbar_aspect = 8
-cbar_x = 0.745  # In axis coordinates
 cax = inset_axes(
     ax,
-    bbox_to_anchor=(cbar_x, 1 - cbar_height, cbar_height / cbar_aspect, cbar_height),
+    bbox_to_anchor=(1 - cbar_width, 0.99, cbar_width, cbar_width / cbar_aspect),
     bbox_transform=ax.transAxes,
     width='100%',
     height='100%',
 )
-fig.colorbar(sm, cax=cax, label='Distance from\nshot (km)')
-cax.yaxis.set_minor_locator(plt.MultipleLocator(5))
+fig.colorbar(sm, cax=cax, label='Distance from\nshot (km)', orientation='horizontal')
+cax.xaxis.set_minor_locator(plt.MultipleLocator(5))
 
 fig.show()
 
