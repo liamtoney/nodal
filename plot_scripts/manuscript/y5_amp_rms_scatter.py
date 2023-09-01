@@ -23,15 +23,18 @@ distance = df.dist_m / 1000  # [km]
 
 # Mask extreme RMS values
 mask = rms <= np.percentile(rms, 95)
-amplitude = amplitude[mask]
-rms = rms[mask]
-distance = distance[mask]
+amplitude = amplitude[mask].values
+rms = rms[mask].values
+distance = distance[mask].values
+
+# Plot closer markers on top
+sorted_idx = np.argsort(distance)[::-1]
 
 fig, ax = plt.subplots(figsize=(3.47, 3.3))
 sm = ax.scatter(
-    x=rms,
-    y=amplitude,
-    c=distance,
+    x=rms[sorted_idx],
+    y=amplitude[sorted_idx],
+    c=distance[sorted_idx],
     s=15,
     clip_on=False,
     alpha=0.7,
