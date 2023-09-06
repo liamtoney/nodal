@@ -15,7 +15,9 @@ SHOT = 'Y4'  # Hard-coded for this special case
 PRE_ROLL = 20  # [s] Duration of data prior to shot time (from Brandon)
 SAMPLING_RATE = 250  # [Hz] Native sampling rate
 
-# Path to Y4 MAT file
+# Path to Y4 MAT file; may require modification for your system (this file can be
+# downloaded from Zenodo; copy/paste this URL into your browser to download:
+# https://zenodo.org/record/8320280/files/shot_y4.mat)
 Y4_PATH = NODAL_WORKING_DIR / 'data' / 'shot_y4.mat'
 
 # Read in data
