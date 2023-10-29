@@ -22,7 +22,7 @@ You must define two environment variables to use the code:
 
 If you use the tools contained in this repository, please cite our paper:
 
-> Toney, L., Fee, D., Schmandt, B., & Bishop, J. W. (in review). Examining infrasound
+> Toney, L., Fee, D., Schmandt, B., & Bishop, J. W. (in press). Examining infrasound
 > propagation at high spatial resolution using a nodal seismic array. *Journal of
 > Geophysical Research: Solid Earth*.
 
